@@ -4,7 +4,8 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
-import { ok, created, noContent, notFound, conflict, withErrorHandler } from "@/lib/api-response";
+import { validate, ProductIdSchema } from "@/lib/validators";
+import { ok, created, notFound, withErrorHandler } from "@/lib/api-response";
 
 const wishlistSelect = {
   id: true,
@@ -16,6 +17,8 @@ const wishlistSelect = {
       price: true,
       originalPrice: true,
       discount: true,
+      category: true,
+      badge: true,
       images: { where: { isPrimary: true }, select: { url: true }, take: 1 },
       artist: { select: { user: { select: { firstName: true, lastName: true } } } },
     },
@@ -34,18 +37,20 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const auth = await requireAuth(req);
-  const { productId } = await req.json();
+  const body = await req.json();
+  const validProductId = validate(ProductIdSchema, body).productId;
 
-  if (!productId) {
-    const { badRequest } = await import("@/lib/api-response");
-    return badRequest("productId is required");
-  }
-
-  const product = await prisma.product.findUnique({ where: { id: productId } });
+  const product = await prisma.product.findUnique({ where: { id: validProductId } });
   if (!product) return notFound("Product not found");
 
+  const existing = await prisma.wishlistItem.findUnique({
+    where: { userId_productId: { userId: auth.userId, productId: validProductId } },
+    select: wishlistSelect,
+  });
+  if (existing) return ok(existing);
+
   const item = await prisma.wishlistItem.create({
-    data: { userId: auth.userId, productId },
+    data: { userId: auth.userId, productId: validProductId },
     select: wishlistSelect,
   });
 

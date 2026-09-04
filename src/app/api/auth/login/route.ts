@@ -20,9 +20,16 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const valid = await bcrypt.compare(input.password, user.password);
   if (!valid) return unauthorized("Invalid email or password");
 
-  const { password: _, ...safeUser } = user;
+  const safeUser = {
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role,
+    avatar: user.avatar,
+  };
   const token = await signToken({ userId: user.id, email: user.email, role: user.role });
   await setAuthCookie(token);
 
-  return ok({ user: safeUser, token });
+  return ok({ user: safeUser });
 });

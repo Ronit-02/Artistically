@@ -30,5 +30,5 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const token = await signToken({ userId: user.id, email: user.email, role: user.role });
   await setAuthCookie(token);
 
-  return created({ user, token });
+  return created({ user });
 });

@@ -6,9 +6,10 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
+import { serverEnv } from "@/lib/env";
 
 const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "change-this-secret-in-production"
+  serverEnv.JWT_SECRET ?? "artistically-local-development-secret-only"
 );
 
 const COOKIE_NAME = "artistically_token";
@@ -49,7 +50,7 @@ export async function setAuthCookie(token: string) {
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: serverEnv.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",

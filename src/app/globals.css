@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300;1,14..32,400&display=optional');
 
-@font-face { font-family: 'General Sans'; src: url('https://cdn.fontshare.com/wf/YFLBLUBLEOMTHZNKQZ7AX67HNEFCCKQ2/NXFZ4AMRBTEIDRQWFLTXE53GJBFQX4HI/YUJH72VKH3YJCF25WHYTJCXFGA4PIJQW.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: swap; }
-@font-face { font-family: 'General Sans'; src: url('https://cdn.fontshare.com/wf/YFLBLUBLEOMTHZNKQZ7AX67HNEFCCKQ2/KQCHYWDLRUASXVP4FVL27Z36MVHZWWMV/JJDLRCDBZLQCSFJIGBYHC6FFCZ3CRY7C.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
-@font-face { font-family: 'General Sans'; src: url('https://cdn.fontshare.com/wf/YFLBLUBLEOMTHZNKQZ7AX67HNEFCCKQ2/JKVFMNCGJV5ZN4MCNWKJWMFCFKUQYZDI/4MMCFGVTPEXM5PYXDEWZIKJXRVHOWQUD.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'General Sans'; src: url('https://cdn.fontshare.com/wf/YFLBLUBLEOMTHZNKQZ7AX67HNEFCCKQ2/NXFZ4AMRBTEIDRQWFLTXE53GJBFQX4HI/YUJH72VKH3YJCF25WHYTJCXFGA4PIJQW.woff2') format('woff2'); font-weight: 500; font-style: normal; font-display: optional; }
+@font-face { font-family: 'General Sans'; src: url('https://cdn.fontshare.com/wf/YFLBLUBLEOMTHZNKQZ7AX67HNEFCCKQ2/KQCHYWDLRUASXVP4FVL27Z36MVHZWWMV/JJDLRCDBZLQCSFJIGBYHC6FFCZ3CRY7C.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: optional; }
+@font-face { font-family: 'General Sans'; src: url('https://cdn.fontshare.com/wf/YFLBLUBLEOMTHZNKQZ7AX67HNEFCCKQ2/JKVFMNCGJV5ZN4MCNWKJWMFCFKUQYZDI/4MMCFGVTPEXM5PYXDEWZIKJXRVHOWQUD.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: optional; }
 
 @tailwind base;
 @tailwind components;
@@ -15,7 +15,7 @@
   --accent-light: #eff6ff;
   --text-heading: #111;
   --text-body: #555;
-  --text-muted: #999;
+  --text-muted: #6b7280;
 }
 
 * { box-sizing: border-box; }
@@ -57,3 +57,12 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); color: var(--text-hea
 .animate-scale-in { animation: scaleIn 0.25s ease-out forwards; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .animate-fade-in { animation: fadeIn 0.35s ease-out forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

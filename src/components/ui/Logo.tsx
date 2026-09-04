@@ -46,6 +46,8 @@ export default function Logo({
       className={`inline-flex items-center flex-shrink-0 ${className}`}
     >
       <svg
+        aria-hidden="true"
+        focusable="false"
         width={width}
         height={size}
         viewBox={`0 0 ${LOGO_VIEWBOX_WIDTH} ${LOGO_VIEWBOX_HEIGHT}`}

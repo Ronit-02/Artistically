@@ -65,7 +65,12 @@ export const initialCartItems: CartItem[] = [
 export const allProducts: Product[] = [...paintings, ...sculptures, ...ceramics];
 
 export const categories: string[] = [
-  "Paintings", "Digital Art", "Sculptures", "Glass Art", "Woodwork", "Ceramics",
+  "Paintings", 
+  "Digital Art", 
+  "Sculptures", 
+  "Glass Art", 
+  "Woodwork", 
+  "Ceramics",
 ];
 
 export const orderHistory: OrderItem[] = [
@@ -103,73 +108,4 @@ export const PRICE_RANGE_MAP: Record<string, [number, number]> = {
   "₹1,000 - ₹2,000": [1000, 2000],
   "₹2,000 - ₹3,000": [2000, 3000],
   "Over ₹3,000":      [3000, Infinity],
-};
-
-// ─── Collections ─────────────────────────────────────────────────────────────
-
-import type { Collection } from "@/types";
-
-export const collections: Collection[] = [
-  {
-    id: 1,
-    name: "Chromatic Dreams",
-    description: "A curated journey through bold colors and abstract expression. Works that blur the boundary between emotion and canvas.",
-    coverImage: "/paintings/painting-2.jpg",
-    artworkCount: 18,
-    curatorName: "Shara Hughes",
-    curatorAvatar: "/artists/artist-2.jpg",
-    featured: true,
-    tags: ["Abstract", "Color", "Contemporary"],
-  },
-  {
-    id: 2,
-    name: "Earth & Form",
-    description: "Sculptures and ceramics celebrating texture, weight, and the ancient bond between human hands and raw materials.",
-    coverImage: "/ceramics/ceramic-2.jpg",
-    artworkCount: 12,
-    curatorName: "Dale Chihuly",
-    curatorAvatar: "/artists/artist-3.jpg",
-    featured: true,
-    tags: ["Ceramics", "Sculpture", "Handmade"],
-  },
-  {
-    id: 3,
-    name: "Urban Narratives",
-    description: "Stories told through cityscapes, street life, and the quiet moments found in metropolitan corners.",
-    coverImage: "/paintings/painting-5.jpg",
-    artworkCount: 24,
-    curatorName: "Cy Twombly",
-    curatorAvatar: "/artists/artist-1.jpg",
-    featured: true,
-    tags: ["Urban", "Narrative", "Contemporary"],
-  },
-  {
-    id: 4,
-    name: "Glass & Light",
-    description: "Translucent sculptures that transform light into living art. Every angle reveals a new world within.",
-    coverImage: "/sculptures/sculpture-4.jpg",
-    artworkCount: 9,
-    curatorName: "Dale Chihuly",
-    curatorAvatar: "/artists/artist-3.jpg",
-    featured: false,
-    tags: ["Glass", "Light", "Installation"],
-  },
-];
-
-export const categoryImages: Record<string, string> = {
-  "Paintings": "/paintings/painting-4.jpg",
-  "Digital Art": "/digital-arts/digital-art-cover.jpg",
-  "Sculptures": "/sculptures/sculpture-cover.jpg",
-  "Glass Art": "/sculptures/sculpture-4.jpg",
-  "Woodwork": "/paintings/painting-6.jpg",
-  "Ceramics": "/ceramics/ceramic-1.jpg",
-};
-
-export const categoryArtworkCounts: Record<string, number> = {
-  "Paintings": 7,
-  "Digital Art": 0,
-  "Sculptures": 4,
-  "Glass Art": 1,
-  "Woodwork": 0,
-  "Ceramics": 3,
 };

@@ -5,7 +5,9 @@
 
 import { NextResponse } from "next/server";
 import { AuthError } from "./auth";
+import { InvalidStateError } from "./domain-errors";
 import { ValidationError } from "./validators";
+import { logger } from "./logger";
 
 // ─── Success ─────────────────────────────────────────────────────────────────
 
@@ -58,24 +60,58 @@ export function withErrorHandler(
   handler: (req: any, ctx?: unknown) => Promise<NextResponse>
 ) {
   return async (req: Request, ctx?: unknown): Promise<NextResponse> => {
+    const requestId = req.headers.get("x-request-id") ?? crypto.randomUUID();
+    const startedAt = Date.now();
+
     try {
-      return await handler(req, ctx);
+      const response = await handler(req, ctx);
+      response.headers.set("x-request-id", requestId);
+      logger.info("api.request.completed", {
+        requestId,
+        method: req.method,
+        path: new URL(req.url).pathname,
+        status: response.status,
+        durationMs: Date.now() - startedAt,
+      });
+      return response;
     } catch (err) {
-      if (err instanceof AuthError) return unauthorized(err.message);
-      if (err instanceof ValidationError) return badRequest("Validation failed", err.fields);
+      let response: NextResponse;
+
+      if (err instanceof AuthError) {
+        response = unauthorized(err.message);
+      } else if (err instanceof ValidationError) {
+        response = badRequest("Validation failed", err.fields);
+      } else if (err instanceof InvalidStateError) {
+        response = badRequest(err.message);
 
       // Prisma unique constraint violation
-      if (
+      } else if (
         typeof err === "object" &&
         err !== null &&
         "code" in err &&
         (err as { code: string }).code === "P2002"
       ) {
-        return conflict("A record with this value already exists");
+        response = conflict("A record with this value already exists");
+      } else {
+        logger.error("api.request.failed", {
+          requestId,
+          method: req.method,
+          path: new URL(req.url).pathname,
+          durationMs: Date.now() - startedAt,
+          error: err,
+        });
+        response = serverError();
       }
 
-      console.error("[API Error]", err);
-      return serverError();
+      response.headers.set("x-request-id", requestId);
+      logger.info("api.request.completed", {
+        requestId,
+        method: req.method,
+        path: new URL(req.url).pathname,
+        status: response.status,
+        durationMs: Date.now() - startedAt,
+      });
+      return response;
     }
   };
 }

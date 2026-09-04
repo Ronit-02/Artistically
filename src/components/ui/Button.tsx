@@ -1,24 +1,24 @@
-interface ButtonProps {
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost";
-  children: React.ReactNode;
-  onClick?: () => void;
+  children: ReactNode;
   fullWidth?: boolean;
-  disabled?: boolean;
-  className?: string;
-  type?: "button" | "submit" | "reset";
+  loading?: boolean;
   size?: "sm" | "md" | "lg";
 }
 
-export default function Button({
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({
   variant = "primary",
   children,
-  onClick,
   fullWidth,
-  disabled,
+  loading = false,
+  disabled = false,
   className = "",
   type = "button",
   size = "md",
-}: ButtonProps) {
+  ...nativeProps
+}, ref) {
   const base =
     "inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-200 disabled:cursor-not-allowed disabled:opacity-50 select-none";
   const sizes = {
@@ -36,12 +36,19 @@ export default function Button({
   };
   return (
     <button
+      ref={ref}
       type={type}
-      onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={`${base} ${sizes[size]} ${variants[variant]} ${fullWidth ? "w-full" : ""} ${className}`}
+      {...nativeProps}
     >
+      {loading && <span className="sr-only">Loading: </span>}
       {children}
     </button>
   );
-}
+});
+
+Button.displayName = "Button";
+
+export default Button;

@@ -1,10 +1,9 @@
 // GET  /api/orders  — list user's orders
-// POST /api/orders  — checkout (create order from cart)
+// POST /api/orders  — retired; orders are created by verified checkout events
 import { NextRequest } from "next/server";
 import { orderService } from "@/lib/services/order.service";
 import { requireAuth } from "@/lib/auth";
-import { validate, CreateOrderSchema } from "@/lib/validators";
-import { ok, created, badRequest, withErrorHandler } from "@/lib/api-response";
+import { conflict, ok, withErrorHandler } from "@/lib/api-response";
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const auth = await requireAuth(req);
@@ -13,18 +12,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 });
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  const auth = await requireAuth(req);
-  const body = await req.json();
-  const input = validate(CreateOrderSchema, body);
-
-  try {
-    const order = await orderService.checkout(
-      auth.userId,
-      input.shippingAddress,
-      input.promoCode
-    );
-    return created(order);
-  } catch (err) {
-    return badRequest((err as Error).message);
-  }
+  await requireAuth(req);
+  return conflict("Orders are created after verified payment checkout; use /api/checkout/session");
 });

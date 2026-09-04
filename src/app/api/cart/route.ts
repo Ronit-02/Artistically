@@ -16,6 +16,10 @@ const cartItemSelect = {
       id: true,
       title: true,
       price: true,
+      originalPrice: true,
+      discount: true,
+      category: true,
+      badge: true,
       stock: true,
       images: { where: { isPrimary: true }, select: { url: true }, take: 1 },
       artist: { select: { user: { select: { firstName: true, lastName: true } } } },
@@ -40,7 +44,19 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Check product exists and has stock
   const product = await prisma.product.findUnique({ where: { id: input.productId } });
   if (!product || !product.isActive) return notFound("Product not found");
-  if (product.stock < (input.quantity ?? 1)) return badRequest("Insufficient stock");
+  const existing = await prisma.cartItem.findUnique({
+    where: {
+      userId_productId_size: {
+        userId: auth.userId,
+        productId: input.productId,
+        size: input.size,
+      },
+    },
+    select: { quantity: true },
+  });
+  const requestedQuantity = (existing?.quantity ?? 0) + input.quantity;
+  if (product.stock < requestedQuantity) return badRequest("Insufficient stock");
+  if (requestedQuantity > 10) return badRequest("Cart quantity cannot exceed 10");
 
   const item = await prisma.cartItem.upsert({
     where: {

@@ -1,0 +1,20 @@
+name: Production health monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/5 * * * *"
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      APP_URL: ${{ vars.PRODUCTION_APP_URL }}
+    steps:
+      - name: Require production URL
+        run: test -n "$APP_URL"
+      - name: Check liveness
+        run: curl --fail --silent --show-error --max-time 15 "$APP_URL/api/health/live"
+      - name: Check readiness
+        run: curl --fail --silent --show-error --max-time 15 "$APP_URL/api/health/ready"

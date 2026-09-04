@@ -3,7 +3,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
-import { validate, UpdateUserSchema } from "@/lib/validators";
+import { validate, RouteIdSchema, UpdateUserSchema } from "@/lib/validators";
 import { ok, notFound, forbidden, withErrorHandler } from "@/lib/api-response";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -25,11 +25,12 @@ const safeUserSelect = {
 export const GET = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   const { id } = await (ctx as Ctx).params;
   const auth = await requireAuth(req);
+  const validId = validate(RouteIdSchema, { id }).id;
 
   // Users can only fetch their own profile (admins can fetch anyone)
-  if (id !== auth.userId && auth.role !== "ADMIN") return forbidden();
+  if (validId !== auth.userId && auth.role !== "ADMIN") return forbidden();
 
-  const user = await prisma.user.findUnique({ where: { id }, select: safeUserSelect });
+  const user = await prisma.user.findUnique({ where: { id: validId }, select: safeUserSelect });
   if (!user) return notFound("User not found");
   return ok(user);
 });
@@ -37,14 +38,15 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
 export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   const { id } = await (ctx as Ctx).params;
   const auth = await requireAuth(req);
+  const validId = validate(RouteIdSchema, { id }).id;
 
-  if (id !== auth.userId) return forbidden("You can only edit your own profile");
+  if (validId !== auth.userId) return forbidden("You can only edit your own profile");
 
   const body = await req.json();
   const input = validate(UpdateUserSchema, body);
 
   const user = await prisma.user.update({
-    where: { id },
+    where: { id: validId },
     data: input,
     select: safeUserSelect,
   });

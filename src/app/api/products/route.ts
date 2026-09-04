@@ -9,7 +9,12 @@ import { prisma } from "@/lib/prisma";
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const { searchParams } = req.nextUrl;
-  const query = validate(ProductQuerySchema, Object.fromEntries(searchParams));
+  const query = validate(ProductQuerySchema, {
+    ...Object.fromEntries(searchParams),
+    categories: searchParams.getAll("category").length > 0 ? searchParams.getAll("category") : undefined,
+    priceRanges: searchParams.getAll("priceRange").length > 0 ? searchParams.getAll("priceRange") : undefined,
+    minRatings: searchParams.getAll("minRating").length > 0 ? searchParams.getAll("minRating") : undefined,
+  });
   const { products, total } = await productService.list(query);
   return paginated(products, total, query.page, query.limit);
 });

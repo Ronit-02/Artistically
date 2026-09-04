@@ -3,14 +3,16 @@
 import { NextRequest } from "next/server";
 import { orderService } from "@/lib/services/order.service";
 import { requireAuth } from "@/lib/auth";
-import { ok, noContent, notFound, badRequest, withErrorHandler } from "@/lib/api-response";
+import { validate, RouteIdSchema } from "@/lib/validators";
+import { ok, noContent, notFound, withErrorHandler } from "@/lib/api-response";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 export const GET = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   const { id } = await (ctx as Ctx).params;
   const auth = await requireAuth(req);
-  const order = await orderService.getById(id, auth.userId);
+  const validId = validate(RouteIdSchema, { id }).id;
+  const order = await orderService.getById(validId, auth.userId);
   if (!order) return notFound("Order not found");
   return ok(order);
 });
@@ -18,12 +20,9 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
 export const DELETE = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   const { id } = await (ctx as Ctx).params;
   const auth = await requireAuth(req);
+  const validId = validate(RouteIdSchema, { id }).id;
 
-  try {
-    const cancelled = await orderService.cancel(id, auth.userId);
-    if (!cancelled) return notFound("Order not found");
-    return noContent();
-  } catch (err) {
-    return badRequest((err as Error).message);
-  }
+  const cancelled = await orderService.cancel(validId, auth.userId);
+  if (!cancelled) return notFound("Order not found");
+  return noContent();
 });

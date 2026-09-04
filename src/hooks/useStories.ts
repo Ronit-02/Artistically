@@ -3,7 +3,7 @@ import { fetchStories, fetchStoryById } from "@/lib/api/stories";
 
 export const storyKeys = {
   all: ["stories"] as const,
-  detail: (id: number) => ["stories", id] as const,
+  detail: (id: string) => ["stories", id] as const,
 };
 
 export function useStories() {
@@ -13,7 +13,7 @@ export function useStories() {
   });
 }
 
-export function useStory(id: number) {
+export function useStory(id: string) {
   return useQuery({
     queryKey: storyKeys.detail(id),
     queryFn: () => fetchStoryById(id),

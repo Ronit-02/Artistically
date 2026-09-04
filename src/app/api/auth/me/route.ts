@@ -2,7 +2,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
-import { ok, unauthorized, notFound, withErrorHandler } from "@/lib/api-response";
+import { ok, notFound, withErrorHandler } from "@/lib/api-response";
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const auth = await requireAuth(req);

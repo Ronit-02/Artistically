@@ -3,27 +3,70 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAppStore } from "@/store/useAppStore";
+import { login as loginApi, register as registerApi } from "@/lib/api/auth";
+import { authKeys } from "@/hooks/useCurrentUser";
+import { cartKeys } from "@/hooks/useCart";
+import { wishlistKeys } from "@/hooks/useWishlist";
+import { ApiClientError } from "@/lib/api/client";
 import Button from "@/components/ui/Button";
 import Logo from "@/components/ui/Logo";
 import type { UserRole } from "@/types";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAppStore();
+  const queryClient = useQueryClient();
+  const { setAuthUser } = useAppStore();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("collector");
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setFieldErrors({});
     if (!email || !password) { setError("Please fill in all fields."); return; }
     if (mode === "signup" && !name) { setError("Please enter your name."); return; }
-    login(email, password, role);
-    router.push(role === "artist" ? "/artist-portal" : "/");
+    setError("");
+    try {
+      const [firstName, ...lastNameParts] = name.trim().split(/\s+/);
+      const user = mode === "login"
+        ? await loginApi({ email, password })
+        : await registerApi({ email, password, firstName, lastName: lastNameParts.join(" ") || firstName });
+      setAuthUser({
+        id: user.id,
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`.trim(),
+        role: user.role === "ARTIST" ? "artist" : "collector",
+      });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: authKeys.currentUser }),
+        queryClient.invalidateQueries({ queryKey: cartKeys.all }),
+        queryClient.invalidateQueries({ queryKey: wishlistKeys.all }),
+      ]);
+      router.push(user.role === "ARTIST" ? "/artist-portal" : "/");
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        setError(err.message);
+        setFieldErrors(err.fields ?? {});
+      } else {
+        setError("Unable to complete sign in. Please try again.");
+      }
+    }
   };
+
+  const fieldLabels: Record<string, string> = {
+    email: "Email",
+    password: "Password",
+    firstName: "First name",
+    lastName: "Last name",
+  };
+  const fieldErrorMessages = Object.entries(fieldErrors).flatMap(([field, messages]) =>
+    messages.map((message) => `${fieldLabels[field] ?? field}: ${message}`),
+  );
 
   const inputClass = "w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all";
 
@@ -45,7 +88,9 @@ export default function LoginPage() {
           {(["login", "signup"] as const).map((m) => (
             <button
               key={m}
-              onClick={() => { setMode(m); setError(""); }}
+              type="button"
+              aria-pressed={mode === m}
+              onClick={() => { setMode(m); setError(""); setFieldErrors({}); }}
               className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-all capitalize border-none cursor-pointer ${
                 mode === m ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 bg-transparent"
               }`}
@@ -66,6 +111,8 @@ export default function LoginPage() {
               ] as const).map((opt) => (
                 <button
                   key={opt.value}
+                  type="button"
+                  aria-pressed={role === opt.value}
                   onClick={() => setRole(opt.value)}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all cursor-pointer bg-transparent ${
                     role === opt.value
@@ -73,48 +120,62 @@ export default function LoginPage() {
                       : "border-gray-100 hover:border-gray-200"
                   }`}
                 >
-                  <svg className={`w-6 h-6 ${role === opt.value ? "text-[#111]" : "text-gray-400"}`} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <svg className={`w-6 h-6 ${role === opt.value ? "text-[#111]" : "text-gray-500"}`} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d={opt.icon} />
                   </svg>
                   <span className={`text-sm font-medium ${role === opt.value ? "text-[#111]" : "text-gray-700"}`}>{opt.label}</span>
-                  <span className="text-[11px] text-gray-400">{opt.desc}</span>
+                  <span className="text-[12px] text-gray-500">{opt.desc}</span>
                 </button>
               ))}
             </div>
           </div>
         )}
 
+        <form onSubmit={(event) => { event.preventDefault(); void handleSubmit(); }}>
         <div className="space-y-3">
           {mode === "signup" && (
-            <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+            <>
+              <label htmlFor="auth-name" className="sr-only">Full name</label>
+              <input id="auth-name" type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} className={inputClass} />
+            </>
           )}
-          <input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
+          <label htmlFor="auth-email" className="sr-only">Email address</label>
+          <input id="auth-email" type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+          <label htmlFor="auth-password" className="sr-only">Password</label>
+          <input id="auth-password" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
         </div>
 
-        {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
+        {mode === "signup" && (
+          <p className="text-xs text-gray-500 mt-2">Use at least 8 characters, including one uppercase letter and one number.</p>
+        )}
 
-        {mode === "login" && (
-          <div className="text-right mt-2">
-            <button className="text-xs text-[#111] hover:underline bg-transparent border-none cursor-pointer p-0">
-              Forgot password?
-            </button>
+        {(error || fieldErrorMessages.length > 0) && (
+          <div role="alert" className="text-sm text-red-500 mt-3 space-y-1">
+            {error && <p>{error}</p>}
+            {fieldErrorMessages.map((message) => <p key={message}>{message}</p>)}
           </div>
         )}
 
-        <Button variant="primary" fullWidth onClick={handleSubmit} className="mt-5">
+        {mode === "login" && (
+          <div className="text-right mt-2">
+            <Link href="/contact" className="text-[13px] text-[#111] hover:underline">Need help signing in?</Link>
+          </div>
+        )}
+
+        <Button type="submit" variant="primary" fullWidth className="mt-5">
           {mode === "login" ? "Sign In" : "Create Account"}
         </Button>
+        </form>
 
         <p className="text-center text-sm text-gray-500 mt-4">
           {mode === "login" ? "Don't have an account? " : "Already have an account? "}
-          <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-[#111] font-medium hover:underline bg-transparent border-none cursor-pointer p-0">
+           <button type="button" onClick={() => setMode(mode === "login" ? "signup" : "login")} className="inline-flex min-h-11 items-center text-[#111] font-medium hover:underline bg-transparent border-none cursor-pointer p-0">
             {mode === "login" ? "Sign up" : "Sign in"}
           </button>
         </p>
 
         <div className="mt-6 text-center">
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← Back to Home</Link>
+          <Link href="/" className="text-sm text-gray-500 hover:text-gray-600 transition-colors">← Back to Home</Link>
         </div>
       </div>
     </div>

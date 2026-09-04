@@ -1,18 +1,42 @@
 // ─── Product ────────────────────────────────────────────────────────────────
 
 export interface Product {
-  id: number;
+  id: string | number;
+  artistId?: string;
   title: string;
   artist: string;
   artistName: string;
+  artistImage?: string;
+  description?: string | null;
   rating: number;
   reviews: number;
   price: number;
+  stock?: number;
   originalPrice: number | null;
   discount: number | null;
   image: string;
+  images?: string[];
   category: string;
   badge?: string;
+  artworkDetails?: ArtworkDetails;
+}
+
+export interface ArtworkDetails {
+  artworkType: "ORIGINAL" | "LIMITED_EDITION" | "MADE_TO_ORDER" | "DIGITAL";
+  medium?: string | null;
+  materials?: string | null;
+  width?: number | null;
+  height?: number | null;
+  depth?: number | null;
+  dimensionUnit?: string;
+  year?: number | null;
+  condition?: string | null;
+  framing?: string | null;
+  editionSize?: number | null;
+  editionNumber?: number | null;
+  authenticity?: string | null;
+  provenance?: string | null;
+  fulfillmentMode: "PHYSICAL" | "DIGITAL";
 }
 
 // ─── Cart ────────────────────────────────────────────────────────────────────
@@ -20,12 +44,13 @@ export interface Product {
 export interface CartItem extends Product {
   quantity: number;
   size: string;
+  cartItemId?: string;
 }
 
 // ─── Artist ──────────────────────────────────────────────────────────────────
 
 export interface Artist {
-  id: number;
+  id: string | number;
   name: string;
   handle: string;
   followers: string;
@@ -39,35 +64,39 @@ export interface Artist {
 // ─── Story ───────────────────────────────────────────────────────────────────
 
 export interface Story {
-  id: number;
+  id: string | number;
   title: string;
   date: string;
   image: string;
   excerpt?: string;
   category?: string;
+  content?: string;
 }
 
 // ─── Review ──────────────────────────────────────────────────────────────────
 
 export interface Review {
-  id: number;
+  id: string | number;
   author: string;
   date: string;
   rating: number;
   text: string;
+  verified?: boolean;
 }
 
 // ─── Order ───────────────────────────────────────────────────────────────────
 
 export interface OrderItem {
-  id: number;
+  id: string | number;
+  orderId?: string;
   title: string;
   artist: string;
   price: number;
   originalPrice: number | null;
   discount: number | null;
   image: string;
-  status?: "delivered" | "in-transit" | "processing";
+  status?: "delivered" | "in-transit" | "processing" | "cancelled";
+  size?: string;
   date?: string;
 }
 
@@ -129,15 +158,12 @@ export type UserRole = "collector" | "artist";
 // ─── Collection ──────────────────────────────────────────────────────────────
 
 export interface Collection {
-  id: number;
+  id: string;
   name: string;
   description: string;
   coverImage: string;
   artworkCount: number;
-  curatorName: string;
-  curatorAvatar: string;
   featured?: boolean;
-  tags?: string[];
 }
 
 // ─── Search Result ───────────────────────────────────────────────────────────

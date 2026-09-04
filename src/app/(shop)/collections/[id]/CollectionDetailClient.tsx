@@ -1,15 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { collections, allProducts } from "@/data";
+import { useCollection } from "@/hooks/useCollections";
 import ProductCard from "@/components/product/ProductCard";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import ReportForm from "@/components/forms/ReportForm";
 
-export default function CollectionDetailClient({ collectionId }: { collectionId: number }) {
-  const collection = collections.find((c) => c.id === collectionId);
-  if (!collection) return <div className="text-center py-20 text-gray-400">Collection not found.</div>;
+export default function CollectionDetailClient({ collectionId }: { collectionId: string }) {
+  const { data: collection, isLoading, isError, refetch } = useCollection(collectionId);
 
-  const artworks = allProducts.slice(0, Math.min(collection.artworkCount, 8));
+  if (isLoading) return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 text-sm text-gray-500" role="status">Loading collection…</div>;
+  if (isError) return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 flex flex-col items-start gap-3 text-sm text-gray-500" role="alert"><p>Collection could not be loaded.</p><button type="button" onClick={() => refetch()} className="inline-flex min-h-11 items-center text-accent-600 underline">Try again</button></div>;
+  if (!collection) return <div className="text-center py-20 text-gray-500">Collection not found.</div>;
+
+  const products = collection.products;
 
   return (
     <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-10 sm:py-16">
@@ -21,22 +25,25 @@ export default function CollectionDetailClient({ collectionId }: { collectionId:
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent"/>
         <div className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10">
           <h1 className="font-heading text-[2rem] sm:text-[2.75rem] font-bold text-white tracking-tighter-heading mb-2">{collection.name}</h1>
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-full overflow-hidden border-2 border-white/50 relative">
-              <Image src={collection.curatorAvatar} alt="" fill className="object-cover" sizes="24px"/>
-            </div>
-            <span className="text-sm text-white/80">{collection.curatorName}</span>
-            <span className="text-sm text-white/40">· {collection.artworkCount} artworks</span>
-          </div>
+          <span className="text-sm text-white/80">Artistically Editorial</span>
         </div>
       </div>
 
-      <p className="text-[15px] text-gray-400 leading-relaxed max-w-2xl mb-10">{collection.description}</p>
+      <p className="text-[15px] text-gray-500 leading-relaxed max-w-2xl mb-10">{collection.description}</p>
 
-      <h2 className="font-heading text-[22px] font-semibold text-[#111] tracking-tight-heading mb-8">Artworks in this Collection</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
-        {artworks.map((p) => <ProductCard key={p.id} product={p}/>)}
+      <div className="mb-10">
+        <ReportForm targetType="COLLECTION" targetId={String(collection.id)} targetLabel={collection.name} />
       </div>
+
+      <h2 className="font-heading text-[22px] font-semibold text-[#111] tracking-tight-heading mb-2">Explore available artworks</h2>
+      <p className="text-sm text-gray-500 mb-8">Artwork selected for this collection from the published catalog.</p>
+      {products.length === 0 ? (
+        <p className="text-sm text-gray-500">No published artworks are available yet.</p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+          {products.map((p) => <ProductCard key={p.id} product={p}/>)}
+        </div>
+      )}
     </div>
   );
 }

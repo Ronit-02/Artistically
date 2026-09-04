@@ -3,14 +3,15 @@
  */
 
 import { create } from "zustand";
-import type { CartItem, Product, SearchFilters, UserRole } from "@/types";
-import { initialCartItems } from "@/data";
+import type { AuthUser, CartItem, Product, SearchFilters, UserRole } from "@/types";
 
 interface AppState {
   // ── Auth ──────────────────────────────────────────────────────────────────
   isLoggedIn: boolean;
   userRole: UserRole;
+  authUser: AuthUser | null;
   login: (email: string, password: string, role?: UserRole) => void;
+  setAuthUser: (user: AuthUser) => void;
   logout: () => void;
 
   // ── Search ────────────────────────────────────────────────────────────────
@@ -26,14 +27,14 @@ interface AppState {
   cart: CartItem[];
   cartCount: number;
   addToCart: (product: Product) => void;
-  updateQty: (id: number, delta: number) => void;
-  removeItem: (id: number) => void;
+  updateQty: (id: string | number, delta: number) => void;
+  removeItem: (id: string | number) => void;
   clearCart: () => void;
 
   // ── Wishlist ──────────────────────────────────────────────────────────────
   wishlist: Product[];
   toggleWishlist: (product: Product) => void;
-  isWishlisted: (id: number) => boolean;
+  isWishlisted: (id: string | number) => boolean;
 }
 
 const computeCount = (cart: CartItem[]): number =>
@@ -49,9 +50,11 @@ const DEFAULT_FILTERS: SearchFilters = {
 export const useAppStore = create<AppState>((set, get) => ({
   isLoggedIn: false,
   userRole: "collector",
+  authUser: null,
   login: (_email, _password, role) =>
     set({ isLoggedIn: true, userRole: role ?? "collector" }),
-  logout: () => set({ isLoggedIn: false, userRole: "collector" }),
+  setAuthUser: (user) => set({ authUser: user, isLoggedIn: true, userRole: user.role }),
+  logout: () => set({ isLoggedIn: false, userRole: "collector", authUser: null }),
 
   searchQuery: "",
   setSearchQuery: (query) => set({ searchQuery: query }),
@@ -61,8 +64,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((s) => ({ filters: { ...s.filters, ...partial } })),
   resetFilters: () => set({ filters: DEFAULT_FILTERS }),
 
-  cart: initialCartItems,
-  cartCount: computeCount(initialCartItems),
+  // Cart authority lives in the authenticated REST resource. Keep this legacy
+  // shape empty so a fresh client cannot display fabricated cart contents.
+  cart: [],
+  cartCount: 0,
 
   addToCart: (product) => {
     const cart = get().cart;
