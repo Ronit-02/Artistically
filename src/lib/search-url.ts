@@ -19,13 +19,13 @@ function appendValues(params: URLSearchParams, key: string, values: readonly (st
 export function buildSearchHref(query: string, options: SearchUrlOptions = {}): string {
   const params = new URLSearchParams();
   const normalized = query.trim();
-  if (normalized) params.set("q", normalized);
+  if (normalized) {params.set("q", normalized);}
 
   appendValues(params, "type", options.types);
   appendValues(params, "price", options.prices);
   appendValues(params, "rating", options.ratings);
-  if (options.sort) params.set("sort", options.sort);
-  if (options.page && options.page > 1) params.set("page", String(Math.floor(options.page)));
+  if (options.sort) {params.set("sort", options.sort);}
+  if (options.page && options.page > 1) {params.set("page", String(Math.floor(options.page)));}
 
   const encoded = params.toString();
   return encoded ? `/search?${encoded}` : "/search";

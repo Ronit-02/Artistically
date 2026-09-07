@@ -44,7 +44,7 @@ export default function ReportForm({ targetType, targetId, targetLabel }: {
     });
   };
 
-  if (isAuthPending) return null;
+  if (isAuthPending) {return null;}
 
   return (
     <section aria-labelledby={`${targetType.toLowerCase()}-report-heading`} className="border-t border-gray-200 pt-6">

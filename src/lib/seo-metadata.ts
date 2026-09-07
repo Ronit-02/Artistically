@@ -4,8 +4,8 @@ const MAX_DESCRIPTION_LENGTH = 160;
 
 function compactDescription(value: string | null | undefined, fallback: string): string {
   const compact = value?.replace(/\s+/g, " ").trim();
-  if (!compact) return fallback;
-  if (compact.length <= MAX_DESCRIPTION_LENGTH) return compact;
+  if (!compact) {return fallback;}
+  if (compact.length <= MAX_DESCRIPTION_LENGTH) {return compact;}
   return `${compact.slice(0, MAX_DESCRIPTION_LENGTH - 1).trimEnd()}…`;
 }
 

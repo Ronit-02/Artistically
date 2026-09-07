@@ -66,7 +66,7 @@ export default function ArtistPortalLayout({
   const queryClient = useQueryClient();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
-    if (typeof window === "undefined") return "overview";
+    if (typeof window === "undefined") {return "overview";}
     return getArtistPortalTab(window.location.search);
   });
 

@@ -19,7 +19,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     credentials: "include",
   });
 
-  if (response.status === 204) return undefined as T;
+  if (response.status === 204) {return undefined as T;}
 
   const payload = (await response.json()) as ApiResponse<T>;
   if (!response.ok || !payload.success) {
@@ -48,6 +48,6 @@ export async function apiRequestPaginated<T>(path: string, init?: RequestInit): 
       payload.success ? undefined : payload.fields,
     );
   }
-  if (!payload.pagination) throw new ApiClientError("Pagination metadata is missing", response.status);
+  if (!payload.pagination) {throw new ApiClientError("Pagination metadata is missing", response.status);}
   return { data: payload.data, pagination: payload.pagination };
 }

@@ -45,13 +45,13 @@ function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide:
   }, []);
 
   useEffect(() => {
-    if (isPaused || prefersReducedMotion) return;
+    if (isPaused || prefersReducedMotion) {return;}
     const t = setInterval(next, 5000);
     return () => clearInterval(t);
   }, [isPaused, next, prefersReducedMotion]);
 
   const slide = slides[idx] ?? slides[0];
-  if (!slide) return null;
+  if (!slide) {return null;}
 
   return (
     <div
@@ -128,7 +128,7 @@ export default function HomePageClient() {
   const collections = collectionsQuery.data ?? [];
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
   const catSearch = (cat: string) => { setSearchQuery(""); router.push(buildSearchHref("", { types: [toSearchTypeLabel(cat)] })); };
-  const navigate = (q: string) => { if (q) catSearch(q); else router.push("/search"); };
+  const navigate = (q: string) => { if (q) {catSearch(q);} else {router.push("/search");} };
   const slides: Slide[] = [
     { label: "Explore paintings", title: "Find original work from independent artists", cta: "Browse paintings", image: "/paintings/painting-1.jpg", query: "Paintings" },
     { label: "Meet the artists", title: "Discover artists and their published work", cta: "View artists", image: "/artists/artist-1-cover.jpg", query: "", href: "/artists" },

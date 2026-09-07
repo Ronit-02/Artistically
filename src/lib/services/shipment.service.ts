@@ -38,7 +38,7 @@ export const shipmentService = {
       where: { id: sellerOrderId, artist: { userId } },
       select: { id: true, orderId: true, status: true, shipment: { select: { status: true } } },
     });
-    if (!sellerOrder) return null;
+    if (!sellerOrder) {return null;}
 
     const currentStatus = sellerOrder.shipment?.status ?? "PENDING";
     if (input.status !== "EXCEPTION" && statusOrder[input.status] < statusOrder[currentStatus]) {
@@ -103,13 +103,13 @@ export const shipmentService = {
         where: { id: input.sellerOrderId },
         select: { id: true, orderId: true, status: true, shipment: { select: { id: true, status: true } } },
       });
-      if (!sellerOrder) return { handled: false, reason: "not_found" as const };
+      if (!sellerOrder) {return { handled: false, reason: "not_found" as const };}
 
       const existingEvent = await tx.shipmentEvent.findUnique({
         where: { providerEventId: input.eventId },
         select: { id: true },
       });
-      if (existingEvent) return { handled: false, reason: "duplicate" as const };
+      if (existingEvent) {return { handled: false, reason: "duplicate" as const };}
 
       const currentStatus = sellerOrder.shipment?.status ?? "PENDING";
       const shouldAdvance = input.status === "EXCEPTION" || statusOrder[input.status] >= statusOrder[currentStatus];

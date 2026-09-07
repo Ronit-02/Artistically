@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { prisma } from "@/lib/prisma";
-import { Prisma, ProductCategory } from "@prisma/client";
+import type { Prisma, ProductCategory } from "@prisma/client";
 import type { z } from "zod";
 import type {
   CreateProductSchema,
@@ -235,7 +235,7 @@ export const productService = {
         .filter((product) => withRating(product).rating >= effectiveMinRating)
         .map((product) => product.id);
 
-      if (eligibleIds.length === 0) return { products: [], total: 0 };
+      if (eligibleIds.length === 0) {return { products: [], total: 0 };}
 
       paginatedWhere = { ...where, id: { in: eligibleIds } };
       totalPromise = Promise.resolve(eligibleIds.length);
@@ -269,7 +269,7 @@ export const productService = {
         },
       },
     });
-    if (!product) return null;
+    if (!product) {return null;}
     return withRating(product);
   },
 
@@ -314,7 +314,7 @@ export const productService = {
       where: { id },
       include: { artworkDetails: true },
     });
-    if (!product || product.artistId !== artistId) return null;
+    if (!product || product.artistId !== artistId) {return null;}
 
     const nextPrice = input.price !== undefined ? toMinorUnits(input.price) : product.price;
     const nextOriginalPrice = input.originalPrice !== undefined ? toMinorUnits(input.originalPrice) : product.originalPrice ?? undefined;
@@ -379,7 +379,7 @@ export const productService = {
 
   async delete(id: string, artistId: string): Promise<boolean> {
     const product = await prisma.product.findUnique({ where: { id } });
-    if (!product || product.artistId !== artistId) return false;
+    if (!product || product.artistId !== artistId) {return false;}
     // Soft delete
     await prisma.product.update({ where: { id }, data: { isActive: false } });
     return true;

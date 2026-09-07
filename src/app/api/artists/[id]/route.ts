@@ -1,6 +1,6 @@
 // GET   /api/artists/[id]  — artist profile + products
 // PATCH /api/artists/[id]  — update own profile
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, RouteIdSchema, UpdateArtistSchema } from "@/lib/validators";
@@ -43,7 +43,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: unknown) => {
     },
   });
 
-  if (!artist) return notFound("Artist not found");
+  if (!artist) {return notFound("Artist not found");}
   const { verification, ...publicArtist } = artist;
   return ok({
     ...publicArtist,
@@ -57,8 +57,8 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
   const validId = validate(RouteIdSchema, { id }).id;
 
   const artist = await prisma.artist.findUnique({ where: { id: validId } });
-  if (!artist) return notFound("Artist not found");
-  if (artist.userId !== auth.userId) return forbidden("You can only edit your own profile");
+  if (!artist) {return notFound("Artist not found");}
+  if (artist.userId !== auth.userId) {return forbidden("You can only edit your own profile");}
 
   const body = await req.json();
   const input = validate(UpdateArtistSchema, body);

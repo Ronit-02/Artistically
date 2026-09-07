@@ -15,7 +15,7 @@ function ArtistFollowControl({ artistId }: { artistId: string | number }) {
   const { currentUser, isAuthPending, following, toggle } = useArtistFollow(String(artistId));
 
   const handleClick = () => {
-    if (isAuthPending || toggle.isPending) return;
+    if (isAuthPending || toggle.isPending) {return;}
     if (!currentUser) {
       router.push("/login");
       return;

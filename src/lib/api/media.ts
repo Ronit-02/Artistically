@@ -9,7 +9,7 @@ export async function authorizeMediaUpload(input: { purpose: MediaPurposeInput; 
 
 export async function uploadMediaFile(file: File, operation: SignedMediaUpload) {
   const response = await fetch(operation.upload.uploadUrl, { method: "PUT", headers: operation.upload.headers, body: file });
-  if (!response.ok) throw new Error("The media provider rejected the upload.");
+  if (!response.ok) {throw new Error("The media provider rejected the upload.");}
   return apiRequest<{ id: string; purpose: string; status: string; mimeType: string; sizeBytes: number }>(`/api/artist/media/${encodeURIComponent(operation.asset.id)}/complete`, { method: "POST", body: JSON.stringify({}) });
 }
 

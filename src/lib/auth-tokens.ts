@@ -47,7 +47,7 @@ async function consumeToken(token: string, purpose: AuthTokenPurpose) {
   const tokenHash = hashToken(token);
   return prisma.$transaction(async (tx) => {
     const record = await tx.authToken.findFirst({ where: { tokenHash, purpose, usedAt: null, expiresAt: { gt: new Date() } } });
-    if (!record) return null;
+    if (!record) {return null;}
     const consumed = await tx.authToken.updateMany({ where: { id: record.id, usedAt: null, expiresAt: { gt: new Date() } }, data: { usedAt: new Date() } });
     return consumed.count === 1 ? record : null;
   });
@@ -55,14 +55,14 @@ async function consumeToken(token: string, purpose: AuthTokenPurpose) {
 
 export async function verifyEmail(token: string) {
   const record = await consumeToken(token, "EMAIL_VERIFICATION");
-  if (!record) return false;
+  if (!record) {return false;}
   await prisma.user.update({ where: { id: record.userId }, data: { emailVerifiedAt: new Date() } });
   return true;
 }
 
 export async function resetPassword(token: string, password: string) {
   const record = await consumeToken(token, "PASSWORD_RESET");
-  if (!record) return false;
+  if (!record) {return false;}
   const passwordHash = await bcrypt.hash(password, 12);
   await prisma.$transaction([
     prisma.user.update({ where: { id: record.userId }, data: { password: passwordHash } }),

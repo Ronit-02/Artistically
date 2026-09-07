@@ -1,6 +1,6 @@
 // PATCH  /api/reviews/[id]  — update own review
 // DELETE /api/reviews/[id]  — delete own review
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, RouteIdSchema, UpdateReviewSchema } from "@/lib/validators";
@@ -14,8 +14,8 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
   const validId = validate(RouteIdSchema, { id }).id;
 
   const review = await prisma.review.findUnique({ where: { id: validId } });
-  if (!review) return notFound("Review not found");
-  if (review.userId !== auth.userId) return forbidden("You can only edit your own reviews");
+  if (!review) {return notFound("Review not found");}
+  if (review.userId !== auth.userId) {return forbidden("You can only edit your own reviews");}
 
   const body = await req.json();
   const input = validate(UpdateReviewSchema, body);
@@ -30,8 +30,8 @@ export const DELETE = withErrorHandler(async (req: NextRequest, ctx: unknown) =>
   const validId = validate(RouteIdSchema, { id }).id;
 
   const review = await prisma.review.findUnique({ where: { id: validId } });
-  if (!review) return notFound("Review not found");
-  if (review.userId !== auth.userId && auth.role !== "ADMIN") return forbidden("Not allowed");
+  if (!review) {return notFound("Review not found");}
+  if (review.userId !== auth.userId && auth.role !== "ADMIN") {return forbidden("Not allowed");}
 
   await prisma.review.delete({ where: { id: validId } });
   await prisma.auditLog.create({ data: { actorId: auth.userId, action: "REVIEW_DELETED", targetType: "REVIEW", targetId: validId } });

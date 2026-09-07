@@ -1,6 +1,6 @@
 // POST /api/reports/[id]/appeal — submit an appeal as the affected owner
 
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, CreateAppealSchema, RouteIdSchema } from "@/lib/validators";
@@ -22,11 +22,11 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
       collection: { select: { ownerArtist: { select: { userId: true } } } },
     },
   });
-  if (!report) return notFound("Report not found");
-  if (report.status !== "RESOLVED") return forbidden("Only resolved reports can be appealed");
+  if (!report) {return notFound("Report not found");}
+  if (report.status !== "RESOLVED") {return forbidden("Only resolved reports can be appealed");}
   const ownerUserId = report.product?.artist.userId ?? report.collection?.ownerArtist?.userId;
-  if (ownerUserId !== auth.userId) return forbidden("Only the affected owner can appeal");
-  if (report.appeal) return conflict("This report already has an appeal");
+  if (ownerUserId !== auth.userId) {return forbidden("Only the affected owner can appeal");}
+  if (report.appeal) {return conflict("This report already has an appeal");}
 
   const appeal = await prisma.$transaction(async (tx) => {
     const createdAppeal = await tx.moderationAppeal.create({

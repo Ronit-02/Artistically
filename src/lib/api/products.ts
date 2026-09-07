@@ -91,17 +91,17 @@ export async function fetchProductPage(params?: ProductListParams): Promise<Prod
 
 function buildProductQuery(params?: ProductListParams) {
   const query = new URLSearchParams({ limit: String(params?.limit ?? 50) });
-  if (params?.artistId) query.set("artistId", params.artistId);
-  if (params?.search) query.set("search", params.search);
-  if (params?.category) query.set("category", params.category);
+  if (params?.artistId) {query.set("artistId", params.artistId);}
+  if (params?.search) {query.set("search", params.search);}
+  if (params?.category) {query.set("category", params.category);}
   params?.categories?.forEach((category) => query.append("category", category));
-  if (params?.minPrice !== undefined) query.set("minPrice", String(params.minPrice));
-  if (params?.maxPrice !== undefined) query.set("maxPrice", String(params.maxPrice));
+  if (params?.minPrice !== undefined) {query.set("minPrice", String(params.minPrice));}
+  if (params?.maxPrice !== undefined) {query.set("maxPrice", String(params.maxPrice));}
   params?.priceRanges?.forEach((range) => query.append("priceRange", range));
-  if (params?.minRating !== undefined) query.set("minRating", String(params.minRating));
+  if (params?.minRating !== undefined) {query.set("minRating", String(params.minRating));}
   params?.minRatings?.forEach((rating) => query.append("minRating", String(rating)));
-  if (params?.sortBy) query.set("sortBy", params.sortBy);
-  if (params?.page !== undefined) query.set("page", String(params.page));
+  if (params?.sortBy) {query.set("sortBy", params.sortBy);}
+  if (params?.page !== undefined) {query.set("page", String(params.page));}
   return query;
 }
 
@@ -109,7 +109,7 @@ export async function fetchProductById(id: string): Promise<Product | null> {
   try {
     return mapProduct(await apiRequest<ProductDto>(`/api/products/${encodeURIComponent(id)}`));
   } catch (error) {
-    if (error instanceof ApiClientError && error.status === 404) return null;
+    if (error instanceof ApiClientError && error.status === 404) {return null;}
     throw error;
   }
 }

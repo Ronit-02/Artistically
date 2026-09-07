@@ -1,6 +1,6 @@
 // GET   /api/users/[id]  — get user profile
 // PATCH /api/users/[id]  — update own profile
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, RouteIdSchema, UpdateUserSchema } from "@/lib/validators";
@@ -28,10 +28,10 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   const validId = validate(RouteIdSchema, { id }).id;
 
   // Users can only fetch their own profile (admins can fetch anyone)
-  if (validId !== auth.userId && auth.role !== "ADMIN") return forbidden();
+  if (validId !== auth.userId && auth.role !== "ADMIN") {return forbidden();}
 
   const user = await prisma.user.findUnique({ where: { id: validId }, select: safeUserSelect });
-  if (!user) return notFound("User not found");
+  if (!user) {return notFound("User not found");}
   return ok(user);
 });
 
@@ -40,7 +40,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
   const auth = await requireAuth(req);
   const validId = validate(RouteIdSchema, { id }).id;
 
-  if (validId !== auth.userId) return forbidden("You can only edit your own profile");
+  if (validId !== auth.userId) {return forbidden("You can only edit your own profile");}
 
   const body = await req.json();
   const input = validate(UpdateUserSchema, body);

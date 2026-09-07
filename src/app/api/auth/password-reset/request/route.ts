@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { ok, withErrorHandler } from "@/lib/api-response";
 import { issueAccountToken } from "@/lib/auth-tokens";
 import { prisma } from "@/lib/prisma";
@@ -11,6 +11,6 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   const input = validate(RequestAccountTokenSchema, await request.json());
   await enforceRateLimit(opaqueRateLimitKey("password-reset", input.email), { max: 3, windowMs: 60 * 60_000 });
   const user = await prisma.user.findFirst({ where: { email: input.email, isActive: true }, select: { id: true, email: true, firstName: true } });
-  if (user) await issueAccountToken(user, "PASSWORD_RESET");
+  if (user) {await issueAccountToken(user, "PASSWORD_RESET");}
   return ok(RESPONSE);
 });

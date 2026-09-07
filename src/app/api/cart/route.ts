@@ -1,7 +1,7 @@
 // GET    /api/cart             — get current user's cart
 // POST   /api/cart             — add item to cart
 // DELETE /api/cart             — clear entire cart
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, AddToCartSchema } from "@/lib/validators";
@@ -43,7 +43,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Check product exists and has stock
   const product = await prisma.product.findUnique({ where: { id: input.productId } });
-  if (!product || !product.isActive) return notFound("Product not found");
+  if (!product || !product.isActive) {return notFound("Product not found");}
   const existing = await prisma.cartItem.findUnique({
     where: {
       userId_productId_size: {
@@ -55,8 +55,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     select: { quantity: true },
   });
   const requestedQuantity = (existing?.quantity ?? 0) + input.quantity;
-  if (product.stock < requestedQuantity) return badRequest("Insufficient stock");
-  if (requestedQuantity > 10) return badRequest("Cart quantity cannot exceed 10");
+  if (product.stock < requestedQuantity) {return badRequest("Insufficient stock");}
+  if (requestedQuantity > 10) {return badRequest("Cart quantity cannot exceed 10");}
 
   const item = await prisma.cartItem.upsert({
     where: {

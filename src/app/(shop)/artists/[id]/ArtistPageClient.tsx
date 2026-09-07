@@ -19,7 +19,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
   } = useArtistProducts(artistId);
   const { currentUser, isAuthPending, following, toggle } = useArtistFollow(artistId);
 
-  if (isLoading) return <div className="min-h-screen animate-pulse bg-gray-50" />;
+  if (isLoading) {return <div className="min-h-screen animate-pulse bg-gray-50" />;}
   if (isError) {
     return (
       <div className="text-center py-20">
@@ -28,7 +28,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
       </div>
     );
   }
-  if (!artist) return <div className="text-center py-20 text-gray-500">Artist not found.</div>;
+  if (!artist) {return <div className="text-center py-20 text-gray-500">Artist not found.</div>;}
 
   const isOwnProfile = currentUser?.artist?.id === artist.id;
 

@@ -14,24 +14,24 @@ import { serverEnv } from "./env";
 class CsrfError extends Error { constructor() { super("Request origin was rejected"); } }
 
 export function assertCsrf(request: Request) {
-  if (!["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) return;
+  if (!["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {return;}
   const hasSessionCookie = request.headers.get("cookie")?.includes("artistically_");
   const pathname = new URL(request.url).pathname;
-  if (!hasSessionCookie || pathname === "/api/checkout/webhook" || pathname === "/api/webhooks/shipment") return;
+  if (!hasSessionCookie || pathname === "/api/checkout/webhook" || pathname === "/api/webhooks/shipment") {return;}
   const origin = request.headers.get("origin");
-  if (!origin || origin !== new URL(serverEnv.NEXT_PUBLIC_APP_URL).origin) throw new CsrfError();
+  if (!origin || origin !== new URL(serverEnv.NEXT_PUBLIC_APP_URL).origin) {throw new CsrfError();}
 }
 
 async function enforceSensitiveMutationLimit(request: Request) {
-  if (!["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) return;
+  if (!["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) {return;}
   const pathname = new URL(request.url).pathname;
   const cookie = request.headers.get("cookie");
-  if (!cookie) return;
+  if (!cookie) {return;}
   const policy = pathname.startsWith("/api/checkout") ? { max: 10, windowMs: 60 * 60_000 }
     : pathname.startsWith("/api/artist/media") ? { max: 30, windowMs: 60 * 60_000 }
     : pathname.startsWith("/api/reviews") || pathname.startsWith("/api/reports") ? { max: 20, windowMs: 60 * 60_000 }
     : undefined;
-  if (policy) await enforceRateLimit(opaqueRateLimitKey(`mutation:${pathname}`, cookie), policy);
+  if (policy) {await enforceRateLimit(opaqueRateLimitKey(`mutation:${pathname}`, cookie), policy);}
 }
 
 // ─── Success ─────────────────────────────────────────────────────────────────

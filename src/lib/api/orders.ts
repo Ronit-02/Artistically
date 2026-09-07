@@ -43,7 +43,7 @@ export async function fetchOrderById(orderId: string): Promise<OrderDto | null> 
     const order = await apiRequest<OrderDto>(`/api/orders/${encodeURIComponent(orderId)}`);
     return mapOrderMoney(order);
   } catch (error) {
-    if (error instanceof ApiClientError && error.status === 404) return null;
+    if (error instanceof ApiClientError && error.status === 404) {return null;}
     throw error;
   }
 }

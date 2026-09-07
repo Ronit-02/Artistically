@@ -26,7 +26,7 @@ export const orderService = {
       where: { userId },
       include: { product: true },
     });
-    if (cartItems.length === 0) throw new InvalidStateError("Cart is empty");
+    if (cartItems.length === 0) {throw new InvalidStateError("Cart is empty");}
 
     const items = cartItems.map((item) => ({
       productId: item.productId,
@@ -111,7 +111,7 @@ export const orderService = {
 
   async listSettlementsForArtist(userId: string) {
     const artist = await prisma.artist.findUnique({ where: { userId }, select: { id: true } });
-    if (!artist) return { sellerOrders: [], payouts: [] };
+    if (!artist) {return { sellerOrders: [], payouts: [] };}
 
     const [sellerOrders, payouts, settlements] = await Promise.all([
       prisma.sellerOrder.findMany({
@@ -202,7 +202,7 @@ export const orderService = {
       where: { id: itemId },
       select: { id: true, orderId: true, fulfillmentStatus: true, product: { select: { artist: { select: { userId: true } } } } },
     });
-    if (!item || item.product.artist.userId !== userId) return null;
+    if (!item || item.product.artist.userId !== userId) {return null;}
 
     const statusOrder: Record<string, number> = {
       PENDING: 0, PROCESSING: 1, SHIPPED: 2, IN_TRANSIT: 3, DELIVERED: 4, CANCELLED: -1,
@@ -329,7 +329,7 @@ export const orderService = {
       where: { id, userId },
       include: { payment: { select: { status: true } } },
     });
-    if (!order) return false;
+    if (!order) {return false;}
     if (order.status !== OrderStatus.PROCESSING && order.status !== OrderStatus.CONFIRMED) {
       throw new InvalidStateError("Order cannot be cancelled at this stage");
     }

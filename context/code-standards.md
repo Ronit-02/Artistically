@@ -68,6 +68,8 @@ Use the following product vocabulary consistently:
 - Use `import type` for type-only imports where it improves clarity and emitted output.
 - Do not import server-only runtime modules or persistence code into client components.
 - Avoid barrel exports that create cycles or obscure runtime boundaries.
+- Keep type-only imports explicit with `import type`.
+- Browser-facing modules must consume public API clients and must not import server-only authentication, configuration, persistence, integration, or domain-service modules.
 
 ## React and Component Organization
 
@@ -148,6 +150,16 @@ Route handlers should not contain long persistence queries, duplicate multi-step
 - Update `context/progress-tracker.md` only when verified project progress changes.
 - Keep sensitive implementation and operational knowledge in the corresponding ignored file under `sensitive context/`.
 
+## Linting
+
+- ESLint runs with the Next.js Core Web Vitals and TypeScript presets, plus type-aware checks through the project TypeScript configuration; warnings fail the quality gate.
+- Application source uses strict equality (with intentional nullish checks), braces for control flow, explicit type-only imports, and no duplicate value imports.
+- Promise-returning work must be awaited, returned to the caller, handled with an explicit rejection path, or deliberately marked with `void`. Switches over closed state must explicitly cover nullable cases.
+- Do not introduce circular imports, unnecessary conditions or type assertions, unsafe values from untyped boundaries, unsafe template interpolation, or non-`Error` thrown and rejected values.
+- Use the structured logger rather than browser console calls in application code. Script output remains an explicit operational choice.
+- Native images, anchors, form labels, and static interactive surfaces must meet the configured accessibility checks. Component-specific accessibility behavior remains covered by component tests and review.
+- Do not add a lint suppression merely to pass a check. A suppression needs a narrowly scoped, documented reason when the rule cannot express a valid framework or security constraint.
+
 ## Definition of Done
 
 A change is complete when, as applicable:
@@ -158,4 +170,3 @@ A change is complete when, as applicable:
 - Responsive and accessibility behavior is verified for UI changes.
 - Documentation, migrations, and progress tracking reflect verified reality.
 - No unrelated files or contracts were changed.
-

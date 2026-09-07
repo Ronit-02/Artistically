@@ -1,6 +1,6 @@
 // PATCH /api/admin/reports/[id] — resolve a moderation case (admin only)
 
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, ResolveReportSchema, RouteIdSchema } from "@/lib/validators";
@@ -10,7 +10,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   const auth = await requireAuth(req);
-  if (auth.role !== "ADMIN") return forbidden("Administrator access required");
+  if (auth.role !== "ADMIN") {return forbidden("Administrator access required");}
   const { id } = await (ctx as Ctx).params;
   const validId = validate(RouteIdSchema, { id }).id;
   const input = validate(ResolveReportSchema, await req.json());
@@ -19,8 +19,8 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
     where: { id: validId },
     select: { id: true, status: true, productId: true, collectionId: true },
   });
-  if (!report) return notFound("Report not found");
-  if (report.status !== "OPEN") return forbidden("Only open reports can be resolved");
+  if (!report) {return notFound("Report not found");}
+  if (report.status !== "OPEN") {return forbidden("Only open reports can be resolved");}
 
   if (input.action === "REMOVE_PRODUCT" && !report.productId) {
     return forbidden("This report does not target artwork");

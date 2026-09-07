@@ -1,6 +1,6 @@
 // PATCH /api/admin/appeals/[id] — decide an appeal (admin only)
 
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, ResolveAppealSchema, RouteIdSchema } from "@/lib/validators";
@@ -10,7 +10,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   const auth = await requireAuth(req);
-  if (auth.role !== "ADMIN") return forbidden("Administrator access required");
+  if (auth.role !== "ADMIN") {return forbidden("Administrator access required");}
   const { id } = await (ctx as Ctx).params;
   const appealId = validate(RouteIdSchema, { id }).id;
   const input = validate(ResolveAppealSchema, await req.json());
@@ -24,8 +24,8 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
       report: { select: { productId: true, collectionId: true } },
     },
   });
-  if (!appeal) return notFound("Appeal not found");
-  if (appeal.status !== "OPEN") return forbidden("Only open appeals can be decided");
+  if (!appeal) {return notFound("Appeal not found");}
+  if (appeal.status !== "OPEN") {return forbidden("Only open appeals can be decided");}
 
   const updated = await prisma.$transaction(async (tx) => {
     if (input.status === "APPROVED" && appeal.report.productId) {

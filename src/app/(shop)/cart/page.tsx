@@ -2,12 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useCart } from "@/hooks/useCart";
-import { useCartMutations } from "@/hooks/useCart";
+import { useCart, useCartMutations } from "@/hooks/useCart";
 import CartItem from "@/components/product/CartItem";
 import Button from "@/components/ui/Button";
-import { createCheckoutSession } from "@/lib/api/checkout";
-import { fetchCheckoutQuote, type CheckoutQuoteDto } from "@/lib/api/checkout";
+import { createCheckoutSession, fetchCheckoutQuote, type CheckoutQuoteDto } from "@/lib/api/checkout";
 import { ApiClientError } from "@/lib/api/client";
 import { useMemo, useState } from "react";
 

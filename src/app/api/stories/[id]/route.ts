@@ -1,5 +1,5 @@
 // GET /api/stories/[id] — read one published editorial story
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { validate, RouteIdSchema } from "@/lib/validators";
 import { notFound, ok, withErrorHandler } from "@/lib/api-response";
@@ -23,6 +23,6 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: unknown) => {
     },
   });
 
-  if (!story) return notFound("Story not found");
+  if (!story) {return notFound("Story not found");}
   return ok({ ...story, date: story.createdAt.toISOString() });
 });

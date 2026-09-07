@@ -67,7 +67,7 @@ export const collectionService = {
         items: { select: { productId: true, sortOrder: true }, orderBy: { sortOrder: "asc" } },
       },
     });
-    if (!collection) return null;
+    if (!collection) {return null;}
 
     const products = await Promise.all(collection.items.map((item) => productService.getById(item.productId)));
     return {
@@ -78,7 +78,7 @@ export const collectionService = {
 
   async listForArtist(userId: string) {
     const artist = await prisma.artist.findUnique({ where: { userId }, select: { id: true } });
-    if (!artist) return [];
+    if (!artist) {return [];}
     const collections = await prisma.collection.findMany({
       where: { ownerArtistId: artist.id },
       orderBy: { updatedAt: "desc" },
@@ -124,7 +124,7 @@ export const collectionService = {
 
   async createForArtist(userId: string, input: { name: string; description: string; coverImage: string; productIds: string[] }) {
     const artist = await prisma.artist.findUnique({ where: { userId }, select: { id: true } });
-    if (!artist) return null;
+    if (!artist) {return null;}
     await assertArtistProducts(artist.id, input.productIds);
     const created = await prisma.collection.create({
       data: {
@@ -145,10 +145,10 @@ export const collectionService = {
       where: { id, ownerArtist: { userId } },
       select: { id: true },
     });
-    if (!collection) return null;
+    if (!collection) {return null;}
     const artist = await prisma.artist.findUnique({ where: { userId }, select: { id: true } });
-    if (!artist) return null;
-    if (input.productIds) await assertArtistProducts(artist.id, input.productIds);
+    if (!artist) {return null;}
+    if (input.productIds) {await assertArtistProducts(artist.id, input.productIds);}
     await prisma.$transaction(async (tx) => {
       if (input.productIds) {
         await tx.collectionItem.deleteMany({ where: { collectionId: id } });
@@ -180,7 +180,7 @@ async function assertArtistProducts(artistId: string, productIds: string[]) {
   if (new Set(productIds).size !== productIds.length) {
     throw new InvalidStateError("A collection cannot contain the same artwork twice");
   }
-  if (productIds.length === 0) return;
+  if (productIds.length === 0) {return;}
   const count = await prisma.product.count({ where: { id: { in: productIds }, artistId, isActive: true } });
   if (count !== productIds.length) {
     throw new InvalidStateError("Collections can contain only your active artworks");

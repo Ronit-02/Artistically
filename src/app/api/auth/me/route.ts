@@ -1,5 +1,5 @@
 // GET /api/auth/me — returns the currently authenticated user
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { ok, notFound, withErrorHandler } from "@/lib/api-response";
@@ -25,6 +25,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     },
   });
 
-  if (!user) return notFound("User not found");
+  if (!user) {return notFound("User not found");}
   return ok(user);
 });

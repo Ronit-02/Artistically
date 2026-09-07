@@ -3,7 +3,8 @@
 // Protects routes that require authentication at the edge level
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { getAuthUser } from "@/lib/auth";
 import {
   getPageRouteAccess,
@@ -54,7 +55,7 @@ export async function proxy(req: NextRequest) {
 
   const payload = await getAuthUser(req);
   if (!payload) {
-    if (!isApiRequest) return redirectToLogin(req);
+    if (!isApiRequest) {return redirectToLogin(req);}
 
     return NextResponse.json(
       { success: false, error: "Authentication required" },
@@ -84,7 +85,7 @@ export async function proxy(req: NextRequest) {
     );
   }
 
-  if (!isApiRequest) return NextResponse.next();
+  if (!isApiRequest) {return NextResponse.next();}
 
   // Forward user info to route handlers via headers
   const requestHeaders = new Headers(req.headers);

@@ -5,7 +5,7 @@ import { fromMinorUnits } from "@/lib/money";
 export const metadataService = {
   async getProduct(id: string) {
     const product = await productService.getById(id);
-    if (!product) return null;
+    if (!product) {return null;}
 
     return {
       id: product.id,
@@ -30,7 +30,7 @@ export const metadataService = {
         user: { select: { firstName: true, lastName: true } },
       },
     }).then((artist) => {
-      if (!artist) return null;
+      if (!artist) {return null;}
       return {
         id: artist.id,
         name: `${artist.user.firstName} ${artist.user.lastName}`.trim(),

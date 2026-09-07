@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import type { FormEvent} from "react";
+import { useState } from "react";
 import { apiRequest, ApiClientError } from "@/lib/api/client";
 import Button from "@/components/ui/Button";
 

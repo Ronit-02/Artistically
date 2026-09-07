@@ -1,6 +1,6 @@
 // POST /api/reports — submit a moderation report (auth required)
 
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, CreateReportSchema } from "@/lib/validators";
@@ -15,13 +15,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       where: { id: input.targetId },
       select: { id: true, isActive: true },
     });
-    if (!product || !product.isActive) return notFound("Artwork not found");
+    if (!product || !product.isActive) {return notFound("Artwork not found");}
   } else {
     const collection = await prisma.collection.findUnique({
       where: { id: input.targetId },
       select: { id: true, published: true },
     });
-    if (!collection || !collection.published) return notFound("Collection not found");
+    if (!collection || !collection.published) {return notFound("Collection not found");}
   }
 
   const targetWhere = input.targetType === "PRODUCT"
@@ -31,7 +31,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     where: { reporterId: auth.userId, status: "OPEN", ...targetWhere },
     select: { id: true },
   });
-  if (existing) return conflict("You already have an open report for this item");
+  if (existing) {return conflict("You already have an open report for this item");}
 
   const report = await prisma.$transaction(async (tx) => {
     const createdReport = await tx.report.create({

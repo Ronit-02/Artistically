@@ -13,9 +13,9 @@ export default function AdminVerificationQueue() {
   const decision = useDecideAdminVerification();
 
   const decide = (id: string, nextStatus: Exclude<VerificationStatus, "NOT_SUBMITTED" | "SUBMITTED">, label: string) => {
-    if (!window.confirm(`${label} this artist verification case?`)) return;
+    if (!window.confirm(`${label} this artist verification case?`)) {return;}
     const decisionNote = window.prompt("Decision note (required)", "")?.trim() ?? "";
-    if (!decisionNote) return;
+    if (!decisionNote) {return;}
     decision.mutate({ id, status: nextStatus, decisionNote });
   };
 

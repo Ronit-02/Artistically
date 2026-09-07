@@ -16,7 +16,7 @@ type PayoutInput = {
 
 function stripeClient() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new InvalidStateError("Seller payments are not configured");
+  if (!secretKey) {throw new InvalidStateError("Seller payments are not configured");}
   return new Stripe(secretKey);
 }
 
@@ -26,7 +26,7 @@ export const connectService = {
       where: { userId },
       select: { id: true, stripeAccount: { select: { id: true, stripeAccountId: true } } },
     });
-    if (!artist) throw new InvalidStateError("Artist profile is required before seller onboarding");
+    if (!artist) {throw new InvalidStateError("Artist profile is required before seller onboarding");}
 
     const stripe = stripeClient();
     let stripeAccountId = artist.stripeAccount?.stripeAccountId;
@@ -72,16 +72,16 @@ export const connectService = {
   },
 
   async handlePayoutEvent(eventType: string, payout: Stripe.Payout, connectedAccountId: string | null) {
-    if (!connectedAccountId) return { updated: false, reason: "missing_connected_account" as const };
+    if (!connectedAccountId) {return { updated: false, reason: "missing_connected_account" as const };}
     const account = await prisma.stripeAccount.findUnique({
       where: { stripeAccountId: connectedAccountId },
       select: { artistId: true },
     });
-    if (!account) return { updated: false, reason: "account_not_found" as const };
+    if (!account) {return { updated: false, reason: "account_not_found" as const };}
 
     const status = eventType === "payout.paid" ? "PAID" : eventType === "payout.failed" || eventType === "payout.canceled" ? "FAILED" : eventType === "payout.created" ? "PENDING" : "IN_TRANSIT";
     const existing = typeof prisma.payout.findUnique === "function" ? await prisma.payout.findUnique({ where: { stripePayoutId: payout.id }, select: { status: true, paidAt: true } }) : null;
-    if (existing?.status === "PAID" && status !== "PAID") return { updated: true, payout: existing };
+    if (existing?.status === "PAID" && status !== "PAID") {return { updated: true, payout: existing };}
     const updated = await prisma.payout.upsert({
       where: { stripePayoutId: payout.id },
       create: {
@@ -103,7 +103,7 @@ export const connectService = {
       select: { id: true, status: true, amount: true, currency: true, stripePayoutId: true },
     });
     const artist = await prisma.artist.findUnique({ where: { id: account.artistId }, select: { userId: true } });
-    if (artist) safeNotify(notificationService.create({ userId: artist.userId, kind: "PAYOUT", title: `Payout ${status.toLowerCase().replace("_", " ")}`, body: `Your Stripe payout is ${status.toLowerCase().replace("_", " ")}.`, href: "/artist-portal?tab=overview", dedupeKey: `payout:${payout.id}:${status}` }));
+    if (artist) {safeNotify(notificationService.create({ userId: artist.userId, kind: "PAYOUT", title: `Payout ${status.toLowerCase().replace("_", " ")}`, body: `Your Stripe payout is ${status.toLowerCase().replace("_", " ")}.`, href: "/artist-portal?tab=overview", dedupeKey: `payout:${payout.id}:${status}` }));}
     return { updated: true, payout: updated };
   },
 
@@ -120,9 +120,9 @@ export const connectService = {
         transfers: { take: 1 },
       },
     });
-    if (!sellerOrder) throw new InvalidStateError("Seller order not found");
+    if (!sellerOrder) {throw new InvalidStateError("Seller order not found");}
     const existingTransfer = sellerOrder.transfers[0] ?? null;
-    if (existingTransfer?.status === "CREATED") return existingTransfer;
+    if (existingTransfer?.status === "CREATED") {return existingTransfer;}
     const account = sellerOrder.artist.stripeAccount;
     if (!account || account.status !== "ACTIVE" || !account.payoutsEnabled) {
       throw new InvalidStateError("Seller Stripe account is not ready for transfers");
@@ -142,7 +142,7 @@ export const connectService = {
       },
     });
     const amount = settlement.netAmount - settlement.refundAmount;
-    if (amount < 1) throw new InvalidStateError("Seller settlement has no transferable balance");
+    if (amount < 1) {throw new InvalidStateError("Seller settlement has no transferable balance");}
     const idempotencyKey = `seller-transfer:${settlement.id}`;
     const stripe = stripeClient();
     const transfer = await stripe.transfers.create({
@@ -181,18 +181,18 @@ export const connectService = {
   },
 
   async createPayoutForArtist(userId: string, input: PayoutInput) {
-    if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor < 1) throw new InvalidStateError("Payout amount must be a positive integer");
+    if (!Number.isSafeInteger(input.amountMinor) || input.amountMinor < 1) {throw new InvalidStateError("Payout amount must be a positive integer");}
     const artist = await prisma.artist.findUnique({
       where: { userId },
       select: { id: true, stripeAccount: { select: { stripeAccountId: true, status: true, payoutsEnabled: true } } },
     });
-    if (!artist?.stripeAccount || artist.stripeAccount.status !== "ACTIVE" || !artist.stripeAccount.payoutsEnabled) throw new InvalidStateError("Seller Stripe account is not ready for payouts");
+    if (!artist?.stripeAccount || artist.stripeAccount.status !== "ACTIVE" || !artist.stripeAccount.payoutsEnabled) {throw new InvalidStateError("Seller Stripe account is not ready for payouts");}
     const outstanding = await prisma.sellerSettlement.aggregate({ where: { artistId: artist.id }, _sum: { netAmount: true, refundAmount: true, transferredAmount: true } });
     const payouts = typeof prisma.payout.aggregate === "function"
       ? await prisma.payout.aggregate({ where: { artistId: artist.id, status: { in: ["PENDING", "IN_TRANSIT", "PAID"] } }, _sum: { amount: true } })
       : { _sum: { amount: 0 } };
     const available = (outstanding._sum.transferredAmount ?? 0) - (payouts._sum.amount ?? 0);
-    if (input.amountMinor > available) throw new InvalidStateError("Payout amount exceeds the available seller balance");
+    if (input.amountMinor > available) {throw new InvalidStateError("Payout amount exceeds the available seller balance");}
     const stripe = stripeClient();
     const payout = await stripe.payouts.create({ amount: input.amountMinor, currency: "inr", metadata: { artist_id: artist.id } }, { stripeAccount: artist.stripeAccount.stripeAccountId, idempotencyKey: `artist-payout:${input.idempotencyKey}` });
     return prisma.payout.upsert({
@@ -206,7 +206,7 @@ export const connectService = {
   async handleTransferEvent(eventType: string, transfer: Stripe.Transfer) {
     const metadata = transfer.metadata ?? {};
     const existing = await prisma.stripeTransfer.findFirst({ where: { OR: [{ stripeTransferId: transfer.id }, ...(typeof metadata.artistically_settlement_id === "string" ? [{ settlementId: metadata.artistically_settlement_id }] : [])] }, select: { id: true, settlementId: true, status: true, amount: true } });
-    if (!existing) return { updated: false, reason: "transfer_not_found" as const };
+    if (!existing) {return { updated: false, reason: "transfer_not_found" as const };}
     const reversedAmount = typeof transfer.amount_reversed === "number" ? transfer.amount_reversed : 0;
     const status = eventType === "transfer.reversed" || reversedAmount > 0 ? "REVERSED" : "CREATED";
     const updated = await prisma.$transaction(async (tx) => {

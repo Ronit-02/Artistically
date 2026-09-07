@@ -9,9 +9,9 @@ import ReportForm from "@/components/forms/ReportForm";
 export default function CollectionDetailClient({ collectionId }: { collectionId: string }) {
   const { data: collection, isLoading, isError, refetch } = useCollection(collectionId);
 
-  if (isLoading) return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 text-sm text-gray-500" role="status">Loading collection…</div>;
-  if (isError) return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 flex flex-col items-start gap-3 text-sm text-gray-500" role="alert"><p>Collection could not be loaded.</p><button type="button" onClick={() => refetch()} className="inline-flex min-h-11 items-center text-accent-600 underline">Try again</button></div>;
-  if (!collection) return <div className="text-center py-20 text-gray-500">Collection not found.</div>;
+  if (isLoading) {return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 text-sm text-gray-500" role="status">Loading collection…</div>;}
+  if (isError) {return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 flex flex-col items-start gap-3 text-sm text-gray-500" role="alert"><p>Collection could not be loaded.</p><button type="button" onClick={() => refetch()} className="inline-flex min-h-11 items-center text-accent-600 underline">Try again</button></div>;}
+  if (!collection) {return <div className="text-center py-20 text-gray-500">Collection not found.</div>;}
 
   const products = collection.products;
 

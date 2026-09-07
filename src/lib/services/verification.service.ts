@@ -92,7 +92,7 @@ export const verificationService = {
       where: { id: verificationId },
       select: { id: true, status: true, artistId: true },
     });
-    if (!existing) return null;
+    if (!existing) {return null;}
     if (["NOT_SUBMITTED", "VERIFIED", "REJECTED", "REVOKED"].includes(existing.status) && input.status !== "REVOKED") {
       throw new InvalidStateError("This verification is not awaiting an administrator decision");
     }

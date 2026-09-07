@@ -56,8 +56,8 @@ export default function ProfilePage() {
   const moveToTab = (nextTab: Tab) => {
     setTab(nextTab);
     const params = new URLSearchParams(window.location.search);
-    if (nextTab === "profile") params.delete("tab");
-    else params.set("tab", nextTab);
+    if (nextTab === "profile") {params.delete("tab");}
+    else {params.set("tab", nextTab);}
     const query = params.toString();
     router.replace(`/profile${query ? `?${query}` : ""}`, { scroll: false });
   };
@@ -71,7 +71,7 @@ export default function ProfilePage() {
   } : form;
 
   const startEditing = () => {
-    if (!currentUser) return;
+    if (!currentUser) {return;}
     setForm({
       firstName: currentUser.firstName,
       lastName: currentUser.lastName,
@@ -83,7 +83,7 @@ export default function ProfilePage() {
   };
 
   const handleSave = () => {
-    if (!currentUser) return;
+    if (!currentUser) {return;}
     updateProfile.mutate({
       userId: currentUser.id,
       input: {

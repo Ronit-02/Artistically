@@ -14,7 +14,7 @@ export function useCurrentUser() {
       try {
         return await getCurrentUser();
       } catch (error) {
-        if (error instanceof ApiClientError && error.status === 401) return null;
+        if (error instanceof ApiClientError && error.status === 401) {return null;}
         throw error;
       }
     },

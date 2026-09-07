@@ -1,6 +1,6 @@
 // GET  /api/artists  — list all artists
 // POST /api/artists  — create artist profile for current user
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, refreshAccessToken } from "@/lib/auth";
 import { validate, CreateArtistSchema } from "@/lib/validators";
@@ -35,10 +35,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const input = validate(CreateArtistSchema, body);
 
   const existing = await prisma.artist.findUnique({ where: { userId: auth.userId } });
-  if (existing) return conflict("You already have an artist profile");
+  if (existing) {return conflict("You already have an artist profile");}
 
   const handleTaken = await prisma.artist.findUnique({ where: { handle: input.handle } });
-  if (handleTaken) return conflict("This handle is already taken");
+  if (handleTaken) {return conflict("This handle is already taken");}
 
   const { artist, updatedUser } = await prisma.$transaction(async (tx) => {
     const artist = await tx.artist.create({

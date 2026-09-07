@@ -14,9 +14,9 @@ async function normalizeImage(asset: { providerKey: string; mimeType: string }) 
   const source = await provider().readForValidation(asset.providerKey);
   const image = sharp(source, { limitInputPixels: MAX_IMAGE_PIXELS, failOn: "error" }).rotate();
   const metadata = await image.metadata();
-  if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_IMAGE_PIXELS) throw new ValidationError({ file: ["Image dimensions exceed the allowed limit"] });
+  if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_IMAGE_PIXELS) {throw new ValidationError({ file: ["Image dimensions exceed the allowed limit"] });}
   const format = metadata.format;
-  if (format !== "jpeg" && format !== "png" && format !== "webp") throw new ValidationError({ file: ["Only JPEG, PNG, and WebP images are supported"] });
+  if (format !== "jpeg" && format !== "png" && format !== "webp") {throw new ValidationError({ file: ["Only JPEG, PNG, and WebP images are supported"] });}
   const content = format === "jpeg" ? await image.jpeg({ quality: 90, mozjpeg: true }).toBuffer() : format === "png" ? await image.png({ compressionLevel: 9 }).toBuffer() : await image.webp({ quality: 90 }).toBuffer();
   return { content, mimeType: format === "jpeg" ? "image/jpeg" : `image/${format}`, width: metadata.width, height: metadata.height };
 }
@@ -42,7 +42,7 @@ export const mediaService = {
 
   async completeUpload(artistId: string, assetId: string, checksum?: string) {
     const asset = await prisma.mediaAsset.findFirst({ where: { id: assetId, artistId, status: MediaStatus.UPLOADING } });
-    if (!asset) return null;
+    if (!asset) {return null;}
     const stored = await provider().verifyUpload(asset.providerKey);
     if (stored.sizeBytes !== asset.sizeBytes) {
       await prisma.mediaAsset.update({ where: { id: asset.id }, data: { status: MediaStatus.FAILED } });
@@ -66,9 +66,9 @@ export const mediaService = {
   },
 
   async readLocal(asset: { provider: string; providerKey: string }) {
-    if (asset.provider !== "local") throw new Error("Non-local assets must be read by the configured provider");
+    if (asset.provider !== "local") {throw new Error("Non-local assets must be read by the configured provider");}
     const read = provider().readLocal;
-    if (!read) throw new Error("Local media provider is unavailable");
+    if (!read) {throw new Error("Local media provider is unavailable");}
     return read.call(provider(), asset.providerKey);
   },
 
@@ -82,20 +82,20 @@ export const mediaService = {
 
   async decideSubmission(id: string, status: "UNDER_REVIEW" | "APPROVED" | "REJECTED", reviewNote: string | undefined) {
     const submission = await prisma.listingSubmission.findUnique({ where: { id }, select: { id: true, productId: true, status: true } });
-    if (!submission) return null;
+    if (!submission) {return null;}
     return prisma.$transaction(async (tx) => {
       const updated = await tx.listingSubmission.update({ where: { id }, data: { status, reviewNote, reviewedAt: status === "APPROVED" || status === "REJECTED" ? new Date() : undefined } });
-      if (status === "APPROVED") await tx.product.update({ where: { id: submission.productId }, data: { isActive: true } });
-      if (status === "REJECTED") await tx.product.update({ where: { id: submission.productId }, data: { isActive: false } });
+      if (status === "APPROVED") {await tx.product.update({ where: { id: submission.productId }, data: { isActive: true } });}
+      if (status === "REJECTED") {await tx.product.update({ where: { id: submission.productId }, data: { isActive: false } });}
       return updated;
     });
   },
 
   async submitListing(artistId: string, input: z.infer<typeof CreateArtistSubmissionSchema>) {
     const imageAssets = await prisma.mediaAsset.findMany({ where: { id: { in: input.imageAssetIds }, artistId, status: MediaStatus.READY, purpose: MediaPurpose.ARTWORK_IMAGE }, orderBy: { createdAt: "asc" } });
-    if (imageAssets.length !== input.imageAssetIds.length) throw new ValidationError({ imageAssetIds: ["Every artwork image must be an uploaded ready asset owned by you"] });
+    if (imageAssets.length !== input.imageAssetIds.length) {throw new ValidationError({ imageAssetIds: ["Every artwork image must be an uploaded ready asset owned by you"] });}
     const digitalAsset = input.digitalAssetId ? await prisma.mediaAsset.findFirst({ where: { id: input.digitalAssetId, artistId, status: MediaStatus.READY, purpose: MediaPurpose.DIGITAL_FILE } }) : null;
-    if (input.digitalAssetId && !digitalAsset) throw new ValidationError({ digitalAssetId: ["The digital file must be an uploaded ready asset owned by you"] });
+    if (input.digitalAssetId && !digitalAsset) {throw new ValidationError({ digitalAssetId: ["The digital file must be an uploaded ready asset owned by you"] });}
     const { price, originalPrice, category, title, description, discount, badge, stock, processingDays, artworkDetails } = input;
     const product = await prisma.$transaction(async (tx) => {
       const created = await tx.product.create({ data: { artistId, title, description, price: toMinorUnits(price), originalPrice: originalPrice === undefined ? undefined : toMinorUnits(originalPrice), discount, category: category as never, badge, stock, processingDays: processingDays ?? 7, isActive: false, artworkDetails: { create: artworkDetails as never }, images: { create: imageAssets.map((asset, index) => ({ url: provider().publicUrl(asset.providerKey, asset.id), mediaAssetId: asset.id, isPrimary: index === 0, sortOrder: index })) } }, select: { id: true, title: true, isActive: true } });

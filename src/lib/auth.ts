@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/lib/env";
 import { enforceRateLimit, opaqueRateLimitKey } from "@/lib/rate-limit";
@@ -31,7 +31,7 @@ async function signAccessToken(payload: TokenPayload) {
 export async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
     const { payload, protectedHeader } = await jwtVerify(token, secret, { algorithms: [TOKEN_ALGORITHM], issuer: serverEnv.AUTH_TOKEN_ISSUER, audience: serverEnv.AUTH_TOKEN_AUDIENCE });
-    if (protectedHeader.alg !== TOKEN_ALGORITHM || payload.purpose !== TOKEN_PURPOSE || typeof payload.sub !== "string" || typeof payload.jti !== "string" || typeof payload.email !== "string" || typeof payload.role !== "string") return null;
+    if (protectedHeader.alg !== TOKEN_ALGORITHM || payload.purpose !== TOKEN_PURPOSE || typeof payload.sub !== "string" || typeof payload.jti !== "string" || typeof payload.email !== "string" || typeof payload.role !== "string") {return null;}
     return { userId: payload.sub, sessionId: payload.jti, email: payload.email, role: payload.role };
   } catch { return null; }
 }
@@ -59,15 +59,15 @@ export async function refreshAccessToken(user: TokenPayload) {
 export async function rotateAuthSession() {
   const cookieStore = await cookies();
   const current = cookieStore.get(REFRESH_COOKIE_NAME)?.value;
-  if (!current) throw new AuthError();
+  if (!current) {throw new AuthError();}
   const currentHash = hashRefreshToken(current);
   const session = await prisma.authSession.findFirst({ where: { refreshTokenHash: currentHash, revokedAt: null, expiresAt: { gt: new Date() }, user: { isActive: true } }, include: { user: { select: { id: true, email: true, role: true } } } });
-  if (!session) throw new AuthError();
+  if (!session) {throw new AuthError();}
   const next = refreshToken();
   const replacement = await prisma.$transaction(async (tx) => {
     const created = await tx.authSession.create({ data: { userId: session.userId, refreshTokenHash: hashRefreshToken(next), expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRY_SECONDS * 1000) } });
     const revoked = await tx.authSession.updateMany({ where: { id: session.id, refreshTokenHash: currentHash, revokedAt: null }, data: { revokedAt: new Date(), replacedById: created.id, lastUsedAt: new Date() } });
-    if (revoked.count !== 1) throw new AuthError();
+    if (revoked.count !== 1) {throw new AuthError();}
     return created;
   });
   await setSessionCookies(await signAccessToken({ userId: session.user.id, email: session.user.email, role: session.user.role, sessionId: replacement.id }), next);
@@ -76,22 +76,22 @@ export async function rotateAuthSession() {
 export async function clearAuthCookie() {
   const cookieStore = await cookies();
   const refresh = cookieStore.get(REFRESH_COOKIE_NAME)?.value;
-  if (refresh) await prisma.authSession.updateMany({ where: { refreshTokenHash: hashRefreshToken(refresh), revokedAt: null }, data: { revokedAt: new Date() } });
+  if (refresh) {await prisma.authSession.updateMany({ where: { refreshTokenHash: hashRefreshToken(refresh), revokedAt: null }, data: { revokedAt: new Date() } });}
   cookieStore.delete(ACCESS_COOKIE_NAME); cookieStore.delete(REFRESH_COOKIE_NAME);
 }
 
 export async function getAuthUser(req: NextRequest): Promise<TokenPayload | null> {
   const token = req.cookies.get(ACCESS_COOKIE_NAME)?.value;
-  if (!token) return null;
+  if (!token) {return null;}
   const payload = await verifyToken(token);
-  if (!payload) return null;
+  if (!payload) {return null;}
   const active = await prisma.authSession.findFirst({ where: { id: payload.sessionId, userId: payload.userId, revokedAt: null, expiresAt: { gt: new Date() }, user: { isActive: true } }, select: { user: { select: { email: true, role: true } } } });
   return active ? { ...payload, email: active.user.email, role: active.user.role } : null;
 }
 
 export async function requireAuth(req: NextRequest): Promise<TokenPayload> {
   const user = await getAuthUser(req);
-  if (!user) throw new AuthError();
+  if (!user) {throw new AuthError();}
   await enforceRateLimit(opaqueRateLimitKey("authenticated", user.sessionId), { max: 600, windowMs: 60_000 });
   return user;
 }

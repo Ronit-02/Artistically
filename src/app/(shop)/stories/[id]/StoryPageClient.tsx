@@ -10,7 +10,7 @@ export default function StoryPageClient({ storyId }: { storyId: string }) {
   const { data: story, isLoading, isError, refetch } = useStory(storyId);
   const { data: allStories } = useStories();
 
-  if (isLoading) return <div className="min-h-screen animate-pulse bg-[#fafafa]" />;
+  if (isLoading) {return <div className="min-h-screen animate-pulse bg-[#fafafa]" />;}
   if (isError) {
     return (
       <div className="text-center py-20">
@@ -19,7 +19,7 @@ export default function StoryPageClient({ storyId }: { storyId: string }) {
       </div>
     );
   }
-  if (!story) return <div className="text-center py-20 text-gray-500">Story not found.</div>;
+  if (!story) {return <div className="text-center py-20 text-gray-500">Story not found.</div>;}
 
   const otherStories = (allStories ?? []).filter((s) => s.id !== story.id);
 

@@ -12,9 +12,9 @@ type NotificationInput = {
 
 async function createNotification(input: NotificationInput) {
   const user = await prisma.user.findUnique({ where: { id: input.userId }, select: { id: true, email: true } });
-  if (!user) return null;
+  if (!user) {return null;}
   const existing = await prisma.notification.findUnique({ where: { dedupeKey: input.dedupeKey }, select: { id: true } });
-  if (existing) return existing;
+  if (existing) {return existing;}
 
   const notification = await prisma.$transaction(async (tx) => {
     const created = await tx.notification.create({ data: input });
@@ -34,7 +34,7 @@ async function createNotification(input: NotificationInput) {
 
   try {
     const result = await deliverTransactionalEmail({ to: user.email, subject: input.title, body: input.body, eventKey: input.dedupeKey });
-    if (result.delivered) await prisma.emailDelivery.update({ where: { eventKey: input.dedupeKey }, data: { status: "SENT", sentAt: new Date(), error: null } });
+    if (result.delivered) {await prisma.emailDelivery.update({ where: { eventKey: input.dedupeKey }, data: { status: "SENT", sentAt: new Date(), error: null } });}
   } catch (error) {
     await prisma.emailDelivery.update({ where: { eventKey: input.dedupeKey }, data: { status: "FAILED", failedAt: new Date(), error: error instanceof Error ? error.message : "Email delivery failed" } });
   }
@@ -66,7 +66,7 @@ export const notificationService = {
   },
   async notifyOrderArtists(orderId: string, input: Omit<NotificationInput, "userId" | "dedupeKey"> & { dedupeKey: string }) {
     const order = await prisma.order.findUnique({ where: { id: orderId }, select: { sellerOrders: { select: { id: true, artist: { select: { userId: true } } } } } });
-    if (!order) return [];
+    if (!order) {return [];}
     return Promise.all(order.sellerOrders.map((sellerOrder) => createNotification({ ...input, userId: sellerOrder.artist.userId, dedupeKey: `${input.dedupeKey}:${sellerOrder.id}` })));
   },
 };

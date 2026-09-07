@@ -10,7 +10,7 @@ export default function VerifyEmailPage() {
   const [message, setMessage] = useState("Verifying your email address…");
   const [failed, setFailed] = useState(false);
   useEffect(() => {
-    if (!token) return;
+    if (!token) {return;}
     void apiRequest<{ message: string }>("/api/auth/email-verification/confirm", { method: "POST", body: JSON.stringify({ token }) })
       .then((response) => setMessage(response.message))
       .catch((caught) => { setMessage(caught instanceof ApiClientError ? caught.message : "We could not verify your email. Please request a new link."); setFailed(true); });

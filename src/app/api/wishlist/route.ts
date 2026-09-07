@@ -1,7 +1,7 @@
 // GET    /api/wishlist                      — get user's wishlist
 // POST   /api/wishlist                      — add product
 // DELETE /api/wishlist/[productId]          — remove product
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, ProductIdSchema } from "@/lib/validators";
@@ -41,13 +41,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const validProductId = validate(ProductIdSchema, body).productId;
 
   const product = await prisma.product.findUnique({ where: { id: validProductId } });
-  if (!product) return notFound("Product not found");
+  if (!product) {return notFound("Product not found");}
 
   const existing = await prisma.wishlistItem.findUnique({
     where: { userId_productId: { userId: auth.userId, productId: validProductId } },
     select: wishlistSelect,
   });
-  if (existing) return ok(existing);
+  if (existing) {return ok(existing);}
 
   const item = await prisma.wishlistItem.create({
     data: { userId: auth.userId, productId: validProductId },

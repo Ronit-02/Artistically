@@ -17,13 +17,13 @@ export default function ProductCard({ product }: { product: Product }) {
   const isSold = isProductSold(product.stock);
 
   const handleWishlist = () => {
-    if (isAuthPending) return;
+    if (isAuthPending) {return;}
     if (!currentUser) {
       router.push("/login");
       return;
     }
-    if (wishlisted) remove.mutate(String(product.id));
-    else add.mutate(String(product.id));
+    if (wishlisted) {remove.mutate(String(product.id));}
+    else {add.mutate(String(product.id));}
   };
 
   return (

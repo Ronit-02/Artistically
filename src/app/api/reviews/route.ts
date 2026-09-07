@@ -1,6 +1,6 @@
 // POST /api/reviews           — create a review (auth required)
 // GET  /api/reviews?productId= — list reviews for a product
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus } from "@prisma/client";
 import { requireAuth } from "@/lib/auth";
@@ -13,7 +13,7 @@ function toReviewDto<T extends { orderItemId?: string | null }>(review: T) {
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const productId = req.nextUrl.searchParams.get("productId");
-  if (!productId) return badRequest("productId is required");
+  if (!productId) {return badRequest("productId is required");}
   const validProductId = validate(ProductIdSchema, { productId }).productId;
 
   const reviews = await prisma.review.findMany({

@@ -21,11 +21,11 @@ import Logo from "@/components/ui/Logo";
 import type { Artist, Product, SearchResult } from "@/types";
 
 const RECENT_KEY = "artistically_recent";
-function getRecent(): string[] { if (typeof window === "undefined") return []; try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; } }
-function saveRecent(q: string) { if (!q.trim()) return; try { localStorage.setItem(RECENT_KEY, JSON.stringify([q, ...getRecent().filter(s => s !== q)].slice(0, 5))); } catch {} }
+function getRecent(): string[] { if (typeof window === "undefined") {return [];} try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; } }
+function saveRecent(q: string) { if (!q.trim()) {return;} try { localStorage.setItem(RECENT_KEY, JSON.stringify([q, ...getRecent().filter(s => s !== q)].slice(0, 5))); } catch {} }
 
 function buildResults(query: string, products: Product[], artists: Artist[]): SearchResult[] {
-  if (!query.trim()) return [];
+  if (!query.trim()) {return [];}
   const q = query.toLowerCase(), r: SearchResult[] = [];
   products.filter(p => p.title.toLowerCase().includes(q) || p.artistName.toLowerCase().includes(q)).slice(0, 3).forEach(p => r.push({ id: `p-${p.id}`, type: "artwork", title: p.title, subtitle: p.artistName, image: p.image, href: `/products/${p.id}` }));
   artists.filter(a => a.name.toLowerCase().includes(q)).slice(0, 2).forEach(a => r.push({ id: `a-${a.id}`, type: "artist", title: a.name, subtitle: `${a.designs} artworks`, image: a.avatar, href: `/artists/${a.id}` }));
@@ -49,14 +49,14 @@ function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
 
   return (
     <div className="relative flex-1 max-w-xl">
-      <form onSubmit={(e) => { e.preventDefault(); if (!local.trim()) return; saveRecent(local); setSearchQuery(local); setFocused(false); onSearch(local); }}>
+      <form onSubmit={(e) => { e.preventDefault(); if (!local.trim()) {return;} saveRecent(local); setSearchQuery(local); setFocused(false); onSearch(local); }}>
         <div className={`flex items-center w-full rounded-full px-4 py-2.5 gap-2.5 transition-all ${focused ? "bg-white border border-accent-300 shadow-sm" : "bg-[#f5f5f5] border border-transparent hover:bg-[#efefef]"}`}>
           <svg aria-hidden="true" className="w-[18px] h-[18px] flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <label htmlFor={searchId} className="sr-only">Search for products or artists</label>
           <input id={searchId} ref={inputRef} type="text" placeholder="Search for products or artists…"
             value={local} onChange={e => { setLocal(e.target.value); setSelIdx(-1); }}
             onFocus={() => { setFocused(true); setRecent(getRecent()); }}
-            onBlur={(e) => { if (dropRef.current?.contains(e.relatedTarget as Node)) return; setTimeout(() => setFocused(false), 120); }}
+            onBlur={(e) => { if (dropRef.current?.contains(e.relatedTarget as Node)) {return;} setTimeout(() => setFocused(false), 120); }}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") { e.preventDefault(); setSelIdx(i => (i + 1) % Math.max(results.length, 1)); }
               if (e.key === "ArrowUp") { e.preventDefault(); setSelIdx(i => (i - 1 + results.length) % Math.max(results.length, 1)); }
@@ -97,7 +97,7 @@ function NavbarContent() {
   const [mobileSearch, setMobileSearch] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { const h = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false); }; document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h); }, []);
+  useEffect(() => { const h = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) {setMenuOpen(false);} }; document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h); }, []);
 
   const doSearch = useCallback((q: string) => { setSearchQuery(q); router.push(buildSearchHref(q)); }, [router, setSearchQuery]);
   const catClick = (cat: string) => { setSearchQuery(""); router.push(buildSearchHref("", { types: [toSearchTypeLabel(cat)] })); };
@@ -120,7 +120,7 @@ function NavbarContent() {
         <div className="flex items-center gap-0.5 flex-shrink-0 ml-auto sm:ml-0">
           {/* Profile */}
           <div className="relative" ref={menuRef}>
-            <button type="button" onClick={() => { if (!hasSession) router.push("/login"); else setMenuOpen(!menuOpen); }}
+            <button type="button" onClick={() => { if (!hasSession) {router.push("/login");} else {setMenuOpen(!menuOpen);} }}
               aria-label={hasSession ? "Open account menu" : "Sign in"}
               aria-expanded={hasSession ? menuOpen : undefined}
               aria-haspopup={hasSession ? "menu" : undefined}

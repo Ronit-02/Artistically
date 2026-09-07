@@ -31,7 +31,7 @@ export default function ArtistSubmissionForm({ onSubmitted, onCancel }: { onSubm
     if (isDigital && !digitalFile) { setError("Add the protected digital file for this artwork."); return; }
     try {
       const imageAssetIds: string[] = [];
-      for (const file of images) imageAssetIds.push((await upload.mutateAsync({ file, purpose: "ARTWORK_IMAGE" })).id);
+      for (const file of images) {imageAssetIds.push((await upload.mutateAsync({ file, purpose: "ARTWORK_IMAGE" })).id);}
       const digitalAssetId = digitalFile ? (await upload.mutateAsync({ file: digitalFile, purpose: "DIGITAL_FILE" })).id : undefined;
       const input: ListingSubmissionInput = {
         title: title.trim(), description: description.trim() || undefined, price: Number(price), category, stock: isDigital ? 1 : 1,

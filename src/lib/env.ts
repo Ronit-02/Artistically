@@ -25,7 +25,7 @@ const ServerEnvSchema = z
     MEDIA_LOCAL_DIR: z.string().min(1).default(".media"),
   })
   .superRefine((environment, context) => {
-    if (environment.NODE_ENV !== "production") return;
+    if (environment.NODE_ENV !== "production") {return;}
 
     if (!environment.DATABASE_URL) {
       context.addIssue({

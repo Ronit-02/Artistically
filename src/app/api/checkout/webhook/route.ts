@@ -1,6 +1,6 @@
 // POST /api/checkout/webhook — Stripe payment event receiver
 
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { ok, withErrorHandler } from "@/lib/api-response";
 import { paymentService } from "@/lib/services/payment.service";
 

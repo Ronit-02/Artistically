@@ -24,7 +24,7 @@ export async function fetchCollectionById(id: string) {
     const collection = await apiRequest<CollectionDetailDto>(`/api/collections/${encodeURIComponent(id)}`);
     return { ...mapCollection(collection), products: collection.products.map(mapProduct) };
   } catch (error) {
-    if (error instanceof ApiClientError && error.status === 404) return null;
+    if (error instanceof ApiClientError && error.status === 404) {return null;}
     throw error;
   }
 }

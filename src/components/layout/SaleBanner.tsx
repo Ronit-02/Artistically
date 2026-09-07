@@ -34,7 +34,7 @@ export default function SaleBanner() {
     window.dispatchEvent(new Event("storage"));
   };
 
-  if (dismissed) return null;
+  if (dismissed) {return null;}
 
   return (
     <div className="bg-[#111] text-white relative">

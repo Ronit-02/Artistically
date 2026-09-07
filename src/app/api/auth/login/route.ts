@@ -1,5 +1,5 @@
 // POST /api/auth/login
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createAuthSession } from "@/lib/auth";
@@ -17,10 +17,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     select: { id: true, email: true, password: true, firstName: true, lastName: true, role: true, avatar: true },
   });
 
-  if (!user) return unauthorized("Invalid email or password");
+  if (!user) {return unauthorized("Invalid email or password");}
 
   const valid = await bcrypt.compare(input.password, user.password);
-  if (!valid) return unauthorized("Invalid email or password");
+  if (!valid) {return unauthorized("Invalid email or password");}
 
   const safeUser = {
     id: user.id,

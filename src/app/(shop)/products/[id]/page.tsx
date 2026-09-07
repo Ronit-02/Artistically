@@ -22,7 +22,7 @@ export default async function ProductPage({ params }: Props) {
   let productJsonLd: string | null = null;
   try {
     const product = await metadataService.getProduct(id);
-    if (product) productJsonLd = serializeJsonLd(createProductJsonLd(product));
+    if (product) {productJsonLd = serializeJsonLd(createProductJsonLd(product));}
   } catch {
     // Structured data is supplemental; page rendering remains available if the read fails.
   }

@@ -294,9 +294,9 @@ export const CreateMediaUploadSchema = z.object({
 }).superRefine((input, context) => {
   const image = input.purpose === "ARTWORK_IMAGE" || input.purpose === "ARTIST_COVER";
   const max = image ? 15 * 1024 * 1024 : input.purpose === "DIGITAL_FILE" ? 250 * 1024 * 1024 : 10 * 1024 * 1024;
-  if (input.sizeBytes > max) context.addIssue({ code: "custom", path: ["sizeBytes"], message: `File exceeds the ${Math.round(max / 1024 / 1024)}MB limit` });
-  if (image && !input.mimeType.startsWith("image/")) context.addIssue({ code: "custom", path: ["mimeType"], message: "Artwork media must be an image" });
-  if (input.purpose === "DIGITAL_FILE" && ["application/x-msdownload", "application/javascript", "text/html"].includes(input.mimeType)) context.addIssue({ code: "custom", path: ["mimeType"], message: "This digital file type is not allowed" });
+  if (input.sizeBytes > max) {context.addIssue({ code: "custom", path: ["sizeBytes"], message: `File exceeds the ${Math.round(max / 1024 / 1024)}MB limit` });}
+  if (image && !input.mimeType.startsWith("image/")) {context.addIssue({ code: "custom", path: ["mimeType"], message: "Artwork media must be an image" });}
+  if (input.purpose === "DIGITAL_FILE" && ["application/x-msdownload", "application/javascript", "text/html"].includes(input.mimeType)) {context.addIssue({ code: "custom", path: ["mimeType"], message: "This digital file type is not allowed" });}
 });
 
 export const CompleteMediaUploadSchema = z.object({

@@ -12,11 +12,11 @@ export function useNotifications() {
 export function useMarkNotificationRead() {
   const client = useQueryClient();
   const { data: user } = useCurrentUser();
-  return useMutation({ mutationFn: markNotificationRead, onSuccess: () => { if (user) client.invalidateQueries({ queryKey: notificationKeys.forUser(user.id) }); } });
+  return useMutation({ mutationFn: markNotificationRead, onSuccess: () => user ? client.invalidateQueries({ queryKey: notificationKeys.forUser(user.id) }) : undefined });
 }
 
 export function useMarkAllNotificationsRead() {
   const client = useQueryClient();
   const { data: user } = useCurrentUser();
-  return useMutation({ mutationFn: markAllNotificationsRead, onSuccess: () => { if (user) client.invalidateQueries({ queryKey: notificationKeys.forUser(user.id) }); } });
+  return useMutation({ mutationFn: markAllNotificationsRead, onSuccess: () => user ? client.invalidateQueries({ queryKey: notificationKeys.forUser(user.id) }) : undefined });
 }

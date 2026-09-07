@@ -1,9 +1,7 @@
-import type { Artist } from "@/types";
-import type { Product } from "@/types";
+import type { Artist, Product } from "@/types";
 import { apiRequest, ApiClientError } from "@/lib/api/client";
 import { fetchProducts } from "@/lib/api/products";
-import type { ArtistDto } from "@/types/api";
-import type { ArtistFollowDto } from "@/types/api";
+import type { ArtistDto, ArtistFollowDto } from "@/types/api";
 
 export type UpdateArtistProfileInput = {
   handle?: string;
@@ -35,7 +33,7 @@ export async function fetchArtistById(id: string): Promise<Artist | null> {
   try {
     return mapArtist(await apiRequest<ArtistDto>(`/api/artists/${encodeURIComponent(id)}`));
   } catch (error) {
-    if (error instanceof ApiClientError && error.status === 404) return null;
+    if (error instanceof ApiClientError && error.status === 404) {return null;}
     throw error;
   }
 }

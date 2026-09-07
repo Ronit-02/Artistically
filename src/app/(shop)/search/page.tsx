@@ -114,7 +114,7 @@ function SearchPageContent() {
   const searchStateKey = searchParams.toString();
 
   useEffect(() => {
-    if (searchQuery !== urlQuery) setSearchQuery(urlQuery);
+    if (searchQuery !== urlQuery) {setSearchQuery(urlQuery);}
   }, [searchQuery, setSearchQuery, urlQuery]);
 
   return <SearchResults key={searchStateKey} searchQuery={urlQuery} setSearchQuery={setSearchQuery}/>;
@@ -146,7 +146,7 @@ function SearchResults({
       page: currentPage,
     });
     const currentHref = searchParams.toString() ? `/search?${searchParams.toString()}` : "/search";
-    if (href !== currentHref) router.replace(href, { scroll: false });
+    if (href !== currentHref) {router.replace(href, { scroll: false });}
   }, [checkedPrices, checkedRatings, checkedTypes, currentPage, router, searchParams, searchQuery, sortBy]);
 
   const serverQuery = useMemo(() => {

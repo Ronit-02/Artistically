@@ -50,20 +50,20 @@ export function getPageRouteAccess(pathname: string): PageRouteAccess {
 }
 
 export function isProtectedApiRoute(pathname: string, method = "GET") {
-  if (matchesRoute(pathname, CHECKOUT_WEBHOOK_ROUTE)) return false;
-  if (isArtistFollowRoute(pathname)) return true;
+  if (matchesRoute(pathname, CHECKOUT_WEBHOOK_ROUTE)) {return false;}
+  if (isArtistFollowRoute(pathname)) {return true;}
 
   if (matchesRoute(pathname, REVIEW_API_ROUTE)) {
     return method !== "GET";
   }
 
-  if (matchesRoute(pathname, ADMIN_API_ROUTE)) return true;
+  if (matchesRoute(pathname, ADMIN_API_ROUTE)) {return true;}
 
-  if (matchesRoute(pathname, REPORT_API_ROUTE)) return true;
+  if (matchesRoute(pathname, REPORT_API_ROUTE)) {return true;}
 
-  if (matchesRoute(pathname, CHECKOUT_API_ROUTE)) return true;
+  if (matchesRoute(pathname, CHECKOUT_API_ROUTE)) {return true;}
 
-  if (matchesRoute(pathname, ARTIST_ORDER_API_ROUTE)) return true;
+  if (matchesRoute(pathname, ARTIST_ORDER_API_ROUTE)) {return true;}
 
   return PROTECTED_API_ROUTES.some((route) => matchesRoute(pathname, route));
 }

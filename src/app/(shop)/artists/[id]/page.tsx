@@ -22,7 +22,7 @@ export default async function ArtistPage({ params }: Props) {
   let artistJsonLd: string | null = null;
   try {
     const artist = await metadataService.getArtist(id);
-    if (artist) artistJsonLd = serializeJsonLd(createArtistJsonLd(artist));
+    if (artist) {artistJsonLd = serializeJsonLd(createArtistJsonLd(artist));}
   } catch {
     // Structured data is supplemental; page rendering remains available if the read fails.
   }

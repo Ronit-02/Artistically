@@ -19,6 +19,6 @@ export function getQueryClient() {
     return makeQueryClient();
   }
   // Browser: reuse the same client
-  if (!browserQueryClient) browserQueryClient = makeQueryClient();
+  if (!browserQueryClient) {browserQueryClient = makeQueryClient();}
   return browserQueryClient;
 }

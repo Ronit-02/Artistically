@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { InvalidStateError } from "@/lib/domain-errors";
 import { notFound, withErrorHandler } from "@/lib/api-response";
@@ -19,13 +20,13 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
     throw new InvalidStateError("Digital download link is invalid or expired");
   }
   const delivery = await postPurchaseService.downloadDigitalDelivery(orderId, orderItemId, auth.userId, true);
-  if (!delivery) return notFound("Digital delivery not found");
+  if (!delivery) {return notFound("Digital delivery not found");}
   if (delivery.mediaAssetId) {
     const asset = await mediaService.getPrivateAssetForDownload(delivery.mediaAssetId);
-    if (!asset) return notFound("Protected digital file not found");
+    if (!asset) {return notFound("Protected digital file not found");}
     if (asset.provider === "local") {
       const read = mediaStorageProvider().readLocal;
-      if (!read) return notFound("Media provider unavailable");
+      if (!read) {return notFound("Media provider unavailable");}
       return new NextResponse(new Uint8Array(await read.call(mediaStorageProvider(), asset.providerKey)), { headers: { "Content-Type": asset.mimeType, "Content-Disposition": `attachment; filename="${asset.originalName.replaceAll('"', "")}"`, "Cache-Control": "private, no-store" } });
     }
     return NextResponse.redirect(await mediaStorageProvider().getDownloadUrl(asset.providerKey, 300), 302);

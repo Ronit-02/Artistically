@@ -44,10 +44,10 @@ function localToken(providerKey: string, expiresAt: number) {
 
 export function verifyLocalUploadToken(providerKey: string, token: string) {
   const [encoded, signature] = token.split(".");
-  if (!encoded || !signature) return false;
+  if (!encoded || !signature) {return false;}
   const payload = Buffer.from(encoded, "base64url").toString("utf8");
   const [signedKey, expiry] = payload.split(":");
-  if (signedKey !== providerKey || !expiry || Number(expiry) < Math.floor(Date.now() / 1000)) return false;
+  if (signedKey !== providerKey || !expiry || Number(expiry) < Math.floor(Date.now() / 1000)) {return false;}
   const expected = createHmac("sha256", serverEnv.JWT_SECRET ?? "artistically-local-media-secret").update(payload).digest("base64url");
   const providedBuffer = Buffer.from(signature);
   const expectedBuffer = Buffer.from(expected);
@@ -59,12 +59,12 @@ function encodedPath(key: string) {
 }
 
 function s3Host() {
-  if (serverEnv.MEDIA_STORAGE_ENDPOINT) return new URL(serverEnv.MEDIA_STORAGE_ENDPOINT).host;
+  if (serverEnv.MEDIA_STORAGE_ENDPOINT) {return new URL(serverEnv.MEDIA_STORAGE_ENDPOINT).host;}
   return `${serverEnv.MEDIA_STORAGE_BUCKET}.s3.${serverEnv.MEDIA_STORAGE_REGION}.amazonaws.com`;
 }
 
 function s3BaseUrl() {
-  if (serverEnv.MEDIA_STORAGE_ENDPOINT) return serverEnv.MEDIA_STORAGE_ENDPOINT.replace(/\/$/, "");
+  if (serverEnv.MEDIA_STORAGE_ENDPOINT) {return serverEnv.MEDIA_STORAGE_ENDPOINT.replace(/\/$/, "");}
   return `https://${s3Host()}`;
 }
 
@@ -148,7 +148,7 @@ class S3MediaStorage implements MediaStorageProvider {
 
   async verifyUpload(providerKey: string) {
     const response = await fetch(`${s3BaseUrl()}/${encodedPath(providerKey)}`, { method: "HEAD" });
-    if (!response.ok) throw new Error("Provider object is not available");
+    if (!response.ok) {throw new Error("Provider object is not available");}
     return { sizeBytes: Number(response.headers.get("content-length") ?? 0), checksum: response.headers.get("etag")?.replaceAll('"', "") ?? "" };
   }
 
@@ -169,13 +169,13 @@ class S3MediaStorage implements MediaStorageProvider {
 
   async readForValidation(providerKey: string) {
     const response = await fetch(await this.getDownloadUrl(providerKey, 60));
-    if (!response.ok) throw new Error("Media object is unavailable");
+    if (!response.ok) {throw new Error("Media object is unavailable");}
     return Buffer.from(await response.arrayBuffer());
   }
 
   async writeValidated(providerKey: string, content: Buffer, mimeType: string) {
     const response = await fetch(signS3Upload({ assetId: "validated", providerKey, mimeType, sizeBytes: content.byteLength }), { method: "PUT", headers: { "Content-Type": mimeType }, body: new Uint8Array(content) });
-    if (!response.ok) throw new Error("Media object could not be normalized");
+    if (!response.ok) {throw new Error("Media object could not be normalized");}
   }
 
   publicUrl(providerKey: string) {

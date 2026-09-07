@@ -47,8 +47,10 @@ export function useArtistFollow(artistId: string) {
     mutationFn: (following: boolean) => following ? unfollowArtist(artistId) : followArtist(artistId),
     onSuccess: (next) => {
       queryClient.setQueryData(artistKeys.follow(artistId, currentUser?.id), next);
-      queryClient.invalidateQueries({ queryKey: artistKeys.all });
-      queryClient.invalidateQueries({ queryKey: artistKeys.detail(artistId) });
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: artistKeys.all }),
+        queryClient.invalidateQueries({ queryKey: artistKeys.detail(artistId) }),
+      ]);
     },
   });
 
@@ -68,8 +70,10 @@ export function useUpdateArtistProfile() {
     mutationFn: ({ artistId, input }: { artistId: string; input: UpdateArtistProfileInput }) =>
       updateArtistProfile(artistId, input),
     onSuccess: (artist) => {
-      queryClient.invalidateQueries({ queryKey: artistKeys.all });
-      queryClient.invalidateQueries({ queryKey: artistKeys.detail(artist.id) });
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: artistKeys.all }),
+        queryClient.invalidateQueries({ queryKey: artistKeys.detail(artist.id) }),
+      ]);
     },
   });
 }

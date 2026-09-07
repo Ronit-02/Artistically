@@ -15,7 +15,7 @@ export async function enforceRateLimit(key: string, { max, windowMs }: Limit) {
   if (serverEnv.NODE_ENV !== "production") {
     const current = memory.get(key);
     if (!current || current.expiresAt <= now) { memory.set(key, { count: 1, expiresAt: now + windowMs }); return; }
-    if (current.count >= max) throw new RateLimitError();
+    if (current.count >= max) {throw new RateLimitError();}
     current.count += 1;
     return;
   }
@@ -25,12 +25,12 @@ export async function enforceRateLimit(key: string, { max, windowMs }: Limit) {
     if (!existing || existing.expiresAt <= new Date(now)) {
       return tx.securityRateLimit.upsert({ where: { key }, create: { key, count: 1, expiresAt }, update: { count: 1, expiresAt } });
     }
-    if (existing.count >= max) throw new RateLimitError();
+    if (existing.count >= max) {throw new RateLimitError();}
     const updated = await tx.securityRateLimit.updateMany({ where: { key, count: existing.count, expiresAt: { gt: new Date(now) } }, data: { count: { increment: 1 } } });
-    if (updated.count !== 1) throw new RateLimitError();
+    if (updated.count !== 1) {throw new RateLimitError();}
     return { count: existing.count + 1 };
   }, { isolationLevel: "Serializable" });
-  if (result.count > max) throw new RateLimitError();
+  if (result.count > max) {throw new RateLimitError();}
 }
 
 export class RateLimitError extends InvalidStateError {

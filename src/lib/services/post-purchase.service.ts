@@ -27,11 +27,11 @@ export function createDigitalDownloadToken(input: { orderId: string; orderItemId
 
 export function verifyDigitalDownloadToken(token: string, input: { orderId: string; orderItemId: string; userId: string }) {
   const [payload, signature] = token.split(".");
-  if (!payload || !signature) return false;
+  if (!payload || !signature) {return false;}
   const expected = createHmac("sha256", tokenSecret()).update(payload).digest("base64url");
   const providedBuffer = Buffer.from(signature);
   const expectedBuffer = Buffer.from(expected);
-  if (providedBuffer.length !== expectedBuffer.length || !timingSafeEqual(providedBuffer, expectedBuffer)) return false;
+  if (providedBuffer.length !== expectedBuffer.length || !timingSafeEqual(providedBuffer, expectedBuffer)) {return false;}
   try {
     const decoded = JSON.parse(decode(payload)) as typeof input & { exp: number };
     return decoded.orderId === input.orderId && decoded.orderItemId === input.orderItemId && decoded.userId === input.userId && decoded.exp > Math.floor(Date.now() / 1000);
@@ -43,11 +43,11 @@ export function verifyDigitalDownloadToken(token: string, input: { orderId: stri
 export function digitalAssetUrl(assetReference: string) {
   try {
     const url = new URL(assetReference);
-    if (url.protocol !== "https:") throw new InvalidStateError("Digital asset URLs must use HTTPS");
+    if (url.protocol !== "https:") {throw new InvalidStateError("Digital asset URLs must use HTTPS");}
     return url.toString();
   } catch (error) {
-    if (error instanceof InvalidStateError) throw error;
-    if (!serverEnv.DIGITAL_ASSET_BASE_URL) throw new InvalidStateError("Digital asset provider is not configured");
+    if (error instanceof InvalidStateError) {throw error;}
+    if (!serverEnv.DIGITAL_ASSET_BASE_URL) {throw new InvalidStateError("Digital asset provider is not configured");}
     return new URL(encodeURIComponent(assetReference), `${serverEnv.DIGITAL_ASSET_BASE_URL.replace(/\/$/, "")}/`).toString();
   }
 }
@@ -59,7 +59,7 @@ function expiryDate() {
 export const postPurchaseService = {
   async listDeliveryRecords(orderId: string, userId: string) {
     const order = await prisma.order.findFirst({ where: { id: orderId, userId }, select: { id: true } });
-    if (!order) return null;
+    if (!order) {return null;}
     return prisma.deliveryRecord.findMany({
       where: { orderId },
       orderBy: { occurredAt: "asc" },
@@ -77,7 +77,7 @@ export const postPurchaseService = {
         product: { select: { id: true, artworkDetails: { select: { fulfillmentMode: true } }, artist: { select: { userId: true } } } },
       },
     });
-    if (!item || item.product.artist.userId !== userId) return null;
+    if (!item || item.product.artist.userId !== userId) {return null;}
     if (item.product.artworkDetails?.fulfillmentMode !== "DIGITAL") {
       throw new InvalidStateError("Only digital artwork can receive a digital delivery");
     }
@@ -86,7 +86,7 @@ export const postPurchaseService = {
     }
 
     const mediaAsset = await prisma.mediaAsset.findFirst({ where: { id: assetReference, artist: { userId }, productId: item.product.id, status: "READY", purpose: "DIGITAL_FILE" }, select: { id: true, providerKey: true } });
-    if (assetReference && !mediaAsset && !/^https:\/\//.test(assetReference)) throw new InvalidStateError("Digital delivery must reference a ready private media asset belonging to this artwork or an HTTPS provider URL");
+    if (assetReference && !mediaAsset && !/^https:\/\//.test(assetReference)) {throw new InvalidStateError("Digital delivery must reference a ready private media asset belonging to this artwork or an HTTPS provider URL");}
 
     const availableAt = new Date();
     const delivery = await prisma.$transaction(async (tx) => {
@@ -117,17 +117,17 @@ export const postPurchaseService = {
       where: { orderItemId, orderItem: { orderId, order: { userId } } },
       select: { assetReference: true, status: true, expiresAt: true },
     });
-    if (!delivery || delivery.status === "EXPIRED" || delivery.status === "REVOKED" || (delivery.expiresAt && delivery.expiresAt <= new Date())) return null;
+    if (!delivery || delivery.status === "EXPIRED" || delivery.status === "REVOKED" || (delivery.expiresAt && delivery.expiresAt <= new Date())) {return null;}
     return delivery;
   },
 
   async prepareDigitalDownload(orderId: string, orderItemId: string, userId: string, acceptLicense: boolean) {
     const delivery = await this.getDigitalDelivery(orderId, orderItemId, userId);
-    if (!delivery) return null;
-    if (delivery.status === "EXPIRED" || (delivery.expiresAt && delivery.expiresAt <= new Date())) throw new InvalidStateError("Digital delivery has expired");
-    if (delivery.status === "REVOKED") throw new InvalidStateError("Digital delivery is no longer available");
-    if (!acceptLicense) throw new InvalidStateError("License acceptance is required before download");
-    if (delivery.downloadCount >= delivery.downloadLimit) throw new InvalidStateError("Digital download limit reached");
+    if (!delivery) {return null;}
+    if (delivery.status === "EXPIRED" || (delivery.expiresAt && delivery.expiresAt <= new Date())) {throw new InvalidStateError("Digital delivery has expired");}
+    if (delivery.status === "REVOKED") {throw new InvalidStateError("Digital delivery is no longer available");}
+    if (!acceptLicense) {throw new InvalidStateError("License acceptance is required before download");}
+    if (delivery.downloadCount >= delivery.downloadLimit) {throw new InvalidStateError("Digital download limit reached");}
     return delivery;
   },
 
@@ -137,14 +137,14 @@ export const postPurchaseService = {
         where: { orderItemId, orderItem: { orderId, order: { userId } } },
         select: { id: true, orderItemId: true, assetReference: true, mediaAssetId: true, status: true, downloadLimit: true, downloadCount: true, expiresAt: true, orderItem: { select: { orderId: true } } },
       });
-      if (!delivery) return null;
+      if (!delivery) {return null;}
       if (delivery.status === "EXPIRED" || (delivery.expiresAt && delivery.expiresAt <= new Date())) {
         await tx.digitalDelivery.update({ where: { id: delivery.id }, data: { status: "EXPIRED" } });
         throw new InvalidStateError("Digital delivery has expired");
       }
-      if (delivery.status === "REVOKED") throw new InvalidStateError("Digital delivery is no longer available");
-      if (!acceptLicense) throw new InvalidStateError("License acceptance is required before download");
-      if (delivery.downloadCount >= delivery.downloadLimit) throw new InvalidStateError("Digital download limit reached");
+      if (delivery.status === "REVOKED") {throw new InvalidStateError("Digital delivery is no longer available");}
+      if (!acceptLicense) {throw new InvalidStateError("License acceptance is required before download");}
+      if (delivery.downloadCount >= delivery.downloadLimit) {throw new InvalidStateError("Digital download limit reached");}
 
       const now = new Date();
       const updated = await tx.digitalDelivery.update({
@@ -159,18 +159,18 @@ export const postPurchaseService = {
 
   async openDispute(orderId: string, claimantId: string, input: { type: "DAMAGE" | "NON_DELIVERY" | "AUTHENTICITY" | "COPYRIGHT" | "DIGITAL_ACCESS" | "OTHER"; reason: string; orderItemId?: string; sellerOrderId?: string }) {
     const order = await prisma.order.findFirst({ where: { id: orderId, userId: claimantId }, select: { id: true, status: true } });
-    if (!order) return null;
-    if (order.status === "CANCELLED") throw new InvalidStateError("Cancelled orders cannot open a dispute");
+    if (!order) {return null;}
+    if (order.status === "CANCELLED") {throw new InvalidStateError("Cancelled orders cannot open a dispute");}
     if (input.orderItemId) {
       const item = await prisma.orderItem.findFirst({ where: { id: input.orderItemId, orderId }, select: { id: true } });
-      if (!item) throw new InvalidStateError("Order item does not belong to this order");
+      if (!item) {throw new InvalidStateError("Order item does not belong to this order");}
     }
     if (input.sellerOrderId) {
       const sellerOrder = await prisma.sellerOrder.findFirst({ where: { id: input.sellerOrderId, orderId }, select: { id: true } });
-      if (!sellerOrder) throw new InvalidStateError("Seller order does not belong to this order");
+      if (!sellerOrder) {throw new InvalidStateError("Seller order does not belong to this order");}
     }
     const existing = await prisma.dispute.findFirst({ where: { orderId, claimantId, status: { in: ["OPEN", "UNDER_REVIEW"] } }, select: { id: true } });
-    if (existing) throw new InvalidStateError("An active dispute already exists for this order");
+    if (existing) {throw new InvalidStateError("An active dispute already exists for this order");}
     return prisma.$transaction(async (tx) => {
       const dispute = await tx.dispute.create({ data: { orderId, claimantId, type: input.type, reason: input.reason, orderItemId: input.orderItemId, sellerOrderId: input.sellerOrderId } });
       await tx.deliveryRecord.create({ data: { orderId, orderItemId: input.orderItemId, sellerOrderId: input.sellerOrderId, actorId: claimantId, type: "DISPUTE_OPENED", note: input.reason } });
@@ -180,7 +180,7 @@ export const postPurchaseService = {
 
   async listDisputesForUser(orderId: string, claimantId: string) {
     const order = await prisma.order.findFirst({ where: { id: orderId, userId: claimantId }, select: { id: true } });
-    if (!order) return null;
+    if (!order) {return null;}
     return prisma.dispute.findMany({ where: { orderId, claimantId }, orderBy: { createdAt: "desc" } });
   },
 
@@ -190,12 +190,12 @@ export const postPurchaseService = {
 
   async resolveDispute(disputeId: string, reviewerId: string, status: "UNDER_REVIEW" | "RESOLVED" | "REJECTED", resolutionNote?: string) {
     const dispute = await prisma.dispute.findUnique({ where: { id: disputeId }, select: { id: true, orderId: true, status: true, orderItemId: true, sellerOrderId: true } });
-    if (!dispute) return null;
-    if (dispute.status === "RESOLVED" || dispute.status === "REJECTED") throw new InvalidStateError("Dispute is already closed");
+    if (!dispute) {return null;}
+    if (dispute.status === "RESOLVED" || dispute.status === "REJECTED") {throw new InvalidStateError("Dispute is already closed");}
     return prisma.$transaction(async (tx) => {
       const resolvedAt = status === "RESOLVED" || status === "REJECTED" ? new Date() : undefined;
       const updated = await tx.dispute.update({ where: { id: disputeId }, data: { status, reviewerId, resolutionNote, resolvedAt } });
-      if (resolvedAt) await tx.deliveryRecord.create({ data: { orderId: dispute.orderId, orderItemId: dispute.orderItemId, sellerOrderId: dispute.sellerOrderId, actorId: reviewerId, type: "DISPUTE_RESOLVED", note: resolutionNote } });
+      if (resolvedAt) {await tx.deliveryRecord.create({ data: { orderId: dispute.orderId, orderItemId: dispute.orderItemId, sellerOrderId: dispute.sellerOrderId, actorId: reviewerId, type: "DISPUTE_RESOLVED", note: resolutionNote } });}
       return updated;
     });
   },

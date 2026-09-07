@@ -21,7 +21,7 @@ export default async function CollectionPage({ params }: Props) {
   let collectionJsonLd: string | null = null;
   try {
     const collection = await metadataService.getCollection(id);
-    if (collection) collectionJsonLd = serializeJsonLd(createCollectionJsonLd(collection));
+    if (collection) {collectionJsonLd = serializeJsonLd(createCollectionJsonLd(collection));}
   } catch {
     // Structured data is supplemental; page rendering remains available if the read fails.
   }

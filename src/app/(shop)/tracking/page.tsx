@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import type { FormEvent} from "react";
+import { Suspense, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,7 +17,7 @@ const STATUS_STEPS = [
 ] as const;
 
 function formatDate(value: string | null) {
-  if (!value) return "Not available";
+  if (!value) {return "Not available";}
   return new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 }
 

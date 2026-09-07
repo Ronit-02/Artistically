@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { ok, notFound, withErrorHandler } from "@/lib/api-response";
 import { validate, RouteIdSchema } from "@/lib/validators";
@@ -11,6 +11,6 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   const { id } = await (ctx as Ctx).params;
   const orderId = validate(RouteIdSchema, { id }).id;
   const records = await postPurchaseService.listDeliveryRecords(orderId, auth.userId);
-  if (!records) return notFound("Order not found");
+  if (!records) {return notFound("Order not found");}
   return ok(records);
 });

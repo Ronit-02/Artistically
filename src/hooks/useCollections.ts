@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { archiveArtistCollection, createArtistCollection, fetchArtistCollections, fetchCollectionById, fetchCollections, updateArtistCollection, type ArtistCollectionInput } from "@/lib/api/collections";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const collectionKeys = {
   all: ["collections"] as const,

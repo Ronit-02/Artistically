@@ -35,8 +35,8 @@ export default function ArtistCollectionManager({ products }: { products: Produc
     event.preventDefault();
     setError(null);
     try {
-      if (editingId) await mutations.update.mutateAsync({ id: editingId, input: form });
-      else await mutations.create.mutateAsync(form);
+      if (editingId) {await mutations.update.mutateAsync({ id: editingId, input: form });}
+      else {await mutations.create.mutateAsync(form);}
       setFormOpen(false);
       setForm(emptyForm);
       setEditingId(null);
@@ -46,7 +46,7 @@ export default function ArtistCollectionManager({ products }: { products: Produc
   };
 
   const archive = async (collection: ArtistCollectionDto) => {
-    if (!window.confirm(`Archive “${collection.name}”? It will no longer be published.`)) return;
+    if (!window.confirm(`Archive “${collection.name}”? It will no longer be published.`)) {return;}
     setError(null);
     try {
       await mutations.archive.mutateAsync(collection.id);

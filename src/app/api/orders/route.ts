@@ -1,6 +1,6 @@
 // GET  /api/orders  — list user's orders
 // POST /api/orders  — retired; orders are created by verified checkout events
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { orderService } from "@/lib/services/order.service";
 import { requireAuth } from "@/lib/auth";
 import { conflict, ok, withErrorHandler } from "@/lib/api-response";

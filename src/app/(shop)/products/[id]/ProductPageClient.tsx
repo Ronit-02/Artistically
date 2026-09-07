@@ -91,16 +91,16 @@ export default function ProductPageClient({ productId }: { productId: string }) 
   const productStock = product?.stock;
   const productQuantityLimit = productStock !== undefined ? Math.max(1, productStock) : 1;
 
-  if (isLoading) return <div className="min-h-screen animate-pulse bg-gray-50" />;
-  if (isError) return (
+  if (isLoading) {return <div className="min-h-screen animate-pulse bg-gray-50" />;}
+  if (isError) {return (
     <div className="mx-auto max-w-xl py-20 text-center" role="alert">
       <p className="text-sm text-gray-500">This artwork could not be loaded.</p>
       <button type="button" onClick={() => refetch()} className="mt-3 inline-flex min-h-11 items-center text-sm text-accent-600 underline hover:text-accent-700 cursor-pointer">
         Try again
       </button>
     </div>
-  );
-  if (!product) return <div className="text-center py-20 text-gray-500">Product not found.</div>;
+  );}
+  if (!product) {return <div className="text-center py-20 text-gray-500">Product not found.</div>;}
 
   const wishlisted = wishlist.some((item) => item.id === product.id);
   const carouselImages = product.images?.length ? product.images : [product.image];
@@ -118,7 +118,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
   const reviewCount = productReviews.length > 0 ? productReviews.length : product.reviews;
 
   const handleAdd = () => {
-    if (isAuthPending || isOutOfStock) return;
+    if (isAuthPending || isOutOfStock) {return;}
     if (!currentUser) {
       router.push("/login");
       return;
@@ -132,13 +132,13 @@ export default function ProductPageClient({ productId }: { productId: string }) 
   };
 
   const handleWishlist = () => {
-    if (isAuthPending) return;
+    if (isAuthPending) {return;}
     if (!currentUser) {
       router.push("/login");
       return;
     }
-    if (wishlisted) removeFromWishlist.mutate(String(product.id));
-    else addToWishlist.mutate(String(product.id));
+    if (wishlisted) {removeFromWishlist.mutate(String(product.id));}
+    else {addToWishlist.mutate(String(product.id));}
   };
 
   const handleCategorySearch = () => {
@@ -148,7 +148,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
 
   const handleReviewSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!currentUser || reviewRating === 0 || reviewText.trim().length < 10) return;
+    if (!currentUser || reviewRating === 0 || reviewText.trim().length < 10) {return;}
     createReview.mutate({ rating: reviewRating, text: reviewText.trim() }, {
       onSuccess: () => {
         setReviewRating(0);

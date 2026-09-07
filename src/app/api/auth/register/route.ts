@@ -1,5 +1,5 @@
 // POST /api/auth/register
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createAuthSession } from "@/lib/auth";
@@ -15,7 +15,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // Check duplicate email
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
-  if (existing) return conflict("Unable to complete authentication");
+  if (existing) {return conflict("Unable to complete authentication");}
 
   // Hash password
   const hashedPassword = await bcrypt.hash(input.password, 12);

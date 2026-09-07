@@ -14,7 +14,7 @@ export default function CartItem({ item }: Props) {
   const isUnavailable = stockLimit === 0;
 
   const updateQuantity = (delta: number) => {
-    if (!itemId) return;
+    if (!itemId) {return;}
     const nextQuantity = Math.max(1, item.quantity + delta);
     update.mutate({ itemId, quantity: stockLimit !== undefined ? Math.min(stockLimit, nextQuantity) : nextQuantity });
   };

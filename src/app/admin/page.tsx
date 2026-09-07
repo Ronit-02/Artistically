@@ -38,8 +38,8 @@ function targetLabel(report: AdminReportDto) {
 }
 
 function reportAction(report: AdminReportDto) {
-  if (report.product) return "REMOVE_PRODUCT" as const;
-  if (report.collection) return "UNPUBLISH_COLLECTION" as const;
+  if (report.product) {return "REMOVE_PRODUCT" as const;}
+  if (report.collection) {return "UNPUBLISH_COLLECTION" as const;}
   return undefined;
 }
 
@@ -111,9 +111,9 @@ export default function AdminPage() {
 
   const resolveReport = (report: AdminReportDto) => {
     const action = reportAction(report);
-    if (!action) return;
+    if (!action) {return;}
     const confirmed = window.confirm(`Remove or unpublish “${targetLabel(report)}” from public discovery?`);
-    if (!confirmed) return;
+    if (!confirmed) {return;}
     const note = window.prompt("Resolution note", "") ?? "";
     void runDecision(report.id, () => resolveAdminReport(report.id, {
       status: "RESOLVED",
@@ -125,7 +125,7 @@ export default function AdminPage() {
   const decideAppeal = (appeal: AdminAppealDto, status: "APPROVED" | "REJECTED") => {
     const target = appeal.report.product?.title ?? appeal.report.collection?.name ?? "this target";
     const confirmed = window.confirm(`${status === "APPROVED" ? "Restore" : "Reject the appeal for"} “${target}”?`);
-    if (!confirmed) return;
+    if (!confirmed) {return;}
     const note = window.prompt("Decision note", "") ?? "";
     void runDecision(appeal.id, () => decideAdminAppeal(appeal.id, {
       status,

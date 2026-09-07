@@ -22,7 +22,7 @@ export default async function StoryPage({ params }: Props) {
   let storyJsonLd: string | null = null;
   try {
     const story = await metadataService.getStory(id);
-    if (story) storyJsonLd = serializeJsonLd(createStoryJsonLd(story));
+    if (story) {storyJsonLd = serializeJsonLd(createStoryJsonLd(story));}
   } catch {
     // Structured data is supplemental; page rendering remains available if the read fails.
   }

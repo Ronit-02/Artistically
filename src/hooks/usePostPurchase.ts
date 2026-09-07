@@ -13,7 +13,7 @@ export function usePrepareDigitalDownload(orderId: string) {
   return useMutation({
     mutationFn: (orderItemId: string) => prepareDigitalDownload(orderId, orderItemId),
     onSuccess: () => {
-      if (currentUser) queryClient.invalidateQueries({ queryKey: ["orders", currentUser.id, orderId] });
+      return currentUser ? queryClient.invalidateQueries({ queryKey: ["orders", currentUser.id, orderId] }) : undefined;
     },
   });
 }
@@ -42,10 +42,12 @@ export function useCreateOrderDispute(orderId: string) {
   return useMutation({
     mutationFn: (input: { type: string; reason: string; orderItemId?: string }) => createOrderDispute(orderId, input),
     onSuccess: () => {
-      if (!currentUser) return;
-      queryClient.invalidateQueries({ queryKey: postPurchaseKeys.disputes(currentUser.id, orderId) });
-      queryClient.invalidateQueries({ queryKey: postPurchaseKeys.records(currentUser.id, orderId) });
-      queryClient.invalidateQueries({ queryKey: ["orders", currentUser.id, orderId] });
+      if (!currentUser) {return;}
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: postPurchaseKeys.disputes(currentUser.id, orderId) }),
+        queryClient.invalidateQueries({ queryKey: postPurchaseKeys.records(currentUser.id, orderId) }),
+        queryClient.invalidateQueries({ queryKey: ["orders", currentUser.id, orderId] }),
+      ]);
     },
   });
 }

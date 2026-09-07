@@ -23,7 +23,7 @@ export async function fetchStoryById(id: string): Promise<Story | null> {
   try {
     return mapStory(await apiRequest<StoryDto>(`/api/stories/${encodeURIComponent(id)}`));
   } catch (error) {
-    if (error instanceof ApiClientError && error.status === 404) return null;
+    if (error instanceof ApiClientError && error.status === 404) {return null;}
     throw error;
   }
 }

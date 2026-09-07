@@ -41,7 +41,7 @@ const DEFAULT_PLATFORM_FEE_BASIS_POINTS = 1_000;
 
 function platformFeeBasisPoints() {
   const configured = process.env.PLATFORM_FEE_BASIS_POINTS;
-  if (!configured) return DEFAULT_PLATFORM_FEE_BASIS_POINTS;
+  if (!configured) {return DEFAULT_PLATFORM_FEE_BASIS_POINTS;}
   const basisPoints = Number(configured);
   if (!Number.isInteger(basisPoints) || basisPoints < 0 || basisPoints > 10_000) {
     throw new InvalidStateError("Platform fee configuration is invalid");
@@ -118,8 +118,8 @@ async function finalizeSuccessfulCheckout(
     payment: { id: string; amount: number; currency: string; orderId: string | null } | null;
   },
 ) {
-  if (!checkout.payment) throw new InvalidStateError("Payment record is missing");
-  if (checkout.payment.orderId) return checkout.payment.orderId;
+  if (!checkout.payment) {throw new InvalidStateError("Payment record is missing");}
+  if (checkout.payment.orderId) {return checkout.payment.orderId;}
 
   const quote = readQuoteSnapshot(checkout.quoteSnapshot);
   if (quote.total !== checkout.payment.amount || checkout.payment.currency !== "inr") {
@@ -250,12 +250,14 @@ async function finalizeSuccessfulCheckout(
 
 function stripeClient() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new InvalidStateError("Payment checkout is not configured");
+  if (!secretKey) {throw new InvalidStateError("Payment checkout is not configured");}
   return new Stripe(secretKey);
 }
 
 function mapStripeRefundStatus(status: string | null): RefundWebhookStatus {
   switch (status) {
+    case null:
+      return "PENDING";
     case "succeeded":
       return "SUCCEEDED";
     case "failed":
@@ -290,7 +292,7 @@ async function reconcileRefundWebhook(
       payment: { select: { id: true, amount: true } },
     },
   });
-  if (!refund) return false;
+  if (!refund) {return false;}
 
   try {
     await tx.paymentEvent.create({
@@ -310,14 +312,14 @@ async function reconcileRefundWebhook(
   }
 
   const status = mapStripeRefundStatus(stripeRefund.status);
-  if (refund.status === "SUCCEEDED" && status !== "SUCCEEDED") return true;
+  if (refund.status === "SUCCEEDED" && status !== "SUCCEEDED") {return true;}
 
   await tx.refund.update({
     where: { id: refund.id },
     data: { status, stripeRefundId: stripeRefund.id },
   });
 
-  if (status !== "SUCCEEDED" || !refund.payment) return true;
+  if (status !== "SUCCEEDED" || !refund.payment) {return true;}
 
   const successfulRefunds = await tx.refund.findMany({
     where: { orderId: refund.orderId, status: "SUCCEEDED" },
@@ -328,7 +330,7 @@ async function reconcileRefundWebhook(
     where: { paymentId: refund.payment.id },
     data: { refundedAmount, status: refundedAmount <= refund.payment.amount ? "RECONCILED" : "OUT_OF_BALANCE" },
   });
-  if (refundedAmount < refund.payment.amount) return true;
+  if (refundedAmount < refund.payment.amount) {return true;}
 
   await tx.payment.update({ where: { id: refund.payment.id }, data: { status: "REFUNDED" } });
   await tx.order.update({ where: { id: refund.orderId }, data: { status: "REFUNDED" } });
@@ -373,7 +375,7 @@ function stripeLineItems(
       },
     };
   });
-  if (remainingDiscount !== 0) throw new InvalidStateError("Checkout discount exceeds the artwork subtotal");
+  if (remainingDiscount !== 0) {throw new InvalidStateError("Checkout discount exceeds the artwork subtotal");}
   if (quote.shippingCost > 0) {
     items.push({ quantity: 1, price_data: { currency: "inr", unit_amount: quote.shippingCost, product_data: { name: "Shipping" } } });
   }
@@ -389,7 +391,7 @@ async function runSerializable<T>(callback: (tx: Prisma.TransactionClient) => Pr
       return await prisma.$transaction(callback, { isolationLevel: "Serializable" });
     } catch (error) {
       const isSerializationConflict = typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "P2034";
-      if (!isSerializationConflict || attempt === 2) throw error;
+      if (!isSerializationConflict || attempt === 2) {throw error;}
     }
   }
   throw new InvalidStateError("Payment transaction could not be serialized");
@@ -427,10 +429,10 @@ export const paymentService = {
       const session = await stripeClient().checkout.sessions.retrieve(existing.stripeSessionId);
       return { id: existing.id, status: existing.status, url: session.url };
     }
-    if (existing) return { id: existing.id, status: existing.status, url: null };
+    if (existing) {return { id: existing.id, status: existing.status, url: null };}
 
     const quote = await orderService.quote(userId, input.promoCode);
-    if (!quote.canCheckout) throw new InvalidStateError("One or more cart items are unavailable");
+    if (!quote.canCheckout) {throw new InvalidStateError("One or more cart items are unavailable");}
     const stripe = stripeClient();
     const cartItems = await prisma.cartItem.findMany({ where: { userId }, include: { product: true } });
     const amount = quote.total;
@@ -452,12 +454,12 @@ export const paymentService = {
         select: { id: true, status: true },
       });
     } catch (error) {
-      if (!(typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "P2002")) throw error;
+      if (!(typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "P2002")) {throw error;}
       const raced = await prisma.checkoutSession.findUnique({
         where: { userId_idempotencyKey: { userId, idempotencyKey: input.idempotencyKey } },
         select: { id: true, status: true, stripeSessionId: true },
       });
-      if (!raced) throw error;
+      if (!raced) {throw error;}
       if (raced.stripeSessionId) {
         const session = await stripeClient().checkout.sessions.retrieve(raced.stripeSessionId);
         return { id: raced.id, status: raced.status, url: session.url };
@@ -488,7 +490,7 @@ export const paymentService = {
 
   async handleWebhook(payload: string, signature: string | null) {
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
-    if (!secret || !signature) throw new InvalidStateError("Payment webhook is not configured");
+    if (!secret || !signature) {throw new InvalidStateError("Payment webhook is not configured");}
     const event = stripeClient().webhooks.constructEvent(payload, signature, secret);
     if (!["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "checkout.session.expired", "account.updated", "payout.created", "payout.paid", "payout.failed", "payout.canceled", "payout.updated", "transfer.created", "transfer.reversed", "refund.created", "refund.updated"].includes(event.type)) {
       return { received: true, handled: false };
@@ -520,22 +522,22 @@ export const paymentService = {
 
     const session = event.data.object as Stripe.Checkout.Session;
     const checkoutId = session.metadata?.checkout_session_id ?? session.client_reference_id;
-    if (!checkoutId) throw new InvalidStateError("Payment webhook has no checkout reference");
+    if (!checkoutId) {throw new InvalidStateError("Payment webhook has no checkout reference");}
 
     await runSerializable(async (tx) => {
       const checkout = await tx.checkoutSession.findUnique({ where: { id: checkoutId }, include: { payment: true } });
-      if (!checkout) return;
+      if (!checkout) {return;}
       try {
         await tx.paymentEvent.create({
           data: { paymentId: checkout.payment?.id, stripeEventId: event.id, type: event.type, payload: event as unknown as object, processedAt: new Date() },
         });
       } catch (error) {
-        if (typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "P2002") return;
+        if (typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "P2002") {return;}
         throw error;
       }
       // A later failure or expiry event must not downgrade a payment that has
       // already produced a durable order from an earlier success event.
-      if (checkout.payment?.orderId) return;
+      if (checkout.payment?.orderId) {return;}
       const succeeded = event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded";
       await tx.checkoutSession.update({ where: { id: checkout.id }, data: { status: succeeded ? "COMPLETED" : "FAILED" } });
       if (checkout.payment) {
@@ -581,7 +583,7 @@ export const paymentService = {
       where: { idempotencyKey: input.idempotencyKey },
       select: { id: true, status: true, amount: true, currency: true, stripeRefundId: true },
     });
-    if (existing?.status === "SUCCEEDED") return existing;
+    if (existing?.status === "SUCCEEDED") {return existing;}
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -595,7 +597,7 @@ export const paymentService = {
         sellerOrders: { select: { id: true, total: true, refunds: { where: { status: "SUCCEEDED" }, select: { amount: true } } } },
       },
     });
-    if (!order) throw new InvalidStateError("Order not found");
+    if (!order) {throw new InvalidStateError("Order not found");}
     if (!order.payment || order.payment.status !== "SUCCEEDED" || !order.payment.stripePaymentId) {
       throw new InvalidStateError("Only successfully paid orders can be refunded");
     }

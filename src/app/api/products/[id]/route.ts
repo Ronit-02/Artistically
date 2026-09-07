@@ -1,7 +1,7 @@
 // GET    /api/products/[id]  — single product
 // PATCH  /api/products/[id]  — update (owner only)
 // DELETE /api/products/[id]  — soft-delete (owner only)
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { productService } from "@/lib/services/product.service";
 import { requireAuth } from "@/lib/auth";
 import { validate, RouteIdSchema, UpdateProductSchema } from "@/lib/validators";
@@ -14,7 +14,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: unknown) => {
   const { id } = await (ctx as Ctx).params;
   const validId = validate(RouteIdSchema, { id }).id;
   const product = await productService.getById(validId);
-  if (!product) return notFound("Product not found");
+  if (!product) {return notFound("Product not found");}
   return ok(product);
 });
 
@@ -23,12 +23,12 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
   const auth = await requireAuth(req);
   const validId = validate(RouteIdSchema, { id }).id;
   const artist = await prisma.artist.findUnique({ where: { userId: auth.userId } });
-  if (!artist) return forbidden("Artists only");
+  if (!artist) {return forbidden("Artists only");}
 
   const body = await req.json();
   const input = validate(UpdateProductSchema, body);
   const product = await productService.update(validId, artist.id, input);
-  if (!product) return notFound("Product not found or not yours");
+  if (!product) {return notFound("Product not found or not yours");}
   return ok(product);
 });
 
@@ -37,9 +37,9 @@ export const DELETE = withErrorHandler(async (req: NextRequest, ctx: unknown) =>
   const auth = await requireAuth(req);
   const validId = validate(RouteIdSchema, { id }).id;
   const artist = await prisma.artist.findUnique({ where: { userId: auth.userId } });
-  if (!artist) return forbidden("Artists only");
+  if (!artist) {return forbidden("Artists only");}
 
   const deleted = await productService.delete(validId, artist.id);
-  if (!deleted) return notFound("Product not found or not yours");
+  if (!deleted) {return notFound("Product not found or not yours");}
   return noContent();
 });

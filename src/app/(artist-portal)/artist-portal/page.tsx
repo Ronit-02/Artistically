@@ -66,7 +66,7 @@ function ArtistProfileSettings({ currentUser, artist }: { currentUser: AuthUserD
 
   const handleProfileSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!artistId) return;
+    if (!artistId) {return;}
     setProfileMessage(null);
     setProfileError(null);
     setProfileFieldErrors({});
@@ -293,14 +293,14 @@ export default function ArtistPortalPage() {
   const moveToTab = (nextTab: Tab) => {
     setTab(nextTab);
     const params = new URLSearchParams(window.location.search);
-    if (nextTab === "overview") params.delete("tab");
-    else params.set("tab", nextTab);
+    if (nextTab === "overview") {params.delete("tab");}
+    else {params.set("tab", nextTab);}
     const query = params.toString();
     router.replace(`${window.location.pathname}${query ? `?${query}` : ""}`, { scroll: false });
   };
   const openArtworkCreator = () => { moveToTab("artworks"); setArtworkEditor(null); };
   const archiveArtwork = async (product: Product) => {
-    if (typeof product.id !== "string" || !window.confirm(`Archive “${product.title}”? It will be removed from public listings.`)) return;
+    if (typeof product.id !== "string" || !window.confirm(`Archive “${product.title}”? It will be removed from public listings.`)) {return;}
     setArchiveError(null);
     try {
       await productMutations.archive.mutateAsync(product.id);
