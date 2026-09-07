@@ -16,11 +16,13 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: unknown) => {
   if (!asset) return notFound("Media asset not found");
   if (asset.provider !== "local") return new NextResponse("Direct provider upload required", { status: 405 });
   const token = new URL(req.url).searchParams.get("token");
-  if (!token || !verifyLocalUploadToken(asset.providerKey, token)) return new NextResponse("Upload token is invalid or expired", { status: 403 });
+  if (!token || !verifyLocalUploadToken(asset.providerKey, token)) return new NextResponse("Upload request could not be authorized", { status: 403 });
+  const declaredLength = Number(req.headers.get("content-length") ?? asset.sizeBytes);
+  if (!Number.isSafeInteger(declaredLength) || declaredLength !== asset.sizeBytes) return new NextResponse("Uploaded file size does not match authorization", { status: 400 });
   const body = Buffer.from(await req.arrayBuffer());
   if (body.byteLength !== asset.sizeBytes) return new NextResponse("Uploaded file size does not match authorization", { status: 400 });
   const write = mediaStorageProvider().writeLocal;
-  if (!write) return new NextResponse("Local media provider is unavailable", { status: 500 });
+  if (!write) return new NextResponse("Upload could not be completed", { status: 500 });
   await write.call(mediaStorageProvider(), asset.providerKey, body);
   return new NextResponse(null, { status: 204 });
 });

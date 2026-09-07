@@ -2,7 +2,7 @@
 // POST /api/artists  — create artist profile for current user
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, setAuthCookie, signToken } from "@/lib/auth";
+import { requireAuth, refreshAccessToken } from "@/lib/auth";
 import { validate, CreateArtistSchema } from "@/lib/validators";
 import { ok, created, conflict, withErrorHandler } from "@/lib/api-response";
 
@@ -58,12 +58,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   // The current session must carry the upgraded role immediately so the
   // artist workspace guard does not require a second sign-in.
-  const token = await signToken({
+  await refreshAccessToken({
     userId: updatedUser.id,
     email: updatedUser.email,
     role: updatedUser.role,
+    sessionId: auth.sessionId,
   });
-  await setAuthCookie(token);
 
   return created(artist);
 });

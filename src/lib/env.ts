@@ -4,14 +4,13 @@ const ServerEnvSchema = z
   .object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     DATABASE_URL: z.string().url("DATABASE_URL must be a valid URL").optional(),
-    JWT_SECRET: z
-      .string()
-      .min(32, "JWT_SECRET must contain at least 32 characters")
-      .optional(),
+    JWT_SECRET: z.string().min(32, "JWT_SECRET must contain at least 32 characters"),
     NEXT_PUBLIC_APP_URL: z
       .string()
       .url("NEXT_PUBLIC_APP_URL must be a valid URL")
       .default("http://localhost:3001"),
+    AUTH_TOKEN_ISSUER: z.string().url().default("http://localhost:3001"),
+    AUTH_TOKEN_AUDIENCE: z.string().min(1).default("artistically-web"),
     SHIPMENT_WEBHOOK_SECRET: z.string().min(16).optional(),
     DIGITAL_ASSET_BASE_URL: z.string().url("DIGITAL_ASSET_BASE_URL must be a valid URL").optional(),
     FULFILLMENT_CRON_SECRET: z.string().min(32).optional(),
@@ -36,14 +35,6 @@ const ServerEnvSchema = z
       });
     }
 
-    if (!environment.JWT_SECRET) {
-      context.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["JWT_SECRET"],
-        message: "JWT_SECRET is required in production",
-      });
-    }
-
     if (environment.MEDIA_STORAGE_PROVIDER === "s3") {
       for (const key of ["MEDIA_STORAGE_BUCKET", "MEDIA_STORAGE_ACCESS_KEY_ID", "MEDIA_STORAGE_SECRET_ACCESS_KEY"] as const) {
         if (!environment[key]) {
@@ -56,7 +47,8 @@ const ServerEnvSchema = z
 export type ServerEnv = z.output<typeof ServerEnvSchema>;
 
 export function parseServerEnv(environment: NodeJS.ProcessEnv): ServerEnv {
-  const result = ServerEnvSchema.safeParse(environment);
+  const prepared = { ...environment, AUTH_TOKEN_ISSUER: environment.AUTH_TOKEN_ISSUER ?? environment.NEXT_PUBLIC_APP_URL };
+  const result = ServerEnvSchema.safeParse(prepared);
 
   if (!result.success) {
     const details = result.error.issues

@@ -2,196 +2,97 @@
 
 ## Purpose
 
-This registry defines how reusable interface components are created, reviewed, recorded, and consumed. It prevents duplicated patterns and avoids turning `components/ui` into an unowned collection of one-off wrappers.
+The UI registry records the reusable component inventory, its ownership level, and its stable public contract. Source code remains authoritative for implementation details and current consumers.
 
-## Ownership Levels
+## Ownership levels
 
-### Primitive components
+- **Primitives** are domain-neutral, token-driven, accessible building blocks.
+- **Shared composites** represent stable marketplace concepts used in more than one place.
+- **Feature components** belong to a single workflow until genuine reuse is established.
 
-Location: `src/components/ui`
+## Registration criteria
 
-Examples: Button, IconButton, Input, Select, Checkbox, Dialog, Drawer, Tooltip, Badge, Tabs, Accordion, Skeleton, Spinner.
+A shared component should have at least two real consumers or foundational value, use documented tokens, define accessibility behavior, and have known loading, disabled, error, and responsive states where applicable. Do not register a component merely to reduce one file’s line count.
 
-Primitives are domain-neutral, token-driven, accessible, and broadly reusable.
+## Component API rules
 
-### Composite shared components
-
-Location: a shared semantic folder such as `src/components/commerce`, `src/components/product`, `src/components/artist`, or `src/components/forms`.
-
-Examples: MoneyDisplay, ProductCard, ArtistCard, QuantityControl, PriceSummary, ArtworkSpecifications, VerificationLabel, AddressForm.
-
-Composites understand a stable domain concept but do not fetch their own route-level data.
-
-### Feature components
-
-Location: `src/features/<feature>/components` or inside the owning route when reuse is unlikely.
-
-Examples: CheckoutPaymentStep, ListingMediaEditor, VerificationEvidenceForm, SellerFulfillmentPanel.
-
-Feature components may depend on feature DTOs and actions. They should not be moved into shared folders until at least two real consumers require the same behavior.
-
-## Registration Criteria
-
-A component enters the shared registry when:
-
-- It has at least two real consumers or represents a foundational primitive.
-- Its visual states and behavior can be described independently of one page.
-- It uses documented tokens.
-- Accessibility behavior is defined.
-- Loading, disabled, error, and responsive behavior are known where relevant.
-- Public props are narrower and more semantic than copying raw HTML plus styling flags.
-
-Do not register a component merely to reduce one file’s line count.
-
-## Component API Rules
-
-- Use semantic variants such as `primary`, `secondary`, `danger`, or `verified`.
-- Avoid props such as `blue`, `roundedMore`, `smallText`, or `hasShadow` that expose implementation styling.
-- Support `className` only where controlled layout composition is needed; variants remain the preferred styling mechanism.
+- Prefer semantic variants over raw styling flags.
+- Avoid styling props such as `blue`, `roundedMore`, `smallText`, or `hasShadow`.
+- Support `className` only for controlled layout composition; variants remain the preferred styling mechanism.
 - Forward refs for primitives that participate in focus, forms, or overlays.
-- Preserve native element props unless doing so creates ambiguous behavior.
-- Do not combine navigation and mutation behavior in one component API.
-- Controlled and uncontrolled behavior must be explicit and documented.
-- Compound components are appropriate for tightly related structures such as Dialog or Tabs.
+- Preserve native element behavior and accessibility.
+- Keep controlled and uncontrolled behavior explicit.
+- Do not combine navigation and state-changing behavior in one ambiguous API.
+- Compound components are appropriate for tightly related structures such as dialogs or tabs.
+- Introduce a shared component only after searching existing patterns.
 
-## Required State Matrix
+## Required state matrix
 
-Each registered component documents applicable states:
+Each registered component documents the applicable default, hover, focus-visible, active, disabled, loading, error, selected or expanded, empty, narrow-layout, and reduced-motion states. A component does not need a state that cannot occur, but it must not leave a relevant state undefined.
 
-- Default.
-- Hover.
-- Focus visible.
-- Active or pressed.
-- Disabled.
-- Loading.
-- Error or invalid.
-- Selected or expanded.
-- Empty.
-- Mobile and narrow-container behavior.
-- Reduced-motion behavior.
+## Accessibility and styling
 
-## Accessibility Requirements
-
-- Native semantics are preferred.
-- Keyboard interaction follows established platform patterns.
-- Icon-only controls require accessible names.
-- Form primitives support label association, descriptions, and error IDs.
-- Overlay primitives manage initial focus, focus containment, escape behavior, outside interaction, and focus restoration.
-- Status components expose meaningful text, not color alone.
+- Prefer native semantics and established keyboard interaction patterns.
+- Icon-only controls require accessible names. Form primitives associate labels, descriptions, and errors with their controls.
+- Overlay primitives define focus entry, containment, escape, outside interaction, and focus restoration.
+- Status components expose meaningful text rather than color alone.
 - Automated accessibility checks supplement manual keyboard and screen-reader review.
+- Shared components consume [ui-tokens.md](./ui-tokens.md) and follow [ui-rules.md](./ui-rules.md); they cannot introduce an undocumented font, color, radius, shadow, or animation.
+- Responsive behavior follows content requirements and avoids unnecessary nested surfaces.
 
-## Styling Rules
+## Current inventory
 
-- Consume tokens from [ui-tokens.md](./ui-tokens.md).
-- Follow behavior rules in [ui-rules.md](./ui-rules.md).
-- Shared components cannot introduce an undocumented font, color, radius, shadow, or animation.
-- Responsive variants are driven by content requirements.
-- Avoid nested surface styling that produces card-within-card repetition.
-
-## Registry Entry Template
-
-Each registered component should have an entry containing:
-
-- Component name.
-- Status: existing, planned, deprecated.
-- Location.
-- Ownership level.
-- Purpose.
-- Variants.
-- Required states.
-- Accessibility contract.
-- Current consumers.
-- Replacement or migration note when deprecated.
-
-## Current Registry
-
-### Existing primitives
-
-| Component | Location | Status | Notes |
+| Ownership | Component | Location | Contract |
 |---|---|---|---|
-| Button | `src/components/ui/Button.tsx` | Existing; API hardening complete | Forwards refs and native button props; `loading` exposes `aria-busy`, disables duplicate activation, and announces loading text |
-| AccordionItem | `src/components/ui/AccordionItem.tsx` | Existing; accessibility review complete | Native button semantics, explicit expanded/control relationship, labelled region, and reduced-motion-safe icon transition |
-| Breadcrumb | `src/components/ui/Breadcrumb.tsx` | Existing; semantics review complete | Uses labelled navigation, ordered-list semantics, current-page state, and native button behavior |
-| Logo | `src/components/ui/Logo.tsx` | Existing; accessibility hardening complete | Home link retains its accessible name and the decorative SVG is hidden from assistive technology |
-| PageHeader | `src/components/ui/PageHeader.tsx` | Existing | Keep for consistent route headings when layout matches |
-| RatingStars | `src/components/ui/RatingStars.tsx` | Existing; display/interactive semantics hardened | Static output is an accessible rating image; callback mode uses a labelled native button with unique half-star gradient IDs |
-| SectionHeader | `src/components/ui/SectionHeader.tsx` | Existing; interaction hardening complete | Link versus button action remains semantic; actions meet the 44px target and decorative icons are hidden |
-| SpecRow | `src/components/ui/SpecRow.tsx` | Existing; narrow use | Specifications must come from product data, not hard-coded page content |
+| Primitive | `Button` | `src/components/ui/Button.tsx` | Native-button props and forwarded ref; `primary`, `secondary`, and `ghost` variants; sizes; loading exposes `aria-busy` and disables duplicate activation. |
+| Primitive | `AccordionItem` | `src/components/ui/AccordionItem.tsx` | Native disclosure button with explicit expanded/control relationship, labelled region, and reduced-motion-safe icon transition. |
+| Primitive | `Breadcrumb` | `src/components/ui/Breadcrumb.tsx` | Labelled navigation with ordered-list semantics, current-page state, links, and optional action items. |
+| Primitive | `Logo` | `src/components/ui/Logo.tsx` | Accessible home link; decorative SVG remains hidden from assistive technology. |
+| Primitive | `PageHeader` | `src/components/ui/PageHeader.tsx` | Page title, optional subtitle, breadcrumbs, and optional action slot. |
+| Primitive | `RatingStars` | `src/components/ui/RatingStars.tsx` | Accessible static rating output and labelled interactive controls when a callback is supplied. |
+| Primitive | `SectionHeader` | `src/components/ui/SectionHeader.tsx` | Section title with semantic link or button action and touch-accessible controls. |
+| Primitive | `SpecRow` | `src/components/ui/SpecRow.tsx` | Label-and-value factual detail row sourced from maintained product data. |
+| Shared composite | `Navbar` and `Footer` | `src/components/layout/` | Labelled marketplace navigation, real destinations, and responsive action controls. |
+| Shared composite | `NotificationBell` and `SaleBanner` | `src/components/layout/` | Notification entry point and optional truthful, dismissible announcement. |
+| Shared composite | `ProductCard` and `CartItem` | `src/components/product/` | Artwork summary, cart-line presentation, semantic navigation, and accessible mutation controls. |
+| Shared composite | `ArtistCard` | `src/components/artist/ArtistCard.tsx` | Semantic artist-profile navigation and text-supported verification display. |
+| Feature | `ArtistCollectionManager` | `src/components/artist/ArtistCollectionManager.tsx` | Artist-portal collection management with validation, loading, retry, empty, and confirmation states. |
+| Feature | `ArtistSubmissionForm` | `src/components/artist/ArtistSubmissionForm.tsx` | Artist listing-submission workflow. |
+| Feature | `ArtistVerificationForm` | `src/components/artist/ArtistVerificationForm.tsx` | Artist verification-submission workflow with visible validation and recovery states. |
+| Feature | `ReportForm` | `src/components/forms/ReportForm.tsx` | Marketplace report submission with reason selection, feedback, and sign-in guidance. |
+| Feature | `AdminVerificationQueue` | `src/components/admin/AdminVerificationQueue.tsx` | Administrative verification review with filters, decisions, confirmation, pending, error, retry, and empty states. |
 
-### Existing composites
-
-| Component | Location | Status | Notes |
-|---|---|---|---|
-| ProductCard | `src/components/product/ProductCard.tsx` | Existing; semantics/truthfulness hardened | Uses semantic links, native wishlist control, persisted badge text, factual zero-stock sold state, and touch-accessible wishlist |
-| CartItem | `src/components/product/CartItem.tsx` | Existing; semantics and touch targets hardened | Uses semantic artwork links, native typed quantity/remove controls, and 44px action targets; server-backed quantity and variant details remain active |
-| ArtistCard | `src/components/artist/ArtistCard.tsx` | Existing; accessibility hardening complete | Semantic artist link, explicit verification text, and decorative avatar/badge imagery hidden from duplicate announcements; trust-state definition remains server-backed work |
-| Navbar | `src/components/layout/Navbar.tsx` | Existing; navigation accessibility hardened | Labelled navigation landmarks, typed buttons, hidden decorative icons, 44px mobile/category/search targets, and existing server-backed counts |
-| Footer | `src/components/layout/Footer.tsx` | Existing; content and semantics hardened | Uses real internal destinations, server-compatible category filters, labelled section navigation, and reviewed pre-launch policy links |
-| SaleBanner | `src/components/layout/SaleBanner.tsx` | Existing; truthful announcement hardening complete | No unsupported campaign claim; real artist destination, persisted dismissal, and labelled native control |
-| ReportForm | `src/components/forms/ReportForm.tsx` | Existing; initial marketplace reporting slice | Authenticated report submission for artwork and collections with reason selection, optional details, durable success/error feedback, and sign-in guidance |
-
-### Existing feature components
-
-| Component | Location | Status | Notes |
-|---|---|---|---|
-| ArtistVerificationForm | `src/components/artist/ArtistVerificationForm.tsx` | Existing; durable verification slice | Owner-scoped verification submission with status, loading, retry, validation, and success feedback; evidence references are never displayed to the owner |
-| AdminVerificationQueue | `src/components/admin/AdminVerificationQueue.tsx` | Existing; durable verification slice | Admin-only status filtering and review decisions with evidence display, confirmation, notes, pending, error, retry, and empty states |
-| ArtistCollectionManager | `src/components/artist/ArtistCollectionManager.tsx` | Existing; artist collections slice | Owner-scoped collection create/edit/archive form with own-artwork selection, validation, loading, retry, empty, confirmation, and unpublished-state feedback |
-
-## Planned Primitive Registry
+## Planned primitives
 
 | Component | Purpose | Key contract |
 |---|---|---|
-| IconButton | Accessible icon-only action | Requires `aria-label`; 44px target |
-| Input | Text field foundation | Label, description, error, prefix/suffix support |
-| Textarea | Long-form input | Character count and error association when required |
-| Select | Native select foundation | Visible label and invalid state |
-| Checkbox | Binary or multi-select input | Full label target and description |
-| RadioGroup | Exclusive choice | Arrow-key and group-label behavior |
-| FormField | Consistent form composition | Label, description, control, and error IDs |
-| Badge | Factual compact label | Semantic status variants and text |
-| Alert | Persistent feedback | Info, success, warning, danger semantics |
-| Toast | Supplemental transient feedback | Never sole carrier of critical state |
-| Dialog | Modal decision surface | Focus management and named title |
-| Drawer | Mobile filters and navigation | Focus management and scroll containment |
-| DropdownMenu | Compact action menu | Keyboard navigation and typeahead |
-| Tooltip | Supplemental control explanation | Not required to understand primary content |
-| Skeleton | Predictable loading placeholder | Hidden appropriately from assistive technology |
-| EmptyState | Empty collection guidance | Explanation and one relevant action |
-| Pagination | Browse navigation | URL-backed page state and accessible labels |
+| `IconButton` | Accessible icon-only action | Requires an accessible name and a 44px target. |
+| `Input` and `Textarea` | Text-field foundations | Labels, descriptions, errors, and prefix/suffix or count support when needed. |
+| `Select`, `Checkbox`, `RadioGroup` | Choice foundations | Visible group labeling, invalid state, full label targets, and appropriate keyboard behavior. |
+| `FormField` | Consistent form composition | Connects label, description, control, and error IDs. |
+| `Badge`, `Alert`, `Toast` | Compact status and feedback | Use semantic variants; critical state never relies only on transient feedback. |
+| `Dialog`, `Drawer`, `DropdownMenu`, `Tooltip` | Overlay and compact actions | Define focus and keyboard behavior; a tooltip never carries essential content. |
+| `Skeleton`, `EmptyState`, `Pagination` | Loading, empty, and browse states | Assistive-technology-safe loading, relevant empty guidance, and URL-backed accessible pagination. |
 
-## Planned Composite Registry
+## Planned composites
 
 | Component | Purpose |
 |---|---|
-| MoneyDisplay | Currency-safe formatted amount from a Money DTO |
-| ProductPrice | Current price, legitimate comparison price, and discount state |
-| ArtworkMediaGallery | Full-artwork viewing, thumbnails, zoom, video, and accessible controls |
-| ArtworkSpecifications | Category-aware factual specification list |
-| VerificationLabel | Defined verification status with accessible explanation |
-| QuantityControl | Bounded quantity selection with stock and pending states |
-| PriceSummary | Authoritative subtotal, shipping, tax, discount, and total rows |
-| AddressForm | Structured delivery address editing and validation |
-| OrderStatus | Consistent buyer and seller order-state presentation |
-| ShipmentTimeline | Normalized shipment events and tracking destination |
-| ReviewSummary | Rating distribution and verified-review totals |
-| FileUploadField | Signed upload progress, validation, retry, and removal |
-| DataTable | Accessible operational table with sorting and responsive behavior |
-| ConfirmActionDialog | Consequence-focused confirmation for risky actions |
+| `MoneyDisplay`, `ProductPrice`, `PriceSummary` | Currency-safe price and authoritative total presentation. |
+| `ArtworkMediaGallery`, `ArtworkSpecifications`, `VerificationLabel` | Art-specific display of media, factual details, and defined trust status. |
+| `QuantityControl`, `AddressForm`, `OrderStatus`, `ShipmentTimeline` | Commerce and fulfillment interaction and state. |
+| `ReviewSummary`, `FileUploadField`, `DataTable`, `ConfirmActionDialog` | Review, upload, operations, and consequence-focused confirmation patterns. |
 
-## Change Process
+## Change process
 
-1. Search the registry and repository before creating a new component.
-2. Decide primitive, composite, or feature ownership.
-3. Define props, states, accessibility, and token usage before implementation.
-4. Implement with focused tests.
-5. Verify keyboard and narrow-layout behavior.
-6. Add or update the registry entry.
-7. Migrate real consumers before deprecating the older pattern.
+1. Search the repository for an existing pattern.
+2. Choose the narrowest ownership level.
+3. Define props, states, accessibility, and token usage.
+4. Implement and verify with real consumers.
+5. Update this inventory when a reusable component’s stable contract or ownership changes.
 
-## Deprecation Rules
+Security-sensitive workflow behavior and internal service dependencies belong in the relevant ignored local context file, not in this registry.
 
-- Mark the component deprecated in this file and in its exported documentation.
-- Name the replacement and migration constraint.
-- Do not add new consumers to a deprecated component.
-- Remove it only after repository search confirms no consumers remain.
+## Deprecation
+
+Mark a deprecated component here with its replacement and migration constraint. Do not add consumers to it, and remove it only after repository search confirms it has none.

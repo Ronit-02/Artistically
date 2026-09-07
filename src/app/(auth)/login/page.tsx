@@ -158,7 +158,7 @@ export default function LoginPage() {
 
         {mode === "login" && (
           <div className="text-right mt-2">
-            <Link href="/contact" className="text-[13px] text-[#111] hover:underline">Need help signing in?</Link>
+            <Link href="/reset-password" className="text-[13px] text-[#111] hover:underline">Forgot your password?</Link>
           </div>
         )}
 

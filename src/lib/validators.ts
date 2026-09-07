@@ -29,6 +29,19 @@ export const LoginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+export const RequestAccountTokenSchema = z.object({
+  email: NormalizedEmailSchema,
+});
+
+export const ConfirmEmailVerificationSchema = z.object({
+  token: z.string().trim().min(32).max(200),
+});
+
+export const ConfirmPasswordResetSchema = z.object({
+  token: z.string().trim().min(32).max(200),
+  password: RegisterSchema.shape.password,
+});
+
 // ─── User ────────────────────────────────────────────────────────────────────
 
 export const UpdateUserSchema = z.object({

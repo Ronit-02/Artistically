@@ -98,6 +98,8 @@ export interface MediaStorageProvider {
   publicUrl(providerKey: string, assetId: string): string;
   writeLocal?(providerKey: string, content: Buffer): Promise<void>;
   readLocal?(providerKey: string): Promise<Buffer>;
+  readForValidation(providerKey: string): Promise<Buffer>;
+  writeValidated(providerKey: string, content: Buffer, mimeType: string): Promise<void>;
 }
 
 class LocalMediaStorage implements MediaStorageProvider {
@@ -131,6 +133,9 @@ class LocalMediaStorage implements MediaStorageProvider {
   readLocal(providerKey: string) {
     return readFile(localPath(providerKey));
   }
+
+  readForValidation(providerKey: string) { return readFile(localPath(providerKey)); }
+  writeValidated(providerKey: string, content: Buffer) { return this.writeLocal(providerKey, content); }
 }
 
 class S3MediaStorage implements MediaStorageProvider {
@@ -160,6 +165,17 @@ class S3MediaStorage implements MediaStorageProvider {
     const signingKey = hmac(hmac(hmac(hmac(`AWS4${serverEnv.MEDIA_STORAGE_SECRET_ACCESS_KEY}`, shortDate), serverEnv.MEDIA_STORAGE_REGION), "s3"), "aws4_request");
     query.set("X-Amz-Signature", createHmac("sha256", signingKey).update(stringToSign).digest("hex"));
     return `${s3BaseUrl()}${canonicalUri}?${query.toString()}`;
+  }
+
+  async readForValidation(providerKey: string) {
+    const response = await fetch(await this.getDownloadUrl(providerKey, 60));
+    if (!response.ok) throw new Error("Media object is unavailable");
+    return Buffer.from(await response.arrayBuffer());
+  }
+
+  async writeValidated(providerKey: string, content: Buffer, mimeType: string) {
+    const response = await fetch(signS3Upload({ assetId: "validated", providerKey, mimeType, sizeBytes: content.byteLength }), { method: "PUT", headers: { "Content-Type": mimeType }, body: new Uint8Array(content) });
+    if (!response.ok) throw new Error("Media object could not be normalized");
   }
 
   publicUrl(providerKey: string) {

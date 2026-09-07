@@ -2,10 +2,13 @@
   "name": "artistically-next",
   "version": "1.0.0",
   "private": true,
+  "engines": { "node": ">=22.13.0" },
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev --port 3001",
-    "build": "next build",
+    "build": "next build && npm run strip:artifacts && npm run check:artifacts",
+    "strip:artifacts": "node scripts/strip-production-source-maps.mjs",
+    "check:artifacts": "node scripts/check-production-artifacts.mjs",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "type-check": "tsc --noEmit",
@@ -31,6 +34,7 @@
     "next": "^16.3.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "sharp": "0.35.3",
     "stripe": "^22.5.0",
     "zod": "^3.24.3",
     "zustand": "^5.0.3"

@@ -3,7 +3,7 @@ import { parseServerEnv } from "@/lib/env";
 
 describe("parseServerEnv", () => {
   it("uses safe local defaults outside production", () => {
-    const environment = parseServerEnv({ NODE_ENV: "test" });
+    const environment = parseServerEnv({ NODE_ENV: "test", JWT_SECRET: "test-only-secret-with-at-least-thirty-two-characters" });
 
     expect(environment).toMatchObject({
       NODE_ENV: "test",
@@ -12,8 +12,8 @@ describe("parseServerEnv", () => {
   });
 
   it("requires database and JWT configuration in production", () => {
-    expect(() => parseServerEnv({ NODE_ENV: "production" })).toThrow(
-      /DATABASE_URL is required in production.*JWT_SECRET is required in production/
+    expect(() => parseServerEnv({ NODE_ENV: "production", JWT_SECRET: "test-only-secret-with-at-least-thirty-two-characters" })).toThrow(
+      /DATABASE_URL is required in production/
     );
   });
 

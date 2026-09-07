@@ -1,9 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+
+const mocks = vi.hoisted(() => ({ getAuthUser: vi.fn() }));
+vi.mock("@/lib/auth", () => ({ getAuthUser: mocks.getAuthUser }));
+
 import { proxy } from "@/proxy";
-import { signToken } from "@/lib/auth";
 
 describe("request proxy", () => {
+  beforeEach(() => { mocks.getAuthUser.mockResolvedValue(null); });
+  it("requires an active server-side session rather than trusting a cookie payload", async () => {
+    mocks.getAuthUser.mockResolvedValue(null);
+    const response = await proxy(new NextRequest("https://artistically.example/profile", { headers: { cookie: "artistically_access=untrusted" } }));
+    expect(response.status).toBe(307);
+  });
+
   it("redirects unauthenticated protected pages to login with the original path", async () => {
     const request = new NextRequest("https://artistically.example/profile?tab=orders");
 
@@ -48,13 +58,14 @@ describe("request proxy", () => {
   });
 
   it("redirects authenticated collectors away from the artist workspace", async () => {
-    const token = await signToken({
+    mocks.getAuthUser.mockResolvedValue({
       userId: "cmabcdefghijklmnopqrstuvwx",
       email: "collector@example.com",
       role: "USER",
+      sessionId: "session-1",
     });
     const request = new NextRequest("https://artistically.example/artist-portal", {
-      headers: { cookie: `artistically_token=${token}` },
+      headers: { cookie: "artistically_access=server-validated" },
     });
 
     const response = await proxy(request);
@@ -66,13 +77,14 @@ describe("request proxy", () => {
   });
 
   it("redirects authenticated non-admins away from the admin workspace", async () => {
-    const token = await signToken({
+    mocks.getAuthUser.mockResolvedValue({
       userId: "cmabcdefghijklmnopqrstuvwx",
       email: "artist@example.com",
       role: "ARTIST",
+      sessionId: "session-1",
     });
     const request = new NextRequest("https://artistically.example/admin/reports", {
-      headers: { cookie: `artistically_token=${token}` },
+      headers: { cookie: "artistically_access=server-validated" },
     });
 
     const response = await proxy(request);
@@ -84,13 +96,14 @@ describe("request proxy", () => {
   });
 
   it("rejects authenticated non-admins at the admin API boundary", async () => {
-    const token = await signToken({
+    mocks.getAuthUser.mockResolvedValue({
       userId: "cmabcdefghijklmnopqrstuvwx",
       email: "artist@example.com",
       role: "ARTIST",
+      sessionId: "session-1",
     });
     const response = await proxy(new NextRequest("https://artistically.example/api/admin/reports", {
-      headers: { cookie: `artistically_token=${token}` },
+      headers: { cookie: "artistically_access=server-validated" },
     }));
 
     expect(response.status).toBe(403);

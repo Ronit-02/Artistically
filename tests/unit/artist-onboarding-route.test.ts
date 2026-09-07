@@ -7,8 +7,7 @@ const mocks = vi.hoisted(() => ({
   userUpdate: vi.fn(),
   transaction: vi.fn(),
   requireAuth: vi.fn(),
-  signToken: vi.fn(),
-  setAuthCookie: vi.fn(),
+  refreshAccessToken: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -23,8 +22,7 @@ vi.mock("@/lib/prisma", () => ({
 vi.mock("@/lib/auth", () => ({
   AuthError: class AuthError extends Error {},
   requireAuth: mocks.requireAuth,
-  signToken: mocks.signToken,
-  setAuthCookie: mocks.setAuthCookie,
+  refreshAccessToken: mocks.refreshAccessToken,
 }));
 
 import { POST } from "@/app/api/artists/route";
@@ -37,14 +35,13 @@ const request = (body: unknown) => new NextRequest(
 describe("artist onboarding route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.requireAuth.mockResolvedValue({ userId: "artist-user", role: "USER" });
+    mocks.requireAuth.mockResolvedValue({ userId: "artist-user", role: "USER", sessionId: "session-1", email: "artist@example.com" });
     mocks.artistFindUnique
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null);
     mocks.artistCreate.mockResolvedValue({ id: "artist-id", handle: "@artist" });
     mocks.userUpdate.mockResolvedValue({ id: "artist-user", email: "artist@example.com", role: "ARTIST" });
-    mocks.signToken.mockResolvedValue("signed-token");
-    mocks.setAuthCookie.mockResolvedValue(undefined);
+    mocks.refreshAccessToken.mockResolvedValue(undefined);
     mocks.transaction.mockImplementation(async (callback: (tx: unknown) => unknown) => callback({
       artist: { create: mocks.artistCreate },
       user: { update: mocks.userUpdate },
@@ -62,11 +59,11 @@ describe("artist onboarding route", () => {
       data: { role: "ARTIST" },
       select: { id: true, email: true, role: true },
     });
-    expect(mocks.signToken).toHaveBeenCalledWith({
+    expect(mocks.refreshAccessToken).toHaveBeenCalledWith({
       userId: "artist-user",
       email: "artist@example.com",
       role: "ARTIST",
+      sessionId: "session-1",
     });
-    expect(mocks.setAuthCookie).toHaveBeenCalledWith("signed-token");
   });
 });

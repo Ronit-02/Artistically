@@ -6,8 +6,8 @@ const mocks = vi.hoisted(() => ({
   userCreate: vi.fn(),
   compare: vi.fn(),
   hash: vi.fn(),
-  signToken: vi.fn(),
-  setAuthCookie: vi.fn(),
+  createAuthSession: vi.fn(),
+  issueAccountToken: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -15,14 +15,17 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/lib/auth", () => ({
-  signToken: mocks.signToken,
-  setAuthCookie: mocks.setAuthCookie,
+  createAuthSession: mocks.createAuthSession,
   AuthError: class AuthError extends Error {
     constructor(message: string) {
       super(message);
       this.name = "AuthError";
     }
   },
+}));
+
+vi.mock("@/lib/auth-tokens", () => ({
+  issueAccountToken: mocks.issueAccountToken,
 }));
 
 vi.mock("bcryptjs", () => ({
@@ -35,8 +38,8 @@ import { POST as register } from "@/app/api/auth/register/route";
 describe("authentication routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.signToken.mockResolvedValue("signed-token");
-    mocks.setAuthCookie.mockResolvedValue(undefined);
+    mocks.createAuthSession.mockResolvedValue(undefined);
+    mocks.issueAccountToken.mockResolvedValue(undefined);
     mocks.compare.mockResolvedValue(true);
     mocks.hash.mockResolvedValue("hashed-password");
   });
@@ -64,8 +67,10 @@ describe("authentication routes", () => {
     expect(response.status).toBe(200);
     expect(payload.data.user).toMatchObject({ id: "user-1", email: "collector@example.com" });
     expect(payload.data).not.toHaveProperty("token");
-    expect(mocks.signToken).toHaveBeenCalledOnce();
-    expect(mocks.setAuthCookie).toHaveBeenCalledWith("signed-token");
+    expect(mocks.createAuthSession).toHaveBeenCalledWith(expect.objectContaining({ id: "user-1" }));
+    expect(mocks.userFindUnique).toHaveBeenCalledWith(expect.objectContaining({
+      where: { email: "collector@example.com", isActive: true },
+    }));
   });
 
   it("sets the session cookie without returning the signed token on registration", async () => {
@@ -95,7 +100,7 @@ describe("authentication routes", () => {
     expect(response.status).toBe(201);
     expect(payload.data.user).toMatchObject({ id: "user-2", email: "new@example.com" });
     expect(payload.data).not.toHaveProperty("token");
-    expect(mocks.signToken).toHaveBeenCalledOnce();
-    expect(mocks.setAuthCookie).toHaveBeenCalledWith("signed-token");
+    expect(mocks.createAuthSession).toHaveBeenCalledWith(expect.objectContaining({ id: "user-2" }));
+    expect(mocks.issueAccountToken).toHaveBeenCalledWith(expect.objectContaining({ id: "user-2" }), "EMAIL_VERIFICATION");
   });
 });

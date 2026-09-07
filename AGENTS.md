@@ -18,8 +18,79 @@ Before analyzing, planning, editing, generating code, or running development act
    - `context/ui-registry.md`
    - `context/progress-tracker.md`
 3. Treat the context documents as the project baseline and reconcile the requested work with the current progress recorded there.
+4. If a local `sensitive context/` directory exists, read every file in it completely and treat it as confidential project baseline material. The directory is intentionally ignored and may be absent from a clean checkout.
 
 Reading only selected context files, reading summaries instead of the complete files, or relying on prior-session memory does not satisfy this requirement.
+Local sensitive-context files are not loaded automatically; agents must explicitly read them when they are present and accessible.
+
+## Context Governance
+
+Before creating or updating any project-context documentation, review the existing tracked `context/` files and any available local `sensitive context/` files completely. Decide whether the information is necessary, whether it is sensitive, and which file owns the topic before writing it.
+
+### Tracked context
+
+Add information to the tracked `context/` directory only when it is all of the following:
+
+- Necessary for application development, maintenance, product decisions, or accurate progress tracking.
+- Safe to retain in version control and share with everyone who can read the repository.
+- Verified against the current repository or an approved decision.
+- Durable enough to remain useful beyond the current task.
+- Concise and placed in the context file that owns the topic.
+
+Tracked context must contain necessary non-sensitive knowledge. Do not remove useful architecture, product, design, engineering, or tracking information merely because it is technical.
+
+### Sensitive context
+
+Place necessary sensitive project knowledge in the matching ignored file under `sensitive context/`, using a `.local.md` suffix. Sensitive context includes, when necessary for development:
+
+- Prior vulnerabilities, security findings, remediation decisions, and security-hardening constraints.
+- Authentication, authorization, session, token, rate-limit, validation, sanitization, and protected-media implementation details.
+- Internal endpoints, infrastructure topology, service/provider names, configuration requirements, and environment-variable requirements.
+- Deployment assumptions, operational procedures, monitoring details, incident handling, and production-readiness gaps or unverified checks.
+- Confidential architecture, data-model, payment, fulfillment, moderation, audit, privacy, or integration details.
+
+Sensitive context files must not contain live credentials, secret values, tokens, passwords, private keys, or connection strings. Store those only in approved secret-management systems or ignored environment files.
+
+When a tracked context file needs to acknowledge omitted sensitive material, include only a short pointer to the matching local file; do not duplicate the sensitive detail in tracked documentation.
+
+### File ownership
+
+- `project-overview.md`: product purpose, users, scope, and user journeys.
+- `architecture.md`: non-sensitive system direction, boundaries, data flow, and durable architectural contracts.
+- `build-plan.md`: implementation phases, sequencing, dependencies, and acceptance gates appropriate for version control.
+- `code-standards.md`: coding, naming, testing, and engineering conventions.
+- `library-docs.md`: approved libraries, version-specific usage rules, and dependency guidance.
+- `ui-tokens.md`: design tokens and visual foundations.
+- `ui-rules.md`: interface behavior, accessibility, responsiveness, and content rules.
+- `ui-registry.md`: reusable component inventory, ownership, and contracts.
+- `progress-tracker.md`: current verified milestone and capability status, not a chronological work diary.
+- `sensitive context/*.local.md`: necessary confidential counterparts organized by the same topic boundaries.
+
+If necessary information does not belong in the file being edited, move or add it to the correct context file instead of leaving it out of place. Preserve its meaning, avoid duplication, and update cross-references when useful.
+
+### Excluded context
+
+Do not add information that is unnecessary for application development, maintenance, decisions, or tracking. In particular, avoid:
+
+- Repeated explanations already owned by another context file.
+- Raw command output, exhaustive session logs, or step-by-step work diaries.
+- Stale snapshots, superseded plans, speculative ideas presented as decisions, or claims not verified against the repository.
+- Source-code inventories or implementation narration that can be obtained more accurately by inspecting the repository.
+- Excessive detail that does not change how future work should be designed, implemented, reviewed, or verified.
+
+### Required review before writing
+
+Before adding any context, confirm all of the following:
+
+1. The information is necessary for future application work or tracking.
+2. It is accurate and verified.
+3. It is not already documented elsewhere.
+4. The selected file owns the topic.
+5. Sensitive and non-sensitive parts have been separated.
+6. The wording is concise and avoids unnecessary history or repetition.
+7. Any replaced or moved information remains available in its correct context location.
+
+If these checks do not pass, revise, relocate, or omit the proposed context instead of appending it.
 
 ## Audit Before Code Changes
 

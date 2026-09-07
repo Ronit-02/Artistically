@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth";
 import {
   getPageRouteAccess,
   isArtistApiMutation,
@@ -14,13 +14,6 @@ import {
   isArtistApiRoute,
   isProtectedApiRoute,
 } from "@/lib/route-access";
-
-function getToken(req: NextRequest) {
-  return (
-    req.cookies.get("artistically_token")?.value ??
-    req.headers.get("authorization")?.replace("Bearer ", "")
-  );
-}
 
 function redirectToLogin(req: NextRequest) {
   const url = req.nextUrl.clone();
@@ -59,22 +52,12 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = getToken(req);
-
-  if (!token) {
+  const payload = await getAuthUser(req);
+  if (!payload) {
     if (!isApiRequest) return redirectToLogin(req);
 
     return NextResponse.json(
       { success: false, error: "Authentication required" },
-      { status: 401 }
-    );
-  }
-
-  const payload = await verifyToken(token);
-
-  if (!payload) {
-    return NextResponse.json(
-      { success: false, error: "Invalid or expired token" },
       { status: 401 }
     );
   }

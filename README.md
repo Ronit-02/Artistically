@@ -35,13 +35,13 @@ Artistically brings those pieces together. Artwork stays at the center of the ex
 
 ## Current status
 
-The repository contains a working full-stack marketplace foundation with a Next.js application, REST route handlers, and PostgreSQL persistence through Prisma. Core catalog, account, artist, checkout, fulfillment, moderation, and administration workflows are implemented.
+The repository contains a full-stack marketplace foundation with a Next.js application, REST route handlers, and PostgreSQL persistence through Prisma. Core catalog, account, artist, checkout, fulfillment, moderation, and administration workflows are implemented.
 
-Production rollout still requires real deployment credentials and live verification for services such as PostgreSQL, Stripe and Stripe Connect, media storage, email delivery, and shipment callbacks. The current milestone status and known gaps are recorded in [`context/progress-tracker.md`](./context/progress-tracker.md).
+The tracked status summary is in [`context/progress-tracker.md`](./context/progress-tracker.md). Detailed deployment, service, security, and readiness context intentionally remains in the ignored `sensitive context/` directory.
 
 ## Run locally
 
-Requirements: Node.js 22 and PostgreSQL 16 or a compatible hosted PostgreSQL database.
+Requirements: Node.js 22.13 or later and PostgreSQL 16 or a compatible hosted PostgreSQL database.
 
 ```bash
 npm ci
@@ -62,29 +62,6 @@ npm run dev
 
 Open [http://localhost:3001](http://localhost:3001). The seed command is blocked when `NODE_ENV=production`.
 
-## Deployment model
-
-This is one full-stack Next.js application. The browser UI and REST API ship in the same build, so the project does not need separate frontend and backend containers.
-
-There is currently no application `Dockerfile` or Docker Compose file in the repository. You can deploy the Node.js application directly with:
-
-```bash
-npm ci
-npx prisma migrate deploy
-npm run build
-npm start
-```
-
-Use `npm run dev` only for local development. A production host should run the built application with `npm start` and provide production environment variables through its secret manager.
-
-PostgreSQL may run on the application host, on another private machine, in a container, or as a managed database. For a disposable local PostgreSQL 16 container:
-
-```bash
-docker run --name artistically-postgres -e POSTGRES_USER=artistically -e POSTGRES_PASSWORD=change-me -e POSTGRES_DB=artistically -p 5432:5432 -v artistically-postgres-data:/var/lib/postgresql/data -d postgres:16
-```
-
-Set `DATABASE_URL` to the database host that the application machine can reach, then run `npx prisma migrate deploy`. Do not expose PostgreSQL port 5432 to the public internet. Prefer a private network, TLS, restricted database users, backups, and a managed PostgreSQL service for production.
-
 ## Repository documentation
 
 The root README is intentionally product-focused. Detailed technical material lives in [`context/`](./context/project-overview.md):
@@ -94,9 +71,9 @@ The root README is intentionally product-focused. Detailed technical material li
 - [`build-plan.md`](./context/build-plan.md) records delivery phases and dependencies.
 - [`code-standards.md`](./context/code-standards.md) and [`library-docs.md`](./context/library-docs.md) define engineering rules.
 - [`ui-tokens.md`](./context/ui-tokens.md), [`ui-rules.md`](./context/ui-rules.md), and [`ui-registry.md`](./context/ui-registry.md) document the design system.
-- [`progress-tracker.md`](./context/progress-tracker.md) records completed work, verification, and open deployment tasks.
+- [`progress-tracker.md`](./context/progress-tracker.md) records the tracked milestone summary.
 
-The `context/` folder is safe and useful to commit because it contains project documentation rather than credentials. Review it before making the repository public if roadmap, operational, or architecture details are commercially sensitive. Never commit `.env.local` or any real secret.
+The `context/` folder is safe and useful to commit because it contains non-sensitive project documentation. Detailed security, provider, configuration, operations, and release-readiness context belongs in the ignored `sensitive context/` directory. Local sensitive context is not loaded automatically; consult the relevant companion explicitly when it is needed. Never commit `.env.local` or any real secret.
 
 ## Quality checks
 

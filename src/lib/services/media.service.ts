@@ -5,8 +5,21 @@ import { mediaStorageProvider } from "@/lib/integrations/media-storage";
 import { ValidationError } from "@/lib/validators";
 import type { z } from "zod";
 import type { CreateArtistSubmissionSchema } from "@/lib/validators";
+import sharp from "sharp";
 
 const provider = () => mediaStorageProvider();
+const MAX_IMAGE_PIXELS = 40_000_000;
+
+async function normalizeImage(asset: { providerKey: string; mimeType: string }) {
+  const source = await provider().readForValidation(asset.providerKey);
+  const image = sharp(source, { limitInputPixels: MAX_IMAGE_PIXELS, failOn: "error" }).rotate();
+  const metadata = await image.metadata();
+  if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_IMAGE_PIXELS) throw new ValidationError({ file: ["Image dimensions exceed the allowed limit"] });
+  const format = metadata.format;
+  if (format !== "jpeg" && format !== "png" && format !== "webp") throw new ValidationError({ file: ["Only JPEG, PNG, and WebP images are supported"] });
+  const content = format === "jpeg" ? await image.jpeg({ quality: 90, mozjpeg: true }).toBuffer() : format === "png" ? await image.png({ compressionLevel: 9 }).toBuffer() : await image.webp({ quality: 90 }).toBuffer();
+  return { content, mimeType: format === "jpeg" ? "image/jpeg" : `image/${format}`, width: metadata.width, height: metadata.height };
+}
 
 function safeName(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 100) || "upload";
@@ -34,6 +47,12 @@ export const mediaService = {
     if (stored.sizeBytes !== asset.sizeBytes) {
       await prisma.mediaAsset.update({ where: { id: asset.id }, data: { status: MediaStatus.FAILED } });
       throw new ValidationError({ file: ["Uploaded file size does not match the authorized file"] });
+    }
+    if (asset.purpose === MediaPurpose.ARTWORK_IMAGE || asset.purpose === MediaPurpose.ARTIST_COVER) {
+      const normalized = await normalizeImage(asset);
+      await provider().writeValidated(asset.providerKey, normalized.content, normalized.mimeType);
+      const verified = await provider().verifyUpload(asset.providerKey);
+      return prisma.mediaAsset.update({ where: { id: asset.id }, data: { status: MediaStatus.READY, checksum: verified.checksum, mimeType: normalized.mimeType, sizeBytes: verified.sizeBytes, width: normalized.width, height: normalized.height } });
     }
     return prisma.mediaAsset.update({ where: { id: asset.id }, data: { status: MediaStatus.READY, checksum: checksum ?? stored.checksum } });
   },

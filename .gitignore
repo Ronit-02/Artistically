@@ -1,7 +1,5 @@
 # dependencies
 node_modules/
-.pnp
-.pnp.js
 
 # next.js
 .next/
@@ -14,11 +12,6 @@ dist/
 # misc
 .DS_Store
 *.pem
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
 # debug
 npm-debug.log*
@@ -30,5 +23,11 @@ yarn-error.log*
 next-env.d.ts
 
 # env
-.env.local
 .env
+.env.*
+!.env.example
+*.local
+
+# sensitive local context
+*.local.md
+/sensitive context/

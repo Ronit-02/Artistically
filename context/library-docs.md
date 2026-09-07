@@ -11,6 +11,8 @@
 - Environment variables are validated centrally and documented in `.env.example` without secrets.
 - Vendor errors are translated into stable project errors at the integration boundary.
 
+Provider-specific security, callback, storage, messaging, analytics, and shipping implementation requirements are maintained in `sensitive context/library-docs.local.md` when that local file is present.
+
 ## Next.js
 
 - Use the App Router.
@@ -106,69 +108,6 @@
 - Do not mix several competing primitive systems for dialogs, menus, and form controls without a migration plan.
 - Record reusable components in [ui-registry.md](./ui-registry.md).
 
-## Stripe and Stripe Connect
-
-- Use official server SDKs on the server only.
-- Keep secret keys out of `NEXT_PUBLIC_` variables and browser bundles.
-- Use Stripe.js or supported Elements components for browser payment collection.
-- Never send raw card data through Artistically servers.
-- Calculate price, currency, commission, and order references server-side.
-- Use idempotency keys for creation and mutation calls that may be retried.
-- Verify webhook signatures using the raw request body.
-- Persist each Stripe event ID before or during idempotent processing.
-- Handle duplicate and out-of-order events.
-- Treat webhooks as authority for asynchronous payment, refund, dispute, connected-account, and payout state.
-- Store Stripe IDs and normalized state, not entire unbounded provider payloads in primary domain tables.
-- Use Stripe test mode and official test clocks or test helpers for lifecycle coverage.
-- Marketplace payments require a documented Connect charge and transfer model before implementation.
-
-## Authentication and Cryptography
-
-- Use a reviewed session or token strategy with revocation requirements documented.
-- Passwords use a current password-hashing algorithm and calibrated work factor.
-- Production startup fails when secrets are absent or weak.
-- Browser authentication uses secure, HTTP-only cookies.
-- Do not return the same browser session token to JavaScript without an approved use case.
-- Normalize email before identity lookup.
-- Add rate limits and generic credential-failure responses.
-- Password reset tokens are single-use, short-lived, hashed at rest, and invalidate relevant sessions when policy requires.
-
-## Object Storage and Image Providers
-
-- Use signed direct uploads with short expiration.
-- Validate declared and detected MIME type, byte size, image dimensions, file count, and owner.
-- Generate provider keys server-side; do not accept arbitrary destination paths.
-- Store provider key and metadata separately from public delivery URL.
-- Strip unsafe metadata when policy requires it.
-- Use transformations for thumbnails while preserving an authorized original.
-- Protected digital artwork files require private storage and expiring authorized downloads.
-- Deletion is coordinated with database references and retention rules.
-
-## Email Provider
-
-- Send transactional email through a project adapter.
-- Templates use stable event data and absolute URLs.
-- Email sending occurs after durable state changes.
-- Retried sends use an idempotent message key where duplicate mail is harmful.
-- Bounce and complaint events update deliverability state.
-- Do not place sensitive identity or full payment information in email.
-
-## Analytics and Error Monitoring
-
-- Define an event registry with owner, trigger, properties, and privacy classification.
-- Never send passwords, tokens, full addresses, protected file URLs, or raw payment data.
-- User identifiers are pseudonymous where possible.
-- Error reports redact headers, cookies, request bodies, and vendor secrets.
-- Marketplace funnel events represent durable milestones, such as `order_payment_confirmed`, rather than optimistic button clicks when measuring business outcomes.
-
-## Shipping Providers
-
-- Integrate through an adapter with normalized shipment and event statuses.
-- Verify callback signatures when supported.
-- Store provider event IDs idempotently.
-- Tracking links are built from trusted provider data.
-- Provider delivery status does not automatically override a dispute or return decision without domain rules.
-
 ## Dependency Review Checklist
 
 Before adding a package, confirm:
@@ -181,4 +120,3 @@ Before adding a package, confirm:
 - Official documentation supports the intended API.
 - Test and upgrade ownership is assigned.
 - The adapter or import location is defined.
-

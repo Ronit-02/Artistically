@@ -1,272 +1,182 @@
 # Artistically — Build Plan
 
-## Planning Principles
+## Planning principles
 
-- Establish one real end-to-end workflow before expanding page count.
-- Treat trust, payment, fulfillment, and seller settlement as core product work.
-- Prefer vertical slices that include UI, API, data, authorization, tests, and observability.
-- Do not display claims such as verified, secure checkout, paid, refunded, insured, or authentic until backed by durable state and policy.
-- Keep REST as the only application API style for the initial release.
-- A phase is complete only when its exit criteria pass.
+- Establish complete user journeys before expanding page count.
+- Treat trust, purchasing, fulfillment, and seller outcomes as core product work.
+- Prefer vertical slices that include interface, application behavior, data, tests, and user-visible states.
+- Do not display claims such as verified, paid, refunded, insured, or authentic until they are backed by maintained product data and policy.
+- Keep REST as the application API style for the initial release.
+- A phase is complete only when its exit outcomes are verified.
+- Current completion status belongs in `progress-tracker.md`; this file defines durable sequence and gates.
 
-## Product Direction and Launch Decisions
+## Phase 0 — Reliable project baseline
 
-- Artistically is an India-first, INR, mobile-friendly web marketplace and discovery platform for curated original art.
-- Discovery and editorial merchandising lead the experience; trusted commerce remains the foundation.
-- The initial buyer is a first-time or emerging collector who needs clear artwork facts, credible artists, protected payment, and dependable delivery.
-- Artistically owns editorial Stories and editorial collections. Artists own their profiles, artwork, and artist-created collections containing only their own artwork.
-- The public trust model uses one `Verified` badge. It means Artistically reviewed the artist's identity and background; it does not guarantee every artwork, price, or future action.
-- Reports create review cases and do not directly trigger enforcement. A validated report can permanently remove the affected artwork or collection from public discovery and purchasing. Appeals are supported.
-- Automated valuation is not part of the product. NFTs, fractional ownership, international tax/customs complexity, and native mobile apps are not initial-release scope.
-- Social feeds, buyer-artist messaging, auctions, and optional AR/3D previews are broader roadmap capabilities. They must not delay the trusted commerce foundation.
-- Server state is authoritative for identity, permissions, pricing, inventory, verification, payment, orders, and moderation outcomes.
+### Goal
 
-## Phase 0 — Baseline and Delivery Safety
+Keep the repository safe to change and capable of rejecting broken work.
 
-### Goals
+### Deliverables
 
-Make the repository safe to change and capable of rejecting broken builds.
+- Reproducible installation, development, validation, test, and production-build workflows.
+- Versioned data-model history and repeatable development data.
+- Accurate project documentation and enforceable quality commands.
 
-### Work
+### Exit outcomes
 
-- Align README and package documentation with the installed Next.js version.
-- Regenerate Prisma Client and resolve all TypeScript errors.
-- Remove `ignoreBuildErrors` from Next.js configuration.
-- Replace the obsolete lint command with an ESLint 9-compatible script and configuration.
-- Add formatting, type-check, lint, unit-test, integration-test, and build scripts.
-- Create CI for clean install, Prisma validation, type-check, lint, tests, and build.
-- Add initial Prisma migration history and a reset-safe development seed.
-- Define environment validation that fails fast for required production variables.
-- Add request IDs and structured server logging.
-- Record current architecture decisions in this context folder.
+- A clean checkout can install dependencies and pass the established quality gate.
+- The application data model can be created from committed history.
+- Build errors are not hidden by configuration.
 
-### Exit criteria
+## Phase 1 — Unified application data
 
-- Clean checkout can install dependencies and build without suppressed errors.
-- CI passes from an empty generated-output state.
-- Database can be created from migrations and seeded repeatedly without duplicate records.
-- No committed default production secret or credential exists.
+### Goal
 
-## Phase 1 — Unify Frontend and Backend
+Ensure marketplace and account experiences use durable application data instead of demonstrations or fabricated records.
 
-### Goals
+### Deliverables
 
-Remove the split between the mock storefront and the real REST and Prisma application.
+- Explicit public data contracts and a typed API client.
+- Consistent string identifiers across application boundaries.
+- Server-backed account, catalog, profile, cart, wishlist, review, and order experiences.
+- Remote data owned by the established query layer and transient display state kept local.
+- Loading, empty, error, unavailable, and not-found states for every connected journey.
 
-### Work
+### Exit outcomes
 
-- Define public DTOs for products, artists, users, cart lines, wishlist items, reviews, and orders.
-- Standardize all public IDs as strings.
-- Build a typed fetch client that handles API success, validation errors, authentication errors, and request IDs.
-- Replace static product, artist, and story adapters with REST calls.
-- Move remote state into React Query with stable query keys.
-- Restrict Zustand to client-only UI state.
-- Implement server-backed registration, sign-in, sign-out, current-user, and profile update.
-- Add email normalization and secure session behavior.
-- Protect collector, artist, and administrator route groups.
-- Add loading, error, empty, unauthorized, and not-found states.
-- Remove initial mock cart, fabricated profile data, and hard-coded order history from production routes.
+- User and marketplace changes persist across sessions.
+- Production-facing pages render from application APIs rather than static marketplace records.
+- Protected experiences behave consistently for signed-out and ineligible users.
 
-### Current implementation position
+## Phase 2 — Art catalog and artist onboarding
 
-- Completed in this phase: typed API client and DTOs, REST-backed product and artist catalog reads, server-backed registration/login/logout, and current-user session reads.
-- Next implementation slice: connect persistent cart and wishlist UI to the existing APIs, then connect profile data and protected route behavior.
-- Do not begin checkout or payment implementation in this slice. Checkout requires the Phase 3 money, inventory reservation, payment, webhook, and idempotency foundations.
+### Goal
 
-### Tests
+Enable artists to create accurate, reviewable profiles, artwork, and collections.
 
-- Authentication integration tests.
-- Authorization tests for user, artist owner, non-owner, and administrator.
-- DTO contract tests.
-- Browser tests for registration, login, logout, product browse, and protected-route redirection.
+### Deliverables
 
-### Exit criteria
+- Art-specific listing facts for physical, edition, made-to-order, and digital work.
+- Artist profile onboarding and storefront management.
+- Artwork creation, editing, preview, submission, publication, archival, and inventory experiences.
+- Media and listing workflows that represent ownership and readiness.
+- Artist verification, listing review, and collection management.
 
-- A user created through the UI persists in PostgreSQL and survives a new browser session.
-- Storefront products and artist profiles render only from API data.
-- No production UI imports marketplace records from `src/data`.
-- Numeric mock-ID transformations are removed.
+### Exit outcomes
 
-## Phase 2 — Art Catalog and Artist Onboarding
+- An eligible artist can submit a complete listing without direct data edits.
+- Incomplete or inapplicable artwork facts are rejected consistently.
+- Public listing and artist status labels reflect maintained review state.
 
-### Goals
+## Phase 3 — Cart, checkout, and payment
 
-Enable legitimate artists to create accurate, reviewable listings.
+### Goal
 
-### Work
+Create a reliable purchase path with authoritative totals and inventory.
 
-- Expand the catalog schema for artwork type, medium, materials, dimensions, weight, creation year, edition, condition, framing, authenticity, provenance, fulfillment mode, processing time, return eligibility, and digital license.
-- Add product variants only where a listing truly supports selectable variants.
-- Create MediaAsset and signed upload workflows.
-- Build artist profile onboarding with handle, biography, location, portfolio, policies, and public contact choices.
-- Integrate Stripe Connect onboarding state without enabling payouts yet.
-- Add verification submission and review states.
-- Build artwork create, edit, preview, submit, publish, archive, and inventory screens.
-- Add listing completeness rules by artwork type.
-- Add moderation queue and basic administrator decisions.
-- Implement real collections and collection items.
+### Deliverables
 
-### Tests
+- Persistent cart operations and clear availability changes.
+- Server-calculated checkout totals, delivery information, and applicable promotions.
+- Durable checkout, payment, order, and seller-allocation records.
+- Order confirmation based on authoritative application state.
+- Clear failure, expiry, abandonment, retry, and duplicate-request behavior.
 
-- Listing validation matrix by physical original, physical edition, made-to-order work, and digital work.
-- Media ownership and upload-policy tests.
-- Listing owner and administrator authorization tests.
-- Verification state-transition tests.
+### Exit outcomes
 
-### Exit criteria
+- Repeated purchase attempts produce at most one intended result.
+- Scarce artwork cannot be sold beyond available inventory.
+- Buyer, order, inventory, and financial records agree after a completed purchase.
 
-- An eligible artist can onboard and submit a complete listing without database intervention.
-- Invalid media ownership, missing required specifications, and unauthorized listing updates are rejected server-side.
-- Public verification labels map to documented reviewed states.
+## Phase 4 — Fulfillment and post-purchase
 
-## Phase 3 — Cart, Checkout, and Payments
+### Goal
 
-### Goals
+Complete the marketplace transaction after purchase.
 
-Create a payment-safe purchase path with authoritative totals and inventory.
+### Deliverables
 
-### Work
+- Seller-specific order acceptance and fulfillment.
+- Shipment tracking and protected digital delivery.
+- Cancellation, return, refund, and dispute experiences.
+- Seller statements that explain sale amounts, deductions, adjustments, balance, and payout state.
+- Buyer and artist notifications for meaningful order events.
 
-- Implement persistent cart list, add, quantity update, variant update, remove, and clear operations.
-- Revalidate listing state, variant, inventory, price, shipping, discount, and currency at checkout.
-- Add normalized Address and immutable order address snapshots.
-- Model Payment, PaymentEvent, SellerOrder, and immutable OrderItem snapshots.
-- Integrate Stripe PaymentIntent or Checkout Session server-side.
-- Implement Stripe webhook signature verification and idempotent event storage.
-- Guard inventory atomically and prevent negative stock.
-- Add checkout idempotency to prevent duplicate charges and orders.
-- Implement platform commission and seller allocation records.
-- Replace the static tracking redirect with real order confirmation.
-- Add payment-failure, abandoned-session, retry, and duplicate-event handling.
+### Exit outcomes
 
-### Tests
+- Buyers, sellers, and operators see consistent order truth appropriate to their role.
+- Cancellation and refund outcomes agree with inventory and seller records.
+- Sellers can understand the disposition of each sale.
 
-- Price tampering and unauthorized-discount tests.
-- Concurrent last-item purchase test.
-- Duplicate checkout request test.
-- Duplicate and out-of-order Stripe webhook tests.
-- Successful payment, failed payment, expired payment, and refund integration paths.
+## Phase 5 — Trust and marketplace operations
 
-### Exit criteria
+### Goal
 
-- No order is marked paid from a client redirect.
-- Repeated client requests and webhook events create at most one intended financial result.
-- Two buyers cannot both purchase a one-of-one artwork.
-- Financial records reconcile with the Stripe test environment.
+Back marketplace trust with defined rules, evidence, and manageable operations.
 
-## Phase 4 — Fulfillment, Payouts, and Post-Purchase
+### Deliverables
 
-### Goals
+- Purchase-eligible reviews and review moderation.
+- Clear explanations for verification and authenticity-related states.
+- Reporting, appeals, disputes, certificates, and marketplace case management.
+- Reviewed marketplace, support, privacy, and seller policies.
+- Auditable operational decisions.
 
-Complete the marketplace transaction after payment.
+### Exit outcomes
 
-### Work
+- Every public trust claim maps to a defined product rule and maintained state.
+- Only eligible purchases receive purchase-verification treatment.
+- Common marketplace cases can be handled through application workflows.
 
-- Build seller-specific order acceptance and fulfillment workflows.
-- Add Shipment and ShipmentEvent records with tracking numbers and provider links.
-- Define valid order and seller-order state machines.
-- Add processing deadlines and late-fulfillment operations.
-- Implement protected digital delivery with expiring access and license acceptance.
-- Build cancellation eligibility and idempotent cancellation.
-- Implement partial and full refunds through Stripe with durable refund state.
-- Add damage, non-delivery, authenticity, and copyright dispute cases.
-- Integrate Stripe Connect payout visibility and seller statements.
-- Add transactional email for payment, fulfillment, delivery, cancellation, refund, and payout events.
+## Phase 6 — Discovery and experience quality
 
-### Tests
+### Goal
 
-- State-transition authorization tests.
-- Stock restoration and repeated cancellation tests.
-- Partial multi-seller refund tests.
-- Protected digital-download authorization tests.
-- Seller statement reconciliation tests.
+Make maintained inventory discoverable and the application usable across devices and abilities.
 
-### Exit criteria
+### Deliverables
 
-- Buyers and sellers see the same durable order truth appropriate to their role.
-- Refund and cancellation actions reconcile with inventory, payment, fee, and payout records.
-- Every seller can understand gross sale, deductions, refund exposure, balance, and payout state.
+- Accurate search, filtering, sorting, pagination, and shareable URLs.
+- Useful page metadata and public-content discovery support.
+- Keyboard, screen-reader, contrast, focus, motion, touch, reflow, and zoom quality.
+- Responsive images, stable layouts, and measurable performance budgets.
+- Privacy-reviewed product measurement when approved.
 
-## Phase 5 — Trust, Reviews, and Marketplace Operations
+### Exit outcomes
 
-### Goals
+- Core buyer and artist journeys pass the approved accessibility matrix.
+- Discovery results, counts, filters, and URLs remain consistent.
+- Approved performance budgets pass on representative devices and networks.
 
-Make Artistically credibly trustworthy rather than merely visually trustworthy.
+## Phase 7 — Controlled release and learning
 
-### Work
+### Goal
 
-- Link review eligibility to delivered order items.
-- Add review reporting and moderation.
-- Build verification explanations visible to buyers.
-- Add certificate-of-authenticity metadata and delivery records.
-- Implement listing, artist, review, and copyright reports.
-- Build administrator case queues with evidence references and audit logs.
-- Replace all placeholder legal and support content with reviewed policies.
-- Add buyer protection, return, damage, dispute, prohibited-content, copyright, privacy, and seller terms.
-- Create risk signals for repeated failed payments, suspicious reviews, duplicate identities, and listing abuse.
+Release with measurable marketplace quality and sustainable operational capacity.
 
-### Exit criteria
+### Deliverables
 
-- Every displayed trust claim is linked to a defined rule and durable evidence state.
-- Only eligible purchases can receive verified-purchase reviews.
-- Operations staff can investigate and resolve common marketplace cases without direct database edits.
+- A focused initial supply and geography strategy.
+- Reviewed release, support, recovery, and escalation ownership.
+- Observable marketplace, fulfillment, and trust outcomes.
+- Growth work sequenced after core journey stability.
 
-## Phase 6 — Discovery, SEO, Accessibility, and Performance
+### Exit outcomes
 
-### Goals
+- Release gates and responsible owners are approved.
+- Support and operations can handle expected marketplace cases.
+- Post-release decisions use observed product and trust outcomes.
 
-Make trusted inventory discoverable and the experience usable across devices and abilities.
+## Dependency order
 
-### Work
-
-- Add database indexes and server-side search/filter/sort behavior.
-- Correct rating filtering and pagination totals.
-- Add canonical metadata, dynamic titles, social images, sitemap, robots rules, and Product structured data.
-- Self-host fonts and optimize image priority, sizes, formats, and placeholders.
-- Complete keyboard, screen-reader, contrast, focus, reduced-motion, and touch-target audits.
-- Fix mobile navigation overflow and non-hover interaction behavior.
-- Add accessible carousel pause and controls.
-- Establish Core Web Vitals and bundle budgets.
-- Add analytics events with privacy review and stable event naming.
-
-### Exit criteria
-
-- Core purchase and seller flows pass the accessibility test matrix.
-- Search results, counts, filters, and URLs are consistent and shareable.
-- Performance budgets pass on representative mobile hardware and network conditions.
-- Search engines can understand products, artists, collections, and editorial pages.
-
-## Phase 7 — Controlled Launch and Growth
-
-### Goals
-
-Launch with measurable marketplace quality and safe operational capacity.
-
-### Work
-
-- Recruit and verify a focused initial artist cohort.
-- Establish category-level listing quality targets.
-- Run payment, refund, dispute, fulfillment, and incident simulations.
-- Create operations runbooks and escalation ownership.
-- Configure dashboards and alerts for conversion, payments, fulfillment, disputes, and supply activation.
-- Launch in a constrained geography and currency before broader expansion.
-- Add artist referrals, editorial merchandising, saved searches, and restock alerts only after core stability.
-
-### Exit criteria
-
-- Launch checklist and incident rollback plan are approved.
-- Support and operations can handle expected case volume.
-- Payment, fulfillment, refund, and dispute metrics remain within defined thresholds during the pilot.
-- Product decisions after launch are based on observed funnel and trust metrics.
-
-## Dependency Order
-
-1. Build safety and migrations.
-2. Real identity and API-backed storefront.
-3. Artist onboarding and accurate catalog.
-4. Cart, payment, and inventory.
-5. Fulfillment, refunds, and payouts.
+1. Reliable project baseline.
+2. Durable identity and application data.
+3. Accurate catalog and artist onboarding.
+4. Authoritative purchase and inventory.
+5. Fulfillment and post-purchase outcomes.
 6. Trust operations and policies.
-7. Discovery, quality, and launch growth.
+7. Discovery quality and controlled release.
 
-Later phases may be designed earlier, but they must not bypass the data and trust foundations on which they depend.
+Later phases may be designed earlier, but they must not bypass the foundations on which they depend.
+
+Sensitive implementation constraints, provider-specific gates, security test requirements, deployment assumptions, and release-readiness dependencies are maintained in `sensitive context/build-plan.local.md` when that local file is present.

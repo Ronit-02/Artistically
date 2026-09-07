@@ -8,6 +8,31 @@ import { AuthError } from "./auth";
 import { InvalidStateError } from "./domain-errors";
 import { ValidationError } from "./validators";
 import { logger } from "./logger";
+import { enforceRateLimit, opaqueRateLimitKey, RateLimitError } from "./rate-limit";
+import { serverEnv } from "./env";
+
+class CsrfError extends Error { constructor() { super("Request origin was rejected"); } }
+
+export function assertCsrf(request: Request) {
+  if (!["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) return;
+  const hasSessionCookie = request.headers.get("cookie")?.includes("artistically_");
+  const pathname = new URL(request.url).pathname;
+  if (!hasSessionCookie || pathname === "/api/checkout/webhook" || pathname === "/api/webhooks/shipment") return;
+  const origin = request.headers.get("origin");
+  if (!origin || origin !== new URL(serverEnv.NEXT_PUBLIC_APP_URL).origin) throw new CsrfError();
+}
+
+async function enforceSensitiveMutationLimit(request: Request) {
+  if (!["POST", "PUT", "PATCH", "DELETE"].includes(request.method)) return;
+  const pathname = new URL(request.url).pathname;
+  const cookie = request.headers.get("cookie");
+  if (!cookie) return;
+  const policy = pathname.startsWith("/api/checkout") ? { max: 10, windowMs: 60 * 60_000 }
+    : pathname.startsWith("/api/artist/media") ? { max: 30, windowMs: 60 * 60_000 }
+    : pathname.startsWith("/api/reviews") || pathname.startsWith("/api/reports") ? { max: 20, windowMs: 60 * 60_000 }
+    : undefined;
+  if (policy) await enforceRateLimit(opaqueRateLimitKey(`mutation:${pathname}`, cookie), policy);
+}
 
 // ─── Success ─────────────────────────────────────────────────────────────────
 
@@ -64,6 +89,8 @@ export function withErrorHandler(
     const startedAt = Date.now();
 
     try {
+      assertCsrf(req);
+      await enforceSensitiveMutationLimit(req);
       const response = await handler(req, ctx);
       response.headers.set("x-request-id", requestId);
       logger.info("api.request.completed", {
@@ -78,11 +105,15 @@ export function withErrorHandler(
       let response: NextResponse;
 
       if (err instanceof AuthError) {
-        response = unauthorized(err.message);
+        response = unauthorized("Authentication required");
       } else if (err instanceof ValidationError) {
         response = badRequest("Validation failed", err.fields);
+      } else if (err instanceof RateLimitError) {
+        response = NextResponse.json({ success: false, error: "Too many requests. Please try again later." }, { status: 429, headers: { "retry-after": "60" } });
+      } else if (err instanceof CsrfError) {
+        response = forbidden("Request could not be authorized");
       } else if (err instanceof InvalidStateError) {
-        response = badRequest(err.message);
+        response = badRequest("Unable to complete this request");
 
       // Prisma unique constraint violation
       } else if (
@@ -91,7 +122,7 @@ export function withErrorHandler(
         "code" in err &&
         (err as { code: string }).code === "P2002"
       ) {
-        response = conflict("A record with this value already exists");
+        response = conflict("Unable to complete this request");
       } else {
         logger.error("api.request.failed", {
           requestId,
