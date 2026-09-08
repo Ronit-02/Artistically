@@ -17,6 +17,7 @@ import ProductCard from "@/components/product/ProductCard";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import NotFoundState from "@/components/ui/NotFoundState";
 import ReportForm from "@/components/forms/ReportForm";
+import Skeleton from "@/components/ui/Skeleton";
 import { sortReviews, type ReviewSort } from "@/lib/review-sort";
 import type { ArtworkDetails } from "@/types";
 
@@ -92,7 +93,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
   const productStock = product?.stock;
   const productQuantityLimit = productStock !== undefined ? Math.max(1, productStock) : 1;
 
-  if (isLoading) {return <div className="min-h-screen animate-pulse bg-gray-50" />;}
+  if (isLoading) {return <div aria-busy="true" aria-label="Loading artwork" className="mx-auto grid max-w-[1240px] gap-10 px-6 py-8 sm:px-10 md:grid-cols-2"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><div className="space-y-5 py-4"><Skeleton className="h-7 w-3/4" /><Skeleton className="h-4 w-1/4" /><Skeleton className="h-5 w-full" /><Skeleton className="h-9 w-1/3" /><Skeleton className="h-12 w-full rounded-xl" /></div></div>;}
   if (isError) {return (
     <div className="mx-auto max-w-xl py-20 text-center" role="alert">
       <p className="text-sm text-gray-500">This artwork could not be loaded.</p>
@@ -165,7 +166,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
   const artistId = product.artistId;
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-6 sm:py-8">
+    <div className="mx-auto max-w-[1240px] px-6 py-8 sm:px-10 sm:py-12">
 
       {/* Breadcrumb */}
       <Breadcrumb
@@ -173,15 +174,15 @@ export default function ProductPageClient({ productId }: { productId: string }) 
           { label: product.category, onClick: handleCategorySearch },
           { label: product.title },
         ]}
-        className="mb-6"
+        className="mb-8"
       />
 
       {/* Top: image + details */}
-      <div className="flex flex-col md:flex-row gap-8 sm:gap-10 mb-12">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] lg:gap-16 xl:gap-20 mb-16 sm:mb-20">
 
         {/* LEFT — Carousel */}
-        <div className="md:w-1/2 space-y-3">
-          <div className="relative bg-gray-50 rounded-xl overflow-hidden aspect-[4/5]">
+        <div className="space-y-4">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gray-50">
             <button type="button" aria-label="Previous product image" onClick={() => setCarouselIndex((carouselIndex - 1 + carouselImages.length) % carouselImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white shadow flex items-center justify-center border border-gray-200 z-10 cursor-pointer hover:bg-gray-50">
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
@@ -223,47 +224,52 @@ export default function ProductPageClient({ productId }: { productId: string }) 
         </div>
 
         {/* RIGHT — Details */}
-        <div className="md:w-1/2">
-          <div className="flex items-start justify-between gap-3 mb-1">
-            <h1 className="text-xl sm:text-2xl font-heading font-semibold text-gray-900 leading-snug tracking-tight-heading">{product.title}</h1>
+        <div className="lg:max-w-[480px] lg:pt-3">
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <button type="button" onClick={handleCategorySearch} className="text-[12px] font-medium uppercase tracking-[0.08em] text-accent-600 hover:text-accent-700 hover:underline transition-colors bg-transparent border-none cursor-pointer p-0">{product.category}</button>
+              <h1 className="mt-2 font-heading text-[32px] font-semibold leading-[1.12] tracking-tighter-heading text-gray-900 sm:text-[40px]">{product.title}</h1>
+            </div>
             <button type="button" onClick={handleWishlist} disabled={isAuthPending || addToWishlist.isPending || removeFromWishlist.isPending} className="flex-shrink-0 w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center hover:border-pink-400 transition-colors bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-50" aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"} aria-pressed={wishlisted}>
               <svg className={`w-4 h-4 ${wishlisted ? "text-pink-500 fill-pink-500" : "text-gray-500"}`} fill={wishlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             </button>
           </div>
 
-          <button type="button" onClick={handleCategorySearch} className="text-[13px] text-gray-500 hover:text-accent-600 hover:underline transition-colors mb-3 bg-transparent border-none cursor-pointer p-0">{product.category}</button>
-
-          {product.description && (
-            <p className="text-sm text-gray-600 leading-relaxed mb-4">{product.description}</p>
-          )}
-
-          <div className="mb-4">
+          <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2">
+            <Link href={artistId ? `/artists/${artistId}` : "/artists"} className="text-sm font-medium text-gray-700 underline-offset-4 hover:text-accent-600 hover:underline">By {product.artistName}</Link>
+            <span aria-hidden="true" className="text-gray-300">/</span>
             <RatingStars rating={product.rating} reviews={product.reviews} size="md" onStarClick={() => reviewsRef.current?.scrollIntoView({ behavior: "smooth" })}/>
           </div>
 
-          <p className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">₹{product.price.toLocaleString()}</p>
+          {product.description && (
+            <p className="mb-7 text-[16px] leading-relaxed text-gray-600">{product.description}</p>
+          )}
+
+          <div className="border-y border-gray-200 py-5">
+          <p className="font-heading text-[28px] font-semibold tracking-tight-heading text-gray-900 sm:text-[32px]">₹{product.price.toLocaleString()}</p>
           {product.originalPrice && (
-            <div className="flex items-center gap-2 mb-5">
+            <div className="mt-2 flex items-center gap-2">
               <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
               {product.discount && <span className="text-sm font-semibold text-green-700 bg-green-50 px-2 py-0.5 rounded">{product.discount}% Off</span>}
             </div>
           )}
+          </div>
 
-          <div className="flex items-center gap-3 mb-5 flex-wrap">
+          <div className="flex flex-wrap items-end gap-5 py-6">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Qty</label>
+              <label className="mb-2 block text-xs font-medium uppercase tracking-[0.08em] text-gray-500">Quantity</label>
               <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
                 <button type="button" aria-label="Decrease quantity" onClick={() => setQty(Math.max(1, boundedQuantity - 1))} className="min-w-11 min-h-11 px-3 py-2 text-sm bg-transparent border-none cursor-pointer hover:bg-gray-50 text-gray-600">−</button>
                 <span className="px-4 py-2 text-sm font-medium text-gray-900 border-x border-gray-300 min-w-[2.5rem] text-center">{boundedQuantity}</span>
                 <button type="button" aria-label="Increase quantity" onClick={() => setQty(Math.min(quantityLimit, boundedQuantity + 1))} disabled={stock !== undefined && boundedQuantity >= quantityLimit} className="min-w-11 min-h-11 px-3 py-2 text-sm bg-transparent border-none cursor-pointer hover:bg-gray-50 text-gray-600 disabled:cursor-not-allowed disabled:opacity-40">+</button>
               </div>
             </div>
-            <p className={`text-xs ${isOutOfStock ? "text-red-600" : "text-gray-500"}`} role={isOutOfStock ? "status" : undefined}>
+            <p className={`pb-3 text-sm ${isOutOfStock ? "text-red-600" : "text-gray-500"}`} role={isOutOfStock ? "status" : undefined}>
               {isOutOfStock ? "Currently unavailable" : stock !== undefined ? `${stock} available` : "Availability checked at checkout"}
             </p>
           </div>
 
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-3">
             <Button variant="primary" fullWidth onClick={handleAdd} disabled={addToCart.isPending || isOutOfStock}>{isOutOfStock ? "UNAVAILABLE" : added ? "✓ ADDED TO CART" : addToCart.isPending ? "ADDING…" : "ADD TO CART"}</Button>
             <Button variant="secondary" onClick={() => router.push("/cart")}>View Cart</Button>
           </div>
@@ -272,8 +278,8 @@ export default function ProductPageClient({ productId }: { productId: string }) 
       </div>
 
       {artworkSpecifications.length > 0 && (
-        <section aria-labelledby="artwork-details-heading" className="mb-12 border-t border-gray-200 pt-10">
-          <h2 id="artwork-details-heading" className="font-heading text-xl font-semibold text-gray-900 mb-5">Artwork details</h2>
+        <section aria-labelledby="artwork-details-heading" className="mb-16 border-t border-gray-200 pt-10 sm:pt-12">
+          <h2 id="artwork-details-heading" className="mb-6 font-heading text-[24px] font-semibold tracking-tight-heading text-gray-900">Artwork details</h2>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
             {artworkSpecifications.map(([label, value]) => (
               <div key={label} className="border-b border-gray-100 pb-3">
@@ -320,7 +326,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
           <h2 className="font-heading text-xl font-semibold text-[#111]">Other Artworks by Creator</h2>
         </div>
         {relatedLoading ? (
-          <p className="text-sm text-gray-500">Loading related artworks…</p>
+          <div aria-busy="true" aria-label="Loading related artworks" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3">{[1, 2, 3].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div>
         ) : relatedError ? (
           <div className="flex flex-col items-start gap-2 text-sm text-gray-500" role="alert">
             <p>Related artworks could not be loaded.</p>
@@ -412,7 +418,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
         </div>
         <div className="space-y-6">
           {reviewsLoading ? (
-            <p className="text-sm text-gray-500">Loading reviews…</p>
+            <div aria-busy="true" aria-label="Loading reviews" className="space-y-4">{[1, 2].map((item) => <div key={item} className="space-y-2 border-b border-gray-100 pb-4"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /></div>)}</div>
           ) : reviewsError ? (
             <div className="flex flex-col items-start gap-2 text-sm text-gray-500" role="alert">
               <p>Reviews could not be loaded.</p>

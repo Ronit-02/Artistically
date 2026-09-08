@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCart, useCartMutations } from "@/hooks/useCart";
 import CartItem from "@/components/product/CartItem";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 import { createCheckoutSession, fetchCheckoutQuote, type CheckoutQuoteDto } from "@/lib/api/checkout";
 import { ApiClientError } from "@/lib/api/client";
 import { useMemo, useState } from "react";
@@ -80,7 +81,7 @@ export default function CartPage() {
   }
 
   if (isAuthPending || (currentUser && isLoading)) {
-    return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-24 text-center text-sm text-gray-500">Loading your cart…</div>;
+    return <div aria-busy="true" aria-label="Loading your cart" className="mx-auto grid max-w-[1240px] gap-12 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[1fr_380px]"><div className="space-y-4"><Skeleton className="h-9 w-36" />{[1, 2].map((item) => <div key={item} className="flex gap-4 border-b border-gray-100 py-5"><Skeleton className="h-28 w-24 shrink-0 rounded-xl" /><div className="flex-1 space-y-3"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2" /><Skeleton className="h-4 w-1/3" /></div></div>)}</div><Skeleton className="hidden h-80 rounded-2xl lg:block" /></div>;
   }
 
   if (!currentUser) {

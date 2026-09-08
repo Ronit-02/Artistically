@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Skeleton from "@/components/ui/Skeleton";
 import type { Metadata } from "next";
 import { metadataService } from "@/lib/services/metadata.service";
 import { createArtistJsonLd, createArtistMetadata, serializeJsonLd } from "@/lib/seo-metadata";
@@ -32,7 +33,7 @@ export default async function ArtistPage({ params }: Props) {
       {artistJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: artistJsonLd }} />
       ) : null}
-      <Suspense fallback={<div className="min-h-screen animate-pulse bg-gray-50" />}>
+      <Suspense fallback={<div aria-busy="true" aria-label="Loading artist profile" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10"><Skeleton className="h-56 w-full rounded-2xl" /></div>}>
         <ArtistPageClient artistId={id} />
       </Suspense>
     </>

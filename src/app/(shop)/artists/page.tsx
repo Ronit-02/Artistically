@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useArtists, useArtistFollow } from "@/hooks/useArtists";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 
 const FILTERS = ["All", "Verified"];
 
@@ -57,12 +58,13 @@ export default function ArtistsPage() {
       <Breadcrumb items={[{ label: "Artists" }]} className="mb-6" />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-8">
-        <div>
+      <div className="mb-10 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+        <div className="max-w-xl">
           <h1 className="font-heading text-[2rem] sm:text-[2.5rem] font-bold text-[#111] tracking-tighter-heading leading-tight">
             Artists
           </h1>
-          <p className="text-[14px] text-gray-500 mt-1">
+          <p className="mt-2 text-[16px] leading-relaxed text-gray-600">Discover original work and the independent artists behind it.</p>
+          <p className="mt-2 text-[13px] text-gray-500">
             {artists.length} independent artists on Artistically
           </p>
         </div>
@@ -80,13 +82,13 @@ export default function ArtistsPage() {
             placeholder="Search artists…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full border border-gray-200 rounded-full pl-10 pr-4 py-2.5 text-[13px] text-[#111] placeholder-gray-400 outline-none focus:border-accent-300 focus:ring-2 focus:ring-accent-50 transition-all bg-white"
+            className="min-h-11 w-full rounded-full border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-[13px] text-[#111] placeholder-gray-400 outline-none transition-all focus:border-accent-300 focus:ring-2 focus:ring-accent-50"
           />
         </div>
       </div>
 
       {/* Filter pills */}
-      <div className="flex gap-2 mb-8">
+      <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
             <button
               key={f}
@@ -103,10 +105,14 @@ export default function ArtistsPage() {
           </button>
         ))}
       </div>
+      <div className="mb-8 mt-4 flex flex-wrap items-center justify-between gap-3 border-y border-gray-100 py-3 text-[13px] text-gray-500">
+        <span>Showing {filtered.length} {filtered.length === 1 ? "artist" : "artists"}</span>
+        <Link href="/help#artist-verification" className="font-medium text-gray-700 underline underline-offset-4 hover:text-accent-600">What the Verified badge means</Link>
+      </div>
 
       {/* Grid */}
       {isLoading ? (
-        <div className="text-center py-20"><p className="text-[14px] text-gray-500">Loading artists…</p></div>
+        <div aria-busy="true" aria-label="Loading artists" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">{[1, 2, 3].map((item) => <div key={item} className="space-y-3"><Skeleton className="h-44 w-full rounded-xl" /><Skeleton className="h-5 w-1/2" /><Skeleton className="h-4 w-4/5" /></div>)}</div>
       ) : isError ? (
         <div className="text-center py-20">
           <p className="text-[14px] text-gray-500 mb-4">We couldn’t load artists right now.</p>
@@ -117,15 +123,15 @@ export default function ArtistsPage() {
           <p className="text-[14px] text-gray-500">No artists found for &ldquo;{query}&rdquo;</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((artist) => (
-            <div key={artist.id}>
+            <div key={artist.id} className="flex flex-col">
               <Link
                 href={`/artists/${artist.id}`}
-                className="card-hover group block bg-white rounded-xl border border-gray-100 overflow-hidden"
+                className="group block overflow-hidden rounded-xl border border-gray-200 bg-white transition-colors hover:border-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2"
               >
               {/* Cover */}
-              <div className="img-hover-zoom relative h-44 bg-[#f5f5f5] overflow-hidden">
+              <div className="img-hover-zoom relative h-48 overflow-hidden bg-[#f5f5f5] sm:h-52">
                 <Image
                   src={artist.cover}
                   alt={artist.name}
@@ -137,7 +143,7 @@ export default function ArtistsPage() {
               </div>
 
               {/* Info */}
-              <div className="p-4">
+              <div className="p-5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm relative flex-shrink-0 -mt-7 bg-[#f5f5f5]">
@@ -145,23 +151,23 @@ export default function ArtistsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-1">
-                        <h3 className="font-heading text-[15px] font-semibold text-[#111]">{artist.name}</h3>
+                        <h3 className="font-heading text-[18px] font-semibold leading-snug text-[#111]">{artist.name}</h3>
                         {artist.verified && (
                           <svg className="w-3.5 h-3.5 text-accent-600 flex-shrink-0" role="img" aria-label="Verified artist" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812z" clipRule="evenodd" />
                           </svg>
                         )}
                       </div>
-                      <p className="text-[12px] text-gray-500">{artist.handle}</p>
+                      <p className="mt-0.5 text-[12px] text-gray-500">@{artist.handle.replace(/^@/, "")}</p>
                     </div>
                   </div>
                 </div>
 
                 {artist.bio && (
-                  <p className="text-[12px] text-gray-500 leading-relaxed mt-3 line-clamp-2">{artist.bio}</p>
+                  <p className="mt-4 text-[14px] leading-relaxed text-gray-600 line-clamp-2">{artist.bio}</p>
                 )}
 
-                <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100">
+                <div className="mt-5 flex items-center gap-4 border-t border-gray-100 pt-4">
                   <div>
                     <p className="text-[13px] font-semibold text-[#111]">{artist.followers}</p>
                     <p className="text-[12px] text-gray-500">Followers</p>
@@ -173,13 +179,12 @@ export default function ArtistsPage() {
                   </div>
                   <div className="w-px h-6 bg-gray-100" />
                   <div>
-                    <p className="text-[13px] font-semibold text-[#111]">{artist.verified ? "Verified" : "Unverified"}</p>
-                    <p className="text-[12px] text-gray-500">Identity status</p>
+                    <p className={`text-[13px] font-semibold ${artist.verified ? "text-accent-700" : "text-gray-700"}`}>{artist.verified ? "Verified" : "Unverified"}</p>
+                    <p className="text-[12px] text-gray-500">Identity</p>
                   </div>
                 </div>
               </div>
               </Link>
-              {artist.verified && <Link href="/help#artist-verification" className="inline-block mt-2 text-xs text-gray-500 underline underline-offset-2 hover:text-accent-600">What verified means</Link>}
               <ArtistFollowControl artistId={artist.id} />
             </div>
           ))}

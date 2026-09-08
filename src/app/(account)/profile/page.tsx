@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { UserProfile, OrderItem } from "@/types";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 import { useAppStore } from "@/store/useAppStore";
 import ProductCard from "@/components/product/ProductCard";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
@@ -111,7 +112,7 @@ export default function ProfilePage() {
   const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 outline-none focus:border-gray-400 focus-visible:ring-2 focus-visible:ring-accent-100 transition-colors disabled:bg-gray-50 disabled:text-gray-500";
 
   if (isAuthPending) {
-    return <div className="max-w-[840px] mx-auto px-6 sm:px-10 py-24 text-center text-sm text-gray-500">Loading your profile…</div>;
+    return <div aria-busy="true" aria-label="Loading your profile" className="mx-auto max-w-[840px] space-y-6 px-6 py-8 sm:px-10"><Skeleton className="h-28 w-full rounded-2xl" /><Skeleton className="h-10 w-72" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
   }
 
   if (!currentUser) {

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Skeleton from "@/components/ui/Skeleton";
 import type { Metadata } from "next";
 import { metadataService } from "@/lib/services/metadata.service";
 import { createStoryJsonLd, createStoryMetadata, serializeJsonLd } from "@/lib/seo-metadata";
@@ -32,7 +33,7 @@ export default async function StoryPage({ params }: Props) {
       {storyJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: storyJsonLd }} />
       ) : null}
-      <Suspense fallback={<div className="min-h-screen animate-pulse bg-gray-50" />}>
+      <Suspense fallback={<div aria-busy="true" aria-label="Loading story" className="mx-auto max-w-[680px] px-6 py-10"><Skeleton className="aspect-[4/3] w-full rounded-xl" /></div>}>
         <StoryPageClient storyId={id} />
       </Suspense>
     </>

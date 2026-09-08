@@ -9,6 +9,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCancelOrder, useOrder } from "@/hooks/useOrders";
 import { useCreateOrderDispute, useOrderDeliveryRecords, useOrderDisputes, usePrepareDigitalDownload } from "@/hooks/usePostPurchase";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 
 const STATUS_STEPS = [
   { statuses: ["PROCESSING", "CONFIRMED"], title: "Order confirmed", sub: "The order is being prepared." },
@@ -23,7 +24,7 @@ function formatDate(value: string | null) {
 
 export default function TrackingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen animate-pulse bg-gray-50" />}>
+    <Suspense fallback={<div aria-busy="true" aria-label="Loading order tracking" className="mx-auto max-w-[1240px] px-6 py-8 sm:px-10"><Skeleton className="h-72 w-full rounded-2xl" /></div>}>
       <TrackingPageContent />
     </Suspense>
   );
@@ -55,7 +56,7 @@ function TrackingPageContent() {
   };
 
   if (isAuthPending) {
-    return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-24 text-center text-sm text-gray-500">Loading your order…</div>;
+    return <div aria-busy="true" aria-label="Loading your order" className="mx-auto max-w-[1240px] px-6 py-8 sm:px-10"><Skeleton className="mb-8 h-8 w-48" /><div className="grid gap-8 lg:grid-cols-[1fr_380px]"><div className="space-y-4">{[1, 2].map((item) => <Skeleton key={item} className="h-28 w-full rounded-xl" />)}</div><Skeleton className="h-72 rounded-2xl" /></div></div>;
   }
 
   if (!currentUser) {
@@ -79,7 +80,7 @@ function TrackingPageContent() {
   }
 
   if (isLoading) {
-    return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-24 text-center text-sm text-gray-500">Loading order details…</div>;
+    return <div aria-busy="true" aria-label="Loading order details" className="mx-auto max-w-[1240px] px-6 py-8 sm:px-10"><Skeleton className="mb-8 h-8 w-48" /><div className="grid gap-8 lg:grid-cols-[1fr_380px]"><div className="space-y-4">{[1, 2].map((item) => <Skeleton key={item} className="h-28 w-full rounded-xl" />)}<Skeleton className="h-64 w-full rounded-xl" /></div><Skeleton className="h-72 rounded-2xl" /></div></div>;
   }
 
   if (isError) {

@@ -8,6 +8,7 @@ import ProductCard from "@/components/product/ProductCard";
 import Button from "@/components/ui/Button";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import NotFoundState from "@/components/ui/NotFoundState";
+import Skeleton from "@/components/ui/Skeleton";
 
 export default function ArtistPageClient({ artistId }: { artistId: string }) {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
   } = useArtistProducts(artistId);
   const { currentUser, isAuthPending, following, toggle } = useArtistFollow(artistId);
 
-  if (isLoading) {return <div className="min-h-screen animate-pulse bg-gray-50" />;}
+  if (isLoading) {return <div aria-busy="true" aria-label="Loading artist profile" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10"><Skeleton className="mb-8 h-56 w-full rounded-2xl" /><div className="mb-10 flex items-center gap-4"><Skeleton className="h-24 w-24 rounded-full" /><div className="space-y-3"><Skeleton className="h-7 w-52" /><Skeleton className="h-4 w-80" /></div></div><div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div></div>;}
   if (isError) {
     return (
       <div className="text-center py-20">
@@ -88,7 +89,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
       {/* Products */}
       <h2 className="font-heading text-xl sm:text-2xl font-semibold text-gray-900 mb-5 tracking-tight-heading">Artworks by {artist.name}</h2>
       {productsLoading ? (
-        <p className="py-8 text-center text-sm text-gray-500">Loading artworks…</p>
+        <div aria-busy="true" aria-label="Loading artworks" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div>
       ) : productsError ? (
         <div className="py-8 text-center">
           <p className="text-sm text-gray-500 mb-4">We couldn’t load this artist’s artworks.</p>

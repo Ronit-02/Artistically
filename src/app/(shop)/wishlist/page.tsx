@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useWishlist } from "@/hooks/useWishlist";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 import ProductCard from "@/components/product/ProductCard";
 
 export default function WishlistPage() {
@@ -10,7 +11,7 @@ export default function WishlistPage() {
   const { data: wishlist = [], currentUser, isAuthPending, isLoading, isError, refetch } = useWishlist();
 
   if (isAuthPending || (currentUser && isLoading)) {
-    return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-24 text-center text-sm text-gray-500">Loading your wishlist…</div>;
+    return <div aria-busy="true" aria-label="Loading your wishlist" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10 sm:py-14"><Skeleton className="mb-10 h-9 w-44" /><div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-1/2" /></div>)}</div></div>;
   }
 
   if (!currentUser) {

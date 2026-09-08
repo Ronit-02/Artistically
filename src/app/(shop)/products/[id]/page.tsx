@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Skeleton from "@/components/ui/Skeleton";
 import type { Metadata } from "next";
 import { metadataService } from "@/lib/services/metadata.service";
 import { createProductJsonLd, createProductMetadata, serializeJsonLd } from "@/lib/seo-metadata";
@@ -32,7 +33,7 @@ export default async function ProductPage({ params }: Props) {
       {productJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: productJsonLd }} />
       ) : null}
-      <Suspense fallback={<div className="min-h-screen animate-pulse bg-gray-50" />}>
+      <Suspense fallback={<div aria-busy="true" aria-label="Loading artwork" className="mx-auto max-w-[1240px] px-6 py-8 sm:px-10"><Skeleton className="aspect-[4/5] w-full rounded-xl md:w-1/2" /></div>}>
         <ProductPageClient productId={id} />
       </Suspense>
     </>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ import ProductCard from "@/components/product/ProductCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ArtistCard from "@/components/artist/ArtistCard";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 
 const CATEGORY_COVER_IMAGES: Record<string, string> = {
   Paintings: "/paintings/painting-1.jpg",
@@ -29,9 +30,14 @@ const CATEGORY_COVER_IMAGES: Record<string, string> = {
 
 type Slide = { label: string; title: string; cta: string; image: string | null; query: string; href?: string };
 
+function formatEditorialTitle(title: string) {
+  if (title !== title.toUpperCase()) {return title;}
+  const normalized = title.toLowerCase();
+  return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}`;
+}
+
 function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide: Slide) => void }) {
   const [idx, setIdx] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const next = useCallback(() => setIdx(i => (i + 1) % slides.length), [slides.length]);
   const prev = () => setIdx(i => (i - 1 + slides.length) % slides.length);
@@ -45,10 +51,10 @@ function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide:
   }, []);
 
   useEffect(() => {
-    if (isPaused || prefersReducedMotion) {return;}
+    if (prefersReducedMotion) {return;}
     const t = setInterval(next, 5000);
     return () => clearInterval(t);
-  }, [isPaused, next, prefersReducedMotion]);
+  }, [next, prefersReducedMotion]);
 
   const slide = slides[idx] ?? slides[0];
   return (
@@ -88,15 +94,6 @@ function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide:
             <button type="button" aria-label="Show next highlight" onClick={next} className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:border-accent-300 cursor-pointer transition-colors">
               <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
             </button>
-            <button
-              type="button"
-              aria-label={isPaused ? "Resume automatic highlights" : "Pause automatic highlights"}
-              aria-pressed={isPaused}
-              onClick={() => setIsPaused((paused) => !paused)}
-              className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:border-accent-300 cursor-pointer transition-colors"
-            >
-              <span aria-hidden="true" className="text-[12px] font-semibold text-gray-500">{isPaused ? "▶" : "Ⅱ"}</span>
-            </button>
           </div>
         </div>
       </div>
@@ -116,6 +113,7 @@ function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide:
 
 export default function HomePageClient() {
   const router = useRouter();
+  const artistRailRef = useRef<HTMLDivElement>(null);
   const productsQuery = useProducts();
   const artistsQuery = useArtists();
   const storiesQuery = useStories();
@@ -124,6 +122,7 @@ export default function HomePageClient() {
   const artists = artistsQuery.data ?? [];
   const stories = storiesQuery.data ?? [];
   const collections = collectionsQuery.data ?? [];
+  const [artistRailControls, setArtistRailControls] = useState({ canGoBack: false, canGoForward: false });
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
   const catSearch = (cat: string) => { setSearchQuery(""); router.push(buildSearchHref("", { types: [toSearchTypeLabel(cat)] })); };
   const navigate = (q: string) => { if (q) {catSearch(q);} else {router.push("/search");} };
@@ -137,11 +136,32 @@ export default function HomePageClient() {
   const catalogError = productsQuery.isError || artistsQuery.isError || storiesQuery.isError || collectionsQuery.isError;
   const isCatalogUnavailable = productsQuery.isError && artistsQuery.isError && storiesQuery.isError && collectionsQuery.isError;
 
+  const updateArtistRailControls = useCallback(() => {
+    const rail = artistRailRef.current;
+    if (!rail) {return;}
+    setArtistRailControls({
+      canGoBack: rail.scrollLeft > 1,
+      canGoForward: rail.scrollLeft + rail.clientWidth < rail.scrollWidth - 1,
+    });
+  }, []);
+
+  const scrollArtists = (direction: -1 | 1) => {
+    const rail = artistRailRef.current;
+    if (!rail) {return;}
+    rail.scrollBy({ left: direction * Math.max(rail.clientWidth * 0.8, 280), behavior: "smooth" });
+  };
+
   useEffect(() => {
     if (isCatalogUnavailable) {
       router.replace("/unavailable");
     }
   }, [isCatalogUnavailable, router]);
+
+  useEffect(() => {
+    updateArtistRailControls();
+    window.addEventListener("resize", updateArtistRailControls);
+    return () => window.removeEventListener("resize", updateArtistRailControls);
+  }, [artists.length, updateArtistRailControls]);
 
   if (isCatalogUnavailable) {
     return null;
@@ -152,7 +172,7 @@ export default function HomePageClient() {
 
       {/* ═══════ CAROUSEL — Auto-rotate: paintings / artists / recent listings / ceramics ═══════ */}
       <section className="py-10 sm:py-12">
-        {catalogPending ? <div className="min-h-[320px] animate-pulse rounded-2xl bg-gray-50 sm:min-h-[360px]" aria-label="Loading homepage highlights" /> : <Carousel slides={slides} onNavigate={(slide) => slide.href ? router.push(slide.href) : navigate(slide.query)}/>} 
+        {catalogPending ? <div aria-busy="true" aria-label="Loading homepage highlights" className="grid min-h-[320px] grid-cols-1 overflow-hidden rounded-2xl bg-[#fafafa] md:grid-cols-2 sm:min-h-[360px]"><div className="space-y-5 p-10 sm:p-12"><Skeleton className="h-4 w-28" /><Skeleton className="h-9 w-4/5" /><Skeleton className="h-5 w-2/3" /><Skeleton className="h-11 w-36 rounded-xl" /></div><Skeleton className="h-full min-h-[240px] rounded-none" /></div> : <Carousel slides={slides} onNavigate={(slide) => slide.href ? router.push(slide.href) : navigate(slide.query)}/>} 
       </section>
 
       {/* ═══════ CATEGORIES — Image grid ═══════ */}
@@ -175,9 +195,10 @@ export default function HomePageClient() {
 
       {/* ═══════ FEATURED PAINTINGS ═══════ */}
       <section className="py-10 sm:py-12 border-t border-gray-100">
-        <SectionHeader title="Paintings" onLinkClick={() => catSearch("Paintings")} className="mb-6"/>
+        <SectionHeader title="Paintings" subtitle="Original work with distinctive presence." onLinkClick={() => catSearch("Paintings")} className="mb-6"/>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {products.filter((p) => p.category === "PAINTINGS").slice(0, 5).map((p) => <ProductCard key={p.id} product={p}/>)}
+          {catalogPending && [1, 2, 3, 4, 5].map((item) => <div key={`painting-${item}`} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}
           {!catalogPending && !catalogError && products.filter((p) => p.category === "PAINTINGS").length === 0 && <p className="col-span-full py-8 text-sm text-gray-500">No paintings are published yet.</p>}
         </div>
       </section>
@@ -204,7 +225,7 @@ export default function HomePageClient() {
 
       {/* ═══════ CERAMICS ═══════ */}
       <section className="py-10 sm:py-12 border-t border-gray-100">
-        <SectionHeader title="Ceramics & Pottery" onLinkClick={() => catSearch("Ceramics")} className="mb-6"/>
+        <SectionHeader title="Ceramics & Pottery" subtitle="Handmade forms for everyday spaces." onLinkClick={() => catSearch("Ceramics")} className="mb-6"/>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {products.filter((p) => p.category === "CERAMICS").map((p) => <ProductCard key={p.id} product={p}/>)}
           {!catalogPending && !catalogError && products.filter((p) => p.category === "CERAMICS").length === 0 && <p className="col-span-full py-8 text-sm text-gray-500">No ceramics are published yet.</p>}
@@ -213,7 +234,7 @@ export default function HomePageClient() {
 
       {/* ═══════ COLLECTIONS — Text below image (not overlay) ═══════ */}
       <section className="py-10 sm:py-12 border-t border-gray-100">
-        <SectionHeader title="Curated Collections" href="/collections" className="mb-6"/>
+        <SectionHeader title="Curated Collections" subtitle="Artworks connected by a shared point of view." href="/collections" className="mb-6"/>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {collections.filter(c => c.featured).map((c) => (
             <Link key={c.id} href={`/collections/${c.id}`} className="card-hover group block">
@@ -280,30 +301,54 @@ export default function HomePageClient() {
 
       {/* ═══════ ARTISTS — Horizontal scroll ═══════ */}
       <section className="py-10 sm:py-12 border-t border-gray-100">
-        <SectionHeader title="Artists" className="mb-6"/>
-        <div className="flex gap-5 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="font-heading text-[20px] font-semibold leading-snug tracking-tight-heading text-[#111] sm:text-[24px]">Artists</h2>
+            <p className="mt-1 text-[13px] text-gray-500">Meet the artists behind the work.</p>
+          </div>
+          <div className="flex items-center gap-2" aria-label="Artist carousel controls">
+            <button type="button" aria-label="Show previous artists" aria-controls="featured-artists" disabled={!artistRailControls.canGoBack} onClick={() => scrollArtists(-1)} className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+              <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" /></svg>
+            </button>
+            <button type="button" aria-label="Show next artists" aria-controls="featured-artists" disabled={!artistRailControls.canGoForward} onClick={() => scrollArtists(1)} className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+              <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" /></svg>
+            </button>
+          </div>
+        </div>
+        <div id="featured-artists" ref={artistRailRef} onScroll={updateArtistRailControls} className="flex gap-5 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
           {artists.map((a) => (
             <div key={a.id} className="flex-shrink-0 w-[260px] sm:w-[300px] snap-start">
               <ArtistCard artist={a}/>
             </div>
           ))}
+          <Link href="/artists" className="group flex h-40 w-[260px] shrink-0 snap-start flex-col justify-between rounded-xl border border-gray-200 bg-[#fafafa] p-5 transition-colors hover:border-gray-400 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:w-[300px]">
+            <div>
+              <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-accent-600">Artistically artists</p>
+              <h3 className="mt-2 font-heading text-[20px] font-semibold leading-snug tracking-tight-heading text-[#111]">Discover more artists</h3>
+            </div>
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#111]">View all artists <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span></span>
+          </Link>
         </div>
       </section>
 
-      {/* ═══════ STORIES — Text below image (blog style, ref 4) ═══════ */}
+      {/* ═══════ STORIES ═══════ */}
       <section className="py-10 sm:py-12 border-t border-gray-100">
-        <SectionHeader title="From the editorial journal" className="mb-6"/>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <SectionHeader title="From the editorial journal" subtitle="Notes on collecting, making, and living with art." href="/stories" linkLabel="All stories" className="mb-7"/>
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {stories.slice(0, 3).map((s) => (
-            <Link key={s.id} href={`/stories/${s.id}`} className="card-hover group block">
-              <div className="img-hover-zoom relative aspect-square rounded-xs overflow-hidden bg-[#f5f5f5] mb-3">
+            <Link key={s.id} href={`/stories/${s.id}`} className="card-hover group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2">
+              <div className="img-hover-zoom relative aspect-[4/3] overflow-hidden rounded-xl bg-[#f5f5f5]">
                 <Image src={s.image} alt={s.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw"/>
-                {s.category && (
-                  <span className="absolute bottom-3 left-3 text-[12px] font-medium bg-white/90 backdrop-blur-sm text-[#111] px-2.5 py-1 rounded-md">{s.category}</span>
-                )}
               </div>
-              <h3 className="font-heading text-[16px] font-semibold text-[#111] leading-snug line-clamp-2 mb-1.5">{s.title}</h3>
-              {s.excerpt && <p className="text-[13px] text-gray-500 line-clamp-2 leading-relaxed">{s.excerpt}</p>}
+              <div className="pt-4">
+                <div className="mb-2 flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.08em] text-gray-500">
+                  <span className="text-accent-600">{s.category ?? "Journal"}</span>
+                  <span aria-hidden="true" className="text-gray-300">/</span>
+                  <time dateTime={s.date}>{new Date(s.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</time>
+                </div>
+                <h3 className="font-heading text-[20px] font-semibold leading-[1.3] tracking-tight-heading text-[#111] line-clamp-3">{formatEditorialTitle(s.title)}</h3>
+                {s.excerpt && <p className="mt-2.5 text-[14px] leading-relaxed text-gray-500 line-clamp-2">{s.excerpt}</p>}
+              </div>
             </Link>
           ))}
         </div>

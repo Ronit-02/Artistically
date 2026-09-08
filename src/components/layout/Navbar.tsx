@@ -34,6 +34,7 @@ function buildResults(query: string, products: Product[], artists: Artist[]): Se
 
 function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { searchQuery, setSearchQuery } = useAppStore();
   const { data: products = [] } = useProducts();
   const { data: artists = [] } = useArtists();
@@ -46,11 +47,19 @@ function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
   const dropRef = useRef<HTMLDivElement>(null);
 
   const results = useMemo(() => buildResults(local, products, artists), [local, products, artists]);
+  const clearSearch = () => {
+    setLocal("");
+    setSearchQuery("");
+    setSelIdx(-1);
+    setFocused(false);
+    inputRef.current?.blur();
+    if (pathname === "/search") {router.replace(buildSearchHref(""));}
+  };
 
   return (
     <div className="relative flex-1 max-w-xl">
       <form onSubmit={(e) => { e.preventDefault(); if (!local.trim()) {return;} saveRecent(local); setSearchQuery(local); setFocused(false); onSearch(local); }}>
-        <div className={`flex items-center w-full rounded-full px-4 py-2.5 gap-2.5 transition-all ${focused ? "bg-white border border-accent-300 shadow-sm" : "bg-[#f5f5f5] border border-transparent hover:bg-[#efefef]"}`}>
+        <div className={`flex min-h-11 items-center w-full rounded-full px-4 gap-2.5 transition-all ${focused ? "bg-white border border-accent-300 shadow-sm" : "bg-[#f5f5f5] border border-transparent hover:bg-[#efefef]"}`}>
           <svg aria-hidden="true" className="w-[18px] h-[18px] flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <label htmlFor={searchId} className="sr-only">Search for products or artists</label>
           <input id={searchId} ref={inputRef} type="text" placeholder="Search for products or artists…"
@@ -64,7 +73,9 @@ function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
               if (e.key === "Escape") { setFocused(false); inputRef.current?.blur(); }
             }}
             className="flex-1 outline-none text-[13px] text-[#111] placeholder-gray-400 bg-transparent"/>
-          {local && <button type="button" aria-label="Clear search" onClick={() => { setLocal(""); setSearchQuery(""); inputRef.current?.focus(); }} className="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-gray-500 bg-transparent border-none cursor-pointer p-0"><svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center">
+            {local && <button type="button" aria-label="Clear search" onPointerDown={(event) => { event.preventDefault(); clearSearch(); }} className="flex h-11 w-11 items-center justify-center text-gray-500 hover:text-gray-900 bg-transparent border-none cursor-pointer p-0"><svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
+          </span>
         </div>
       </form>
       {focused && (local.trim() ? results.length > 0 : recent.length > 0) && (

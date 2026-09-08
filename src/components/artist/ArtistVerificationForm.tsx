@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 import { useArtistVerification, useSubmitArtistVerification } from "@/hooks/useArtistVerification";
 import { ApiClientError } from "@/lib/api/client";
 
@@ -46,7 +47,7 @@ export default function ArtistVerificationForm({ artistId }: { artistId: string 
         <h3 id="artist-verification-heading" className="font-heading text-base font-semibold text-gray-900">Artist verification</h3>
         <p className="mt-1 text-sm leading-6 text-gray-500">Verification means Artistically reviewed your identity and background. It does not guarantee any artwork, price, or future action.</p>
       </div>
-      {isLoading ? <p className="text-sm text-gray-500">Loading verification status…</p> : isError ? <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500"><span>Verification status could not be loaded.</span><Button variant="secondary" size="sm" onClick={() => void refetch()}>Try again</Button></div> : (
+      {isLoading ? <div aria-busy="true" aria-label="Loading verification status" className="space-y-3"><Skeleton className="h-12 w-full rounded-lg" /><Skeleton className="h-10 w-40" /></div> : isError ? <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500"><span>Verification status could not be loaded.</span><Button variant="secondary" size="sm" onClick={() => void refetch()}>Try again</Button></div> : (
         <>
           <p className="rounded-lg bg-gray-50 px-3 py-2.5 text-sm text-gray-600"><span className="font-medium text-gray-900">Status: {verification?.status ?? "NOT_SUBMITTED"}</span> · {STATUS_COPY[verification?.status ?? "NOT_SUBMITTED"]}</p>
           {submitted && <p role="status" className="mt-3 text-sm text-green-700">Verification submission sent for review.</p>}

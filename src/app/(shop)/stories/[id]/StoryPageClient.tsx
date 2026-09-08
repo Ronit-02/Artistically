@@ -6,12 +6,13 @@ import { useStory, useStories } from "@/hooks/useStories";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Button from "@/components/ui/Button";
 import NotFoundState from "@/components/ui/NotFoundState";
+import Skeleton from "@/components/ui/Skeleton";
 
 export default function StoryPageClient({ storyId }: { storyId: string }) {
   const { data: story, isLoading, isError, refetch } = useStory(storyId);
   const { data: allStories } = useStories();
 
-  if (isLoading) {return <div className="min-h-screen animate-pulse bg-[#fafafa]" />;}
+  if (isLoading) {return <main aria-busy="true" aria-label="Loading story" className="mx-auto max-w-[680px] px-6 py-10 sm:py-16"><Skeleton className="mb-8 aspect-[4/3] w-full rounded-xl" /><Skeleton className="mb-4 h-5 w-1/4" /><Skeleton className="mb-5 h-10 w-4/5" /><Skeleton className="mb-3 h-4 w-full" /><Skeleton className="h-4 w-11/12" /></main>;}
   if (isError) {
     return (
       <div className="text-center py-20">

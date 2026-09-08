@@ -33,14 +33,6 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); color: var(--text-hea
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 3px; }
 
-/* Card hover — NO movement, just subtle shadow */
-.card-hover {
-  transition: box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.card-hover:hover {
-  box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.03);
-}
-
 /* Image zoom on hover */
 .img-hover-zoom { overflow: hidden; }
 .img-hover-zoom img {

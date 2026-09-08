@@ -7,6 +7,7 @@ import { useProductPage } from "@/hooks/useProducts";
 import ProductCard from "@/components/product/ProductCard";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Button from "@/components/ui/Button";
+import Skeleton from "@/components/ui/Skeleton";
 import type { SortOption } from "@/types";
 import type { ProductListParams } from "@/lib/api/products";
 import { buildSearchHref, parseSearchUrl, type SearchSortParam } from "@/lib/search-url";
@@ -102,7 +103,7 @@ function FilterPanel({
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 text-center text-[14px] text-gray-500">Loading artworks…</div>}>
+    <Suspense fallback={<div aria-busy="true" aria-label="Loading artworks" className="mx-auto grid max-w-[1240px] grid-cols-2 gap-6 px-6 py-10 sm:grid-cols-3 sm:px-10"><Skeleton className="aspect-[4/5] w-full" /><Skeleton className="aspect-[4/5] w-full" /><Skeleton className="aspect-[4/5] w-full" /></div>}>
       <SearchPageContent />
     </Suspense>
   );
@@ -263,7 +264,7 @@ function SearchResults({
 
           {/* Grid */}
           {isLoading ? (
-            <div className="text-center py-20"><p className="text-gray-500 text-[14px]">Loading artworks…</p></div>
+            <div aria-busy="true" aria-label="Loading artworks" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4, 5, 6, 7, 8].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-1/2" /></div>)}</div>
           ) : isError ? (
             <div className="text-center py-20">
               <p className="text-gray-500 text-[14px] mb-4">We couldn’t load artworks right now.</p>

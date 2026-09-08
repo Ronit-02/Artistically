@@ -53,6 +53,7 @@ Each registered component documents the applicable default, hover, focus-visible
 | Primitive | `RatingStars` | `src/components/ui/RatingStars.tsx` | Accessible static rating output and labelled interactive controls when a callback is supplied. |
 | Primitive | `SectionHeader` | `src/components/ui/SectionHeader.tsx` | Section title with semantic link or button action and touch-accessible controls. |
 | Primitive | `SpecRow` | `src/components/ui/SpecRow.tsx` | Label-and-value factual detail row sourced from maintained product data. |
+| Primitive | `Skeleton` | `src/components/ui/Skeleton.tsx` | Decorative, token-aligned placeholder surface. Consumers provide the labelled loading container; the primitive remains hidden from assistive technology. |
 | Shared composite | `Navbar` and `Footer` | `src/components/layout/` | Labelled marketplace navigation, real destinations, and responsive action controls. |
 | Shared composite | `NotificationBell` and `SaleBanner` | `src/components/layout/` | Notification entry point and optional truthful, dismissible announcement. |
 | Shared composite | `ProductCard` and `CartItem` | `src/components/product/` | Artwork summary, cart-line presentation, semantic navigation, and accessible mutation controls. |
@@ -73,7 +74,7 @@ Each registered component documents the applicable default, hover, focus-visible
 | `FormField` | Consistent form composition | Connects label, description, control, and error IDs. |
 | `Badge`, `Alert`, `Toast` | Compact status and feedback | Use semantic variants; critical state never relies only on transient feedback. |
 | `Dialog`, `Drawer`, `DropdownMenu`, `Tooltip` | Overlay and compact actions | Define focus and keyboard behavior; a tooltip never carries essential content. |
-| `Skeleton`, `EmptyState`, `Pagination` | Loading, empty, and browse states | Assistive-technology-safe loading, relevant empty guidance, and URL-backed accessible pagination. |
+| `EmptyState`, `Pagination` | Loading, empty, and browse states | Relevant empty guidance and URL-backed accessible pagination. |
 
 ## Planned composites
 

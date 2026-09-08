@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCollections } from "@/hooks/useCollections";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import Skeleton from "@/components/ui/Skeleton";
 
 export default function CollectionsPage() {
   const { data: collections = [], isLoading, isError, refetch } = useCollections();
@@ -18,7 +19,7 @@ export default function CollectionsPage() {
         Thoughtfully curated groupings that bring together artworks united by theme, medium, or vision.
       </p>
       {isLoading ? (
-        <p className="text-sm text-gray-500" role="status">Loading collections…</p>
+        <div aria-busy="true" aria-label="Loading collections" className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">{[1, 2, 3].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/3] w-full rounded-xl" /><Skeleton className="h-4 w-28" /><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-full" /></div>)}</div>
       ) : isError ? (
         <div className="flex flex-col items-start gap-3 text-sm text-gray-500" role="alert">
           <p>Collections could not be loaded.</p>

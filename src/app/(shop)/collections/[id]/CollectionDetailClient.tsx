@@ -6,11 +6,12 @@ import ProductCard from "@/components/product/ProductCard";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import NotFoundState from "@/components/ui/NotFoundState";
 import ReportForm from "@/components/forms/ReportForm";
+import Skeleton from "@/components/ui/Skeleton";
 
 export default function CollectionDetailClient({ collectionId }: { collectionId: string }) {
   const { data: collection, isLoading, isError, refetch } = useCollection(collectionId);
 
-  if (isLoading) {return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 text-sm text-gray-500" role="status">Loading collection…</div>;}
+  if (isLoading) {return <div aria-busy="true" aria-label="Loading collection" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10 sm:py-16"><Skeleton className="mb-10 h-72 w-full rounded-2xl" /><Skeleton className="mb-4 h-5 w-3/4" /><Skeleton className="mb-10 h-4 w-full" /><div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div></div>;}
   if (isError) {return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 flex flex-col items-start gap-3 text-sm text-gray-500" role="alert"><p>Collection could not be loaded.</p><button type="button" onClick={() => refetch()} className="inline-flex min-h-11 items-center text-accent-600 underline">Try again</button></div>;}
   if (!collection) {
     return <NotFoundState title="Collection not found" description="This collection may have been removed, unpublished, or the link may be incorrect." />;
