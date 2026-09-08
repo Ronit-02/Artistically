@@ -17,7 +17,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
   if (!review) {return notFound("Review not found");}
   if (review.userId !== auth.userId) {return forbidden("You can only edit your own reviews");}
 
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(UpdateReviewSchema, body);
   const updated = await prisma.review.update({ where: { id: validId }, data: input });
   await prisma.auditLog.create({ data: { actorId: auth.userId, action: "REVIEW_UPDATED", targetType: "REVIEW", targetId: validId } });

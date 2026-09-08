@@ -8,7 +8,7 @@ import { ok, unauthorized, withErrorHandler } from "@/lib/api-response";
 import { enforceRateLimit, opaqueRateLimitKey } from "@/lib/rate-limit";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(LoginSchema, body);
   await enforceRateLimit(opaqueRateLimitKey("login", input.email), { max: 5, windowMs: 15 * 60_000 });
 

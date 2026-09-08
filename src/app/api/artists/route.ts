@@ -31,7 +31,7 @@ export const GET = withErrorHandler(async () => {
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const auth = await requireAuth(req);
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(CreateArtistSchema, body);
 
   const existing = await prisma.artist.findUnique({ where: { userId: auth.userId } });

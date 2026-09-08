@@ -155,7 +155,7 @@ Route handlers should not contain long persistence queries, duplicate multi-step
 - ESLint runs with the Next.js Core Web Vitals and TypeScript presets, plus type-aware checks through the project TypeScript configuration; warnings fail the quality gate.
 - Application source uses strict equality (with intentional nullish checks), braces for control flow, explicit type-only imports, and no duplicate value imports.
 - Promise-returning work must be awaited, returned to the caller, handled with an explicit rejection path, or deliberately marked with `void`. Switches over closed state must explicitly cover nullable cases.
-- Do not introduce circular imports, unnecessary conditions or type assertions, unsafe values from untyped boundaries, unsafe template interpolation, or non-`Error` thrown and rejected values.
+- Do not introduce circular imports, unsafe values from untyped boundaries, unsafe template interpolation, or non-`Error` thrown and rejected values.
 - Use the structured logger rather than browser console calls in application code. Script output remains an explicit operational choice.
 - Native images, anchors, form labels, and static interactive surfaces must meet the configured accessibility checks. Component-specific accessibility behavior remains covered by component tests and review.
 - Do not add a lint suppression merely to pass a check. A suppression needs a narrowly scoped, documented reason when the rule cannot express a valid framework or security constraint.

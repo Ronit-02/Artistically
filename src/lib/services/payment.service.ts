@@ -92,7 +92,7 @@ function readQuoteSnapshot(value: Prisma.JsonValue): QuoteSnapshot {
   });
 
   const totals = ["subtotal", "shippingCost", "tax", "discount", "total"];
-  if (totals.some((key) => typeof snapshot[key] !== "number" || !Number.isSafeInteger(snapshot[key] as number) || (snapshot[key] as number) < 0)) {
+  if (totals.some((key) => typeof snapshot[key] !== "number" || !Number.isSafeInteger(snapshot[key]) || (snapshot[key]) < 0)) {
     throw new InvalidStateError("Payment quote totals are invalid");
   }
 
@@ -497,7 +497,7 @@ export const paymentService = {
     }
 
     if (event.type === "account.updated") {
-      return { received: true, handled: (await connectService.handleAccountUpdated(event.data.object as Stripe.Account)).updated };
+      return { received: true, handled: (await connectService.handleAccountUpdated(event.data.object)).updated };
     }
 
     if (["payout.created", "payout.paid", "payout.failed", "payout.canceled", "payout.updated"].includes(event.type)) {
@@ -505,12 +505,12 @@ export const paymentService = {
     }
 
     if (event.type === "transfer.created" || event.type === "transfer.reversed") {
-      return { received: true, handled: (await connectService.handleTransferEvent(event.type, event.data.object as Stripe.Transfer)).updated };
+      return { received: true, handled: (await connectService.handleTransferEvent(event.type, event.data.object)).updated };
     }
 
     if (event.type === "refund.created" || event.type === "refund.updated") {
-      const handled = await runSerializable((tx) => reconcileRefundWebhook(tx, event, event.data.object as Stripe.Refund));
-      const stripeRefund = event.data.object as Stripe.Refund;
+      const handled = await runSerializable((tx) => reconcileRefundWebhook(tx, event, event.data.object));
+      const stripeRefund = event.data.object;
       const reconciledRefund = typeof prisma.refund?.findUnique === "function"
         ? await prisma.refund.findUnique({ where: { stripeRefundId: stripeRefund.id }, select: { id: true, orderId: true, status: true, amount: true } })
         : null;

@@ -178,7 +178,7 @@ export const productService = {
     const categoryFilter = categories?.length
       ? { category: { in: categories as ProductCategory[] } }
       : category
-        ? { category: category as ProductCategory }
+        ? { category: category }
         : {};
     const parsedPriceRanges = priceRanges?.map((range) => {
       const [minimum, maximum] = range.split("-");

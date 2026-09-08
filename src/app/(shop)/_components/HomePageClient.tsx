@@ -51,8 +51,6 @@ function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide:
   }, [isPaused, next, prefersReducedMotion]);
 
   const slide = slides[idx] ?? slides[0];
-  if (!slide) {return null;}
-
   return (
     <div
       className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-0 rounded-2xl overflow-hidden bg-[#f8f8f6] min-h-[320px] sm:min-h-[360px]"

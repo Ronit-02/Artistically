@@ -26,7 +26,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const artist = await prisma.artist.findUnique({ where: { userId: auth.userId } });
   if (!artist) {return forbidden("You must be an artist to list products");}
 
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(CreateProductSchema, body);
   const product = await productService.create(artist.id, input);
   return created(product);

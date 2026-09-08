@@ -11,7 +11,7 @@ import { useArtistSettlements, useCreateArtistPayout, usePublishDigitalDelivery,
 import { useSellerReviews } from "@/hooks/useReviews";
 import { useArtist, useUpdateArtistProfile } from "@/hooks/useArtists";
 import { useUpdateProfile } from "@/hooks/useProfile";
-import type { Artist, ArtworkDetails, Product } from "@/types";
+import type { Artist, Product } from "@/types";
 import type { AuthUserDto } from "@/types/api";
 import type { ProductMutationInput } from "@/lib/api/products";
 import { ApiClientError } from "@/lib/api/client";
@@ -137,7 +137,7 @@ function ArtworkForm({ product, onSaved, onCancel }: { product: Product | null; 
     discount: product?.discount ? String(product.discount) : "",
     badge: product?.badge ?? "",
     description: product?.description ?? "",
-    artworkType: (product?.artworkDetails?.artworkType ?? "ORIGINAL") as ArtworkDetails["artworkType"],
+    artworkType: (product?.artworkDetails?.artworkType ?? "ORIGINAL"),
     medium: product?.artworkDetails?.medium ?? "",
     materials: product?.artworkDetails?.materials ?? "",
     width: product?.artworkDetails?.width !== null && product?.artworkDetails?.width !== undefined ? String(product.artworkDetails.width) : "",
@@ -150,7 +150,7 @@ function ArtworkForm({ product, onSaved, onCancel }: { product: Product | null; 
     editionNumber: product?.artworkDetails?.editionNumber !== null && product?.artworkDetails?.editionNumber !== undefined ? String(product.artworkDetails.editionNumber) : "",
     authenticity: product?.artworkDetails?.authenticity ?? "",
     provenance: product?.artworkDetails?.provenance ?? "",
-    fulfillmentMode: (product?.artworkDetails?.artworkType === "DIGITAL" ? "DIGITAL" : "PHYSICAL") as ArtworkDetails["fulfillmentMode"],
+    fulfillmentMode: (product?.artworkDetails?.artworkType === "DIGITAL" ? "DIGITAL" : "PHYSICAL"),
   });
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -172,7 +172,7 @@ function ArtworkForm({ product, onSaved, onCancel }: { product: Product | null; 
       ...(form.description.trim() ? { description: form.description.trim() } : {}),
       artworkDetails: {
         artworkType: form.artworkType,
-        fulfillmentMode: form.fulfillmentMode,
+        fulfillmentMode: form.fulfillmentMode === "DIGITAL" ? "DIGITAL" as const : "PHYSICAL" as const,
         dimensionUnit: "cm",
         ...(form.medium.trim() ? { medium: form.medium.trim() } : {}),
         ...(form.materials.trim() ? { materials: form.materials.trim() } : {}),
@@ -227,7 +227,7 @@ function ArtworkForm({ product, onSaved, onCancel }: { product: Product | null; 
           </div>
         </div>
         <label className="block text-xs font-medium text-gray-600">Artwork type<select value={form.artworkType} onChange={(event) => setForm((current) => { const artworkType = event.target.value as typeof current.artworkType; return { ...current, artworkType, fulfillmentMode: artworkType === "DIGITAL" ? "DIGITAL" : "PHYSICAL" }; })} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50"><option value="ORIGINAL">Original</option><option value="LIMITED_EDITION">Limited edition</option><option value="MADE_TO_ORDER">Made to order</option><option value="DIGITAL">Digital</option></select></label>
-        <label className="block text-xs font-medium text-gray-600">Fulfillment<select value={form.fulfillmentMode} onChange={(event) => setForm((current) => ({ ...current, fulfillmentMode: event.target.value as typeof current.fulfillmentMode }))} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50"><option value={form.artworkType === "DIGITAL" ? "DIGITAL" : "PHYSICAL"}>{form.artworkType === "DIGITAL" ? "Digital" : "Physical"}</option></select></label>
+        <label className="block text-xs font-medium text-gray-600">Fulfillment<select value={form.fulfillmentMode} onChange={(event) => setForm((current) => ({ ...current, fulfillmentMode: event.target.value }))} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50"><option value={form.artworkType === "DIGITAL" ? "DIGITAL" : "PHYSICAL"}>{form.artworkType === "DIGITAL" ? "Digital" : "Physical"}</option></select></label>
         {form.artworkType === "LIMITED_EDITION" && <>
           <label className="block text-xs font-medium text-gray-600">Edition size<input required type="number" min="1" step="1" value={form.editionSize} onChange={(event) => setForm((current) => ({ ...current, editionSize: event.target.value }))} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50" /></label>
           <label className="block text-xs font-medium text-gray-600">Edition number (optional)<input type="number" min="1" step="1" max={form.editionSize || undefined} value={form.editionNumber} onChange={(event) => setForm((current) => ({ ...current, editionNumber: event.target.value }))} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50" /></label>
@@ -467,16 +467,16 @@ export default function ArtistPortalPage() {
               <div className="bg-white border border-gray-100 rounded-xl px-5 py-8 text-center"><p className="text-sm text-gray-500">No settlement records yet.</p><p className="text-xs text-gray-500 mt-1">Seller allocations and Stripe payout events will appear here after a verified sale.</p></div>
             ) : (
               <div className="space-y-4">
-                {settlements.statement && <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   {[
                     ["Gross sales", settlements.statement.grossAmountMinor],
                     ["Platform fees", settlements.statement.platformFeeAmountMinor],
                     ["Refunds", settlements.statement.refundAmountMinor],
                     ["Outstanding", settlements.statement.outstandingAmountMinor],
                   ].map(([label, amount]) => <div key={label} className="bg-white border border-gray-100 rounded-xl px-4 py-3"><p className="text-xs text-gray-500">{label}</p><p className="text-sm font-medium text-gray-900 mt-1">₹{(Number(amount) / 100).toLocaleString("en-IN")}</p></div>)}
-                </div>}
-                {settlements.statement && <div className="bg-white border border-gray-100 rounded-xl px-5 py-4"><div className="flex flex-wrap items-end justify-between gap-4"><div><label htmlFor="artist-payout-amount" className="block text-sm font-medium text-gray-900">Request a payout</label><p className="text-xs text-gray-500 mt-1">Available balance: ₹{(settlements.statement.outstandingAmountMinor / 100).toLocaleString("en-IN")}</p></div><div className="flex flex-wrap items-end gap-2"><div><label htmlFor="artist-payout-amount" className="sr-only">Payout amount in rupees</label><input id="artist-payout-amount" inputMode="decimal" value={payoutAmount} onChange={(event) => setPayoutAmount(event.target.value)} placeholder="Amount in ₹" className="min-h-11 w-32 rounded-lg border border-gray-200 px-3 text-sm" /></div><Button size="sm" loading={payoutMutation.isPending} disabled={!Number.isFinite(Number(payoutAmount)) || Number(payoutAmount) <= 0 || Math.round(Number(payoutAmount) * 100) > settlements.statement.outstandingAmountMinor} onClick={() => payoutMutation.mutate({ amountMinor: Math.round(Number(payoutAmount) * 100), idempotencyKey: crypto.randomUUID() }, { onSuccess: () => setPayoutAmount("") })}>Request payout</Button></div></div>{payoutMutation.isError && <p role="alert" className="mt-3 text-sm text-red-600">Couldn’t request the payout. Check the amount and Connect account status, then try again.</p>}</div>}
-                {settlements.settlements?.map((settlement) => <div key={settlement.id} className="bg-white border border-gray-100 rounded-xl px-5 py-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-medium text-gray-900">Settlement {settlement.sellerOrderId}</p><p className="text-xs text-gray-500 mt-1">{settlement.transfer?.stripeTransferId ? `Transfer ${settlement.transfer.stripeTransferId}` : "Transfer pending"}</p></div><span className="text-xs font-medium rounded bg-gray-50 text-gray-600 px-2 py-1">{settlement.status}</span></div><div className="grid grid-cols-2 gap-3 mt-4 text-xs md:grid-cols-4"><div><p className="text-gray-500">Net due</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.netAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Transferred</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.transferredAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Refunds</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.refundAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Remaining</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.outstandingAmountMinor / 100).toLocaleString("en-IN")}</p></div></div></div>)}
+                </div>
+                <div className="bg-white border border-gray-100 rounded-xl px-5 py-4"><div className="flex flex-wrap items-end justify-between gap-4"><div><label htmlFor="artist-payout-amount" className="block text-sm font-medium text-gray-900">Request a payout</label><p className="text-xs text-gray-500 mt-1">Available balance: ₹{(settlements.statement.outstandingAmountMinor / 100).toLocaleString("en-IN")}</p></div><div className="flex flex-wrap items-end gap-2"><div><label htmlFor="artist-payout-amount" className="sr-only">Payout amount in rupees</label><input id="artist-payout-amount" inputMode="decimal" value={payoutAmount} onChange={(event) => setPayoutAmount(event.target.value)} placeholder="Amount in ₹" className="min-h-11 w-32 rounded-lg border border-gray-200 px-3 text-sm" /></div><Button size="sm" loading={payoutMutation.isPending} disabled={!Number.isFinite(Number(payoutAmount)) || Number(payoutAmount) <= 0 || Math.round(Number(payoutAmount) * 100) > settlements.statement.outstandingAmountMinor} onClick={() => payoutMutation.mutate({ amountMinor: Math.round(Number(payoutAmount) * 100), idempotencyKey: crypto.randomUUID() }, { onSuccess: () => setPayoutAmount("") })}>Request payout</Button></div></div>{payoutMutation.isError && <p role="alert" className="mt-3 text-sm text-red-600">Couldn’t request the payout. Check the amount and Connect account status, then try again.</p>}</div>
+                {settlements.settlements.map((settlement) => <div key={settlement.id} className="bg-white border border-gray-100 rounded-xl px-5 py-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-medium text-gray-900">Settlement {settlement.sellerOrderId}</p><p className="text-xs text-gray-500 mt-1">{settlement.transfer?.stripeTransferId ? `Transfer ${settlement.transfer.stripeTransferId}` : "Transfer pending"}</p></div><span className="text-xs font-medium rounded bg-gray-50 text-gray-600 px-2 py-1">{settlement.status}</span></div><div className="grid grid-cols-2 gap-3 mt-4 text-xs md:grid-cols-4"><div><p className="text-gray-500">Net due</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.netAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Transferred</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.transferredAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Refunds</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.refundAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Remaining</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.outstandingAmountMinor / 100).toLocaleString("en-IN")}</p></div></div></div>)}
                 {settlements.sellerOrders.slice(0, 3).map((settlement) => (
                   <div key={settlement.id} className="bg-white border border-gray-100 rounded-xl px-5 py-4">
                     <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-medium text-gray-900">Order {settlement.orderId}</p><p className="text-xs text-gray-500 mt-1">{new Date(settlement.createdAt).toLocaleDateString("en-IN")}</p></div><span className="text-xs font-medium rounded bg-gray-50 text-gray-600 px-2 py-1">{settlement.status}</span></div>
@@ -594,7 +594,7 @@ export default function ArtistPortalPage() {
                     </div>
                   </div>
                   <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, j) => (
+                    {Array.from({ length: 5 }).map((_, j) => (
                       <svg key={j} className={`w-3.5 h-3.5 ${j < r.rating ? "text-yellow-400" : "text-gray-200"}`} fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                       </svg>

@@ -38,7 +38,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const auth = await requireAuth(req);
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(AddToCartSchema, body);
 
   // Check product exists and has stock

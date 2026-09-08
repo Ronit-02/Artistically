@@ -56,7 +56,7 @@ function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
           <input id={searchId} ref={inputRef} type="text" placeholder="Search for products or artists…"
             value={local} onChange={e => { setLocal(e.target.value); setSelIdx(-1); }}
             onFocus={() => { setFocused(true); setRecent(getRecent()); }}
-            onBlur={(e) => { if (dropRef.current?.contains(e.relatedTarget as Node)) {return;} setTimeout(() => setFocused(false), 120); }}
+            onBlur={(e) => { if (dropRef.current?.contains(e.relatedTarget)) {return;} setTimeout(() => setFocused(false), 120); }}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") { e.preventDefault(); setSelIdx(i => (i + 1) % Math.max(results.length, 1)); }
               if (e.key === "ArrowUp") { e.preventDefault(); setSelIdx(i => (i - 1 + results.length) % Math.max(results.length, 1)); }

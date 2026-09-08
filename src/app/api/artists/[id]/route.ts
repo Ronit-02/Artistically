@@ -60,7 +60,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
   if (!artist) {return notFound("Artist not found");}
   if (artist.userId !== auth.userId) {return forbidden("You can only edit your own profile");}
 
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(UpdateArtistSchema, body);
 
   const updated = await prisma.artist.update({

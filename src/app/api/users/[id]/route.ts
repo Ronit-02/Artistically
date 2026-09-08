@@ -42,7 +42,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
 
   if (validId !== auth.userId) {return forbidden("You can only edit your own profile");}
 
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(UpdateUserSchema, body);
 
   const user = await prisma.user.update({

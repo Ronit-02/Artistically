@@ -8,6 +8,7 @@ import ProductCard from "@/components/product/ProductCard";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Button from "@/components/ui/Button";
 import type { SortOption } from "@/types";
+import type { ProductListParams } from "@/lib/api/products";
 import { buildSearchHref, parseSearchUrl, type SearchSortParam } from "@/lib/search-url";
 import { API_CATEGORY_BY_LABEL, ART_TYPES, PRICE_RANGES, PRICE_RANGE_MAP } from "@/lib/catalog-taxonomy";
 
@@ -52,7 +53,7 @@ function CheckGroup({
             <span className="text-[13px] text-gray-500 group-hover:text-accent-600 transition-colors">
               {typeof item === "number" ? (
                 <span className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
+                  {Array.from({ length: 5 }).map((_, i) => (
                     <svg key={i} className={`w-3 h-3 ${i < item ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"}`} viewBox="0 0 18 18"><path d={STAR_PATH}/></svg>
                   ))}
                   <span className="text-[12px] text-gray-500">& up</span>
@@ -166,7 +167,7 @@ function SearchResults({
         return `${minimum}-${maximum === Infinity ? "+" : maximum}`;
       }),
       minRatings: checkedRatings,
-      sortBy: sort as "price_asc" | "price_desc" | "newest" | "popular",
+      sortBy: sort as ProductListParams["sortBy"],
     };
   }, [checkedPrices, checkedRatings, checkedTypes, searchQuery, sortBy]);
   const { data: productPage, isLoading, isError, refetch } = useProductPage({
@@ -284,7 +285,7 @@ function SearchResults({
               <button type="button" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}
                 aria-label="Previous page"
                 className="min-w-11 min-h-11 rounded-lg border border-gray-200 flex items-center justify-center text-[13px] text-gray-500 disabled:opacity-30 cursor-pointer hover:bg-[#f5f5f5] bg-white transition-colors">‹</button>
-              {[...Array(totalPages)].map((_, i) => (
+              {Array.from({ length: totalPages }).map((_, i) => (
                 <button type="button" key={i} onClick={() => setCurrentPage(i + 1)}
                   aria-label={`Go to page ${i + 1}`}
                   aria-current={currentPage === i + 1 ? "page" : undefined}

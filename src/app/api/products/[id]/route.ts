@@ -25,7 +25,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: unknown) => 
   const artist = await prisma.artist.findUnique({ where: { userId: auth.userId } });
   if (!artist) {return forbidden("Artists only");}
 
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(UpdateProductSchema, body);
   const product = await productService.update(validId, artist.id, input);
   if (!product) {return notFound("Product not found or not yours");}

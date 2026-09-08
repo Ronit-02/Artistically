@@ -9,7 +9,7 @@ import { created, conflict, withErrorHandler } from "@/lib/api-response";
 import { enforceRateLimit, opaqueRateLimitKey } from "@/lib/rate-limit";
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
-  const body = await req.json();
+  const body: unknown = await req.json();
   const input = validate(RegisterSchema, body);
   await enforceRateLimit(opaqueRateLimitKey("register", input.email), { max: 3, windowMs: 60 * 60_000 });
 

@@ -27,7 +27,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const auth = await requireAuth(req);
-  const body = await req.json();
+  const body: unknown = await req.json();
   const validProductId = validate(ProductIdSchema, body).productId;
   const input = validate(CreateReviewSchema, body);
 
