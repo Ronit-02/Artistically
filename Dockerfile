@@ -5,6 +5,11 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci
 COPY . .
+# The application validates server configuration while Next.js collects pages.
+# This placeholder is used only during image build; Render injects the real
+# JWT_SECRET into the runtime container.
+ARG BUILD_JWT_SECRET=artistically-build-only-placeholder-rotate-not-a-runtime-secret
+ENV JWT_SECRET=${BUILD_JWT_SECRET}
 RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
