@@ -1,11 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiRequest, ApiClientError } from "@/lib/api/client";
 
 export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailFallback />}>
+      <VerifyEmailContent />
+    </Suspense>
+  );
+}
+
+function VerifyEmailFallback() {
+  return <main aria-busy="true" className="mx-auto flex min-h-[70vh] w-full max-w-md items-center px-4 py-12" />;
+}
+
+function VerifyEmailContent() {
   const token = useSearchParams().get("token");
   const [message, setMessage] = useState("Verifying your email address…");
   const [failed, setFailed] = useState(false);

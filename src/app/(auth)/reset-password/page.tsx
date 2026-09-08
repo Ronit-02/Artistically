@@ -2,12 +2,24 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import type { FormEvent} from "react";
-import { useState } from "react";
+import type { FormEvent } from "react";
+import { Suspense, useState } from "react";
 import { apiRequest, ApiClientError } from "@/lib/api/client";
 import Button from "@/components/ui/Button";
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<ResetPasswordFallback />}>
+      <ResetPasswordContent />
+    </Suspense>
+  );
+}
+
+function ResetPasswordFallback() {
+  return <main aria-busy="true" className="mx-auto flex min-h-[70vh] w-full max-w-md items-center px-4 py-12" />;
+}
+
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [email, setEmail] = useState("");

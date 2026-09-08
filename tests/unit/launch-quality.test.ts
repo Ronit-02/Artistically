@@ -49,9 +49,9 @@ describe("launch quality guardrails", () => {
     const analyticsReview = readFileSync(join(projectRoot, "docs", "launch", "analytics-privacy-review.md"), "utf8");
     const performanceBudget = readFileSync(join(projectRoot, "docs", "launch", "performance-budgets.md"), "utf8");
 
-    expect(launchPack).toContain("Accessibility and mobile audit");
+    expect(launchPack).toContain("Accessibility and mobile quality");
     expect(launchPack).toContain("Monitoring and alerts");
-    expect(analyticsReview).toContain("analytics status is **disabled**");
+    expect(analyticsReview).toContain("Analytics remains disabled");
     expect(performanceBudget).toContain("LCP");
     expect(performanceBudget).toContain("INP");
     expect(performanceBudget).toContain("CLS");
