@@ -12,6 +12,6 @@
 
 This tracked file intentionally contains only the publication-safe tracking policy and status vocabulary.
 
-Detailed milestone state, verification evidence, unresolved release gates, and operational readiness are maintained in `sensitive context/progress-tracker.local.md` when that local file is present, as well as in the approved project tracker. Local files are not loaded automatically and must be read explicitly. Do not infer production readiness from repository documentation alone.
+Detailed milestone state, verification evidence, unresolved release gates, and operational readiness are maintained in the local progress companion when present, as well as in the approved project tracker. Local files are not loaded automatically and must be read explicitly. Do not infer production readiness from repository documentation alone.
 
 When updating public progress documentation, include only non-sensitive product outcomes that have been independently approved for publication.

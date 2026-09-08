@@ -135,6 +135,17 @@ export default function HomePageClient() {
   ];
   const catalogPending = productsQuery.isPending || artistsQuery.isPending || storiesQuery.isPending || collectionsQuery.isPending;
   const catalogError = productsQuery.isError || artistsQuery.isError || storiesQuery.isError || collectionsQuery.isError;
+  const isCatalogUnavailable = productsQuery.isError && artistsQuery.isError && storiesQuery.isError && collectionsQuery.isError;
+
+  useEffect(() => {
+    if (isCatalogUnavailable) {
+      router.replace("/unavailable");
+    }
+  }, [isCatalogUnavailable, router]);
+
+  if (isCatalogUnavailable) {
+    return null;
+  }
 
   return (
     <div className="max-w-[1240px] mx-auto px-6 sm:px-10">

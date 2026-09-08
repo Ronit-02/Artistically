@@ -93,4 +93,4 @@ Social feeds, buyer-artist messaging, auctions, and optional room-preview capabi
 
 When measurement is approved through the privacy process, product decisions should consider artist-onboarding completion, time to first published listing and sale, listing-to-cart and checkout conversion, payment success, on-time delivery, refund and dispute rates, repeat buyer and seller activity, and eligible-review participation.
 
-Internal workflows, security posture, service providers, confidential architecture, deployment assumptions, and operational readiness belong in the relevant ignored files under `sensitive context/` when present.
+Internal workflows, security posture, service providers, confidential architecture, deployment assumptions, and operational readiness belong in the relevant ignored local files when present.

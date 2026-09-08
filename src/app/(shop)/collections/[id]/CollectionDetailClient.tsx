@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCollection } from "@/hooks/useCollections";
 import ProductCard from "@/components/product/ProductCard";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import NotFoundState from "@/components/ui/NotFoundState";
 import ReportForm from "@/components/forms/ReportForm";
 
 export default function CollectionDetailClient({ collectionId }: { collectionId: string }) {
@@ -11,7 +12,9 @@ export default function CollectionDetailClient({ collectionId }: { collectionId:
 
   if (isLoading) {return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 text-sm text-gray-500" role="status">Loading collection…</div>;}
   if (isError) {return <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-20 flex flex-col items-start gap-3 text-sm text-gray-500" role="alert"><p>Collection could not be loaded.</p><button type="button" onClick={() => refetch()} className="inline-flex min-h-11 items-center text-accent-600 underline">Try again</button></div>;}
-  if (!collection) {return <div className="text-center py-20 text-gray-500">Collection not found.</div>;}
+  if (!collection) {
+    return <NotFoundState title="Collection not found" description="This collection may have been removed, unpublished, or the link may be incorrect." />;
+  }
 
   const products = collection.products;
 

@@ -7,6 +7,7 @@ import { useArtist, useArtistProducts, useArtistFollow } from "@/hooks/useArtist
 import ProductCard from "@/components/product/ProductCard";
 import Button from "@/components/ui/Button";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import NotFoundState from "@/components/ui/NotFoundState";
 
 export default function ArtistPageClient({ artistId }: { artistId: string }) {
   const router = useRouter();
@@ -28,7 +29,9 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
       </div>
     );
   }
-  if (!artist) {return <div className="text-center py-20 text-gray-500">Artist not found.</div>;}
+  if (!artist) {
+    return <NotFoundState title="Artist profile not found" description="This artist profile may no longer be published, or the link may be incorrect." />;
+  }
 
   const isOwnProfile = currentUser?.artist?.id === artist.id;
 

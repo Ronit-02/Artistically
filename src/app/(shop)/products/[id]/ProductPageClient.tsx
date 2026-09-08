@@ -15,6 +15,7 @@ import RatingStars from "@/components/ui/RatingStars";
 import Button from "@/components/ui/Button";
 import ProductCard from "@/components/product/ProductCard";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import NotFoundState from "@/components/ui/NotFoundState";
 import ReportForm from "@/components/forms/ReportForm";
 import { sortReviews, type ReviewSort } from "@/lib/review-sort";
 import type { ArtworkDetails } from "@/types";
@@ -100,7 +101,9 @@ export default function ProductPageClient({ productId }: { productId: string }) 
       </button>
     </div>
   );}
-  if (!product) {return <div className="text-center py-20 text-gray-500">Product not found.</div>;}
+  if (!product) {
+    return <NotFoundState title="Artwork not found" description="This artwork may have been removed, unpublished, or the link may be incorrect." />;
+  }
 
   const wishlisted = wishlist.some((item) => item.id === product.id);
   const carouselImages = product.images?.length ? product.images : [product.image];

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useStory, useStories } from "@/hooks/useStories";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Button from "@/components/ui/Button";
+import NotFoundState from "@/components/ui/NotFoundState";
 
 export default function StoryPageClient({ storyId }: { storyId: string }) {
   const { data: story, isLoading, isError, refetch } = useStory(storyId);
@@ -19,7 +20,9 @@ export default function StoryPageClient({ storyId }: { storyId: string }) {
       </div>
     );
   }
-  if (!story) {return <div className="text-center py-20 text-gray-500">Story not found.</div>;}
+  if (!story) {
+    return <NotFoundState title="Story not found" description="This story may no longer be published, or the link may be incorrect." />;
+  }
 
   const otherStories = (allStories ?? []).filter((s) => s.id !== story.id);
 

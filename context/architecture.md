@@ -123,7 +123,7 @@ Authoritative totals must not use JavaScript floating-point arithmetic.
 ## Documentation boundaries
 
 - This file contains the architecture required for ordinary application development.
-- Sensitive provider, security, authorization, data-model, payment, media, observability, and operational details live in `sensitive context/architecture.local.md` when that local file is present.
+- Provider, security, authorization, data-model, payment, media, observability, and operational details are maintained in the local architecture companion when present.
 - Delivery state and incomplete work belong in `progress-tracker.md` rather than architecture documentation.
 - Library-specific rules belong in `library-docs.md`; coding and folder conventions belong in `code-standards.md`.
 - The repository itself is the source of truth for the current folder structure.

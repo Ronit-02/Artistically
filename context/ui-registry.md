@@ -48,6 +48,7 @@ Each registered component documents the applicable default, hover, focus-visible
 | Primitive | `AccordionItem` | `src/components/ui/AccordionItem.tsx` | Native disclosure button with explicit expanded/control relationship, labelled region, and reduced-motion-safe icon transition. |
 | Primitive | `Breadcrumb` | `src/components/ui/Breadcrumb.tsx` | Labelled navigation with ordered-list semantics, current-page state, links, and optional action items. |
 | Primitive | `Logo` | `src/components/ui/Logo.tsx` | Accessible home link; decorative SVG remains hidden from assistive technology. |
+| Primitive | `NotFoundState` | `src/components/ui/NotFoundState.tsx` | Resource-specific 404 heading and explanation with browser-back and homepage actions. |
 | Primitive | `PageHeader` | `src/components/ui/PageHeader.tsx` | Page title, optional subtitle, breadcrumbs, and optional action slot. |
 | Primitive | `RatingStars` | `src/components/ui/RatingStars.tsx` | Accessible static rating output and labelled interactive controls when a callback is supplied. |
 | Primitive | `SectionHeader` | `src/components/ui/SectionHeader.tsx` | Section title with semantic link or button action and touch-accessible controls. |

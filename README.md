@@ -37,7 +37,7 @@ Artistically brings those pieces together. Artwork stays at the center of the ex
 
 The repository contains a full-stack marketplace foundation with a Next.js application, REST route handlers, and PostgreSQL persistence through Prisma. Core catalog, account, artist, checkout, fulfillment, moderation, and administration workflows are implemented.
 
-The tracked status summary is in [`context/progress-tracker.md`](./context/progress-tracker.md). Detailed deployment, service, security, and readiness context intentionally remains in the ignored `sensitive context/` directory.
+The tracked status summary is in [`context/progress-tracker.md`](./context/progress-tracker.md).
 
 ## Run locally
 
@@ -73,7 +73,7 @@ The root README is intentionally product-focused. Detailed technical material li
 - [`ui-tokens.md`](./context/ui-tokens.md), [`ui-rules.md`](./context/ui-rules.md), and [`ui-registry.md`](./context/ui-registry.md) document the design system.
 - [`progress-tracker.md`](./context/progress-tracker.md) records the tracked milestone summary.
 
-The `context/` folder is safe and useful to commit because it contains non-sensitive project documentation. Detailed security, provider, configuration, operations, and release-readiness context belongs in the ignored `sensitive context/` directory. Local sensitive context is not loaded automatically; consult the relevant companion explicitly when it is needed. Never commit `.env.local` or any real secret.
+The `context/` folder is safe and useful to commit because it contains non-sensitive project documentation. Detailed security, provider, configuration, operations, and release-readiness information is kept locally and must be consulted explicitly when needed. Never commit `.env.local` or any real secret.
 
 ## Quality checks
 

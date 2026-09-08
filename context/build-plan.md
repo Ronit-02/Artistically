@@ -179,4 +179,4 @@ Release with measurable marketplace quality and sustainable operational capacity
 
 Later phases may be designed earlier, but they must not bypass the foundations on which they depend.
 
-Sensitive implementation constraints, provider-specific gates, security test requirements, deployment assumptions, and release-readiness dependencies are maintained in `sensitive context/build-plan.local.md` when that local file is present.
+Implementation constraints, provider-specific gates, security test requirements, deployment assumptions, and release-readiness dependencies are maintained in the local build-plan companion when present.

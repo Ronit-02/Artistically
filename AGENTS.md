@@ -21,11 +21,11 @@ Before analyzing, planning, editing, generating code, or running development act
 4. If a local `sensitive context/` directory exists, read every file in it completely and treat it as confidential project baseline material. The directory is intentionally ignored and may be absent from a clean checkout.
 
 Reading only selected context files, reading summaries instead of the complete files, or relying on prior-session memory does not satisfy this requirement.
-Local sensitive-context files are not loaded automatically; agents must explicitly read them when they are present and accessible.
+Local companion files are not loaded automatically; agents must explicitly read them when they are present and accessible.
 
 ## Context Governance
 
-Before creating or updating any project-context documentation, review the existing tracked `context/` files and any available local `sensitive context/` files completely. Decide whether the information is necessary, whether it is sensitive, and which file owns the topic before writing it.
+Before creating or updating any project-context documentation, review the existing tracked `context/` files and any available local companion files completely. Decide whether the information is necessary, whether it is sensitive, and which file owns the topic before writing it.
 
 ### Tracked context
 
@@ -39,9 +39,9 @@ Add information to the tracked `context/` directory only when it is all of the f
 
 Tracked context must contain necessary non-sensitive knowledge. Do not remove useful architecture, product, design, engineering, or tracking information merely because it is technical.
 
-### Sensitive context
+### Confidential material
 
-Place necessary sensitive project knowledge in the matching ignored file under `sensitive context/`, using a `.local.md` suffix. Sensitive context includes, when necessary for development:
+Place necessary confidential project knowledge in the matching ignored local file, using a `.local.md` suffix. This includes, when necessary for development:
 
 - Prior vulnerabilities, security findings, remediation decisions, and security-hardening constraints.
 - Authentication, authorization, session, token, rate-limit, validation, sanitization, and protected-media implementation details.
@@ -49,7 +49,7 @@ Place necessary sensitive project knowledge in the matching ignored file under `
 - Deployment assumptions, operational procedures, monitoring details, incident handling, and production-readiness gaps or unverified checks.
 - Confidential architecture, data-model, payment, fulfillment, moderation, audit, privacy, or integration details.
 
-Sensitive context files must not contain live credentials, secret values, tokens, passwords, private keys, or connection strings. Store those only in approved secret-management systems or ignored environment files.
+Local confidential files must not contain live credentials, secret values, tokens, passwords, private keys, or connection strings. Store those only in approved secret-management systems or ignored environment files.
 
 When a tracked context file needs to acknowledge omitted sensitive material, include only a short pointer to the matching local file; do not duplicate the sensitive detail in tracked documentation.
 
@@ -64,7 +64,7 @@ When a tracked context file needs to acknowledge omitted sensitive material, inc
 - `ui-rules.md`: interface behavior, accessibility, responsiveness, and content rules.
 - `ui-registry.md`: reusable component inventory, ownership, and contracts.
 - `progress-tracker.md`: current verified milestone and capability status, not a chronological work diary.
-- `sensitive context/*.local.md`: necessary confidential counterparts organized by the same topic boundaries.
+- Local `.local.md` files: necessary confidential counterparts organized by the same topic boundaries.
 
 If necessary information does not belong in the file being edited, move or add it to the correct context file instead of leaving it out of place. Preserve its meaning, avoid duplication, and update cross-references when useful.
 

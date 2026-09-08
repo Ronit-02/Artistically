@@ -2,7 +2,7 @@
 
 ## Purpose
 
-These standards define the general, non-sensitive engineering practices used across Artistically. Security-sensitive implementation constraints and operational details belong in the ignored companion file `sensitive context/code-standards.local.md`.
+These standards define the general, non-sensitive engineering practices used across Artistically. Security-sensitive implementation constraints and operational details belong in the ignored local companion file.
 
 ## Engineering Mindset
 
@@ -148,7 +148,7 @@ Route handlers should not contain long persistence queries, duplicate multi-step
 - Document complex state transitions and externally visible contracts.
 - Record architectural decisions in the context file that owns the topic.
 - Update `context/progress-tracker.md` only when verified project progress changes.
-- Keep sensitive implementation and operational knowledge in the corresponding ignored file under `sensitive context/`.
+- Keep sensitive implementation and operational knowledge in the corresponding ignored local file.
 
 ## Linting
 

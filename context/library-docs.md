@@ -11,7 +11,7 @@
 - Environment variables are validated centrally and documented in `.env.example` without secrets.
 - Vendor errors are translated into stable project errors at the integration boundary.
 
-Provider-specific security, callback, storage, messaging, analytics, and shipping implementation requirements are maintained in `sensitive context/library-docs.local.md` when that local file is present.
+Provider-specific security, callback, storage, messaging, analytics, and shipping implementation requirements are maintained in the local library companion when present.
 
 ## Next.js
 
