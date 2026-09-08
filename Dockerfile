@@ -10,6 +10,8 @@ COPY . .
 # JWT_SECRET into the runtime container.
 ARG BUILD_JWT_SECRET=artistically-build-only-placeholder-rotate-not-a-runtime-secret
 ENV JWT_SECRET=${BUILD_JWT_SECRET}
+ARG BUILD_DATABASE_URL=postgresql://build:build@localhost:5432/build?schema=public
+ENV DATABASE_URL=${BUILD_DATABASE_URL}
 RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
