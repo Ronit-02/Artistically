@@ -73,6 +73,29 @@ describe("authentication routes", () => {
     }));
   });
 
+  it("does not permit password sign-in for a Google-only account", async () => {
+    mocks.userFindUnique.mockResolvedValue({
+      id: "user-3",
+      email: "google@example.com",
+      password: null,
+      firstName: "Google",
+      lastName: "User",
+      role: "USER",
+      avatar: null,
+    });
+
+    const response = await login(
+      new NextRequest("https://artistically.example/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email: "google@example.com", password: "password123" }),
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    expect(response.status).toBe(401);
+    expect(mocks.compare).not.toHaveBeenCalled();
+  });
+
   it("sets the session cookie without returning the signed token on registration", async () => {
     mocks.userFindUnique.mockResolvedValue(null);
     mocks.userCreate.mockResolvedValue({

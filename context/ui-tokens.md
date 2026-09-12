@@ -53,6 +53,10 @@ Tokens are semantic. Components consume meanings such as `surface`, `text-muted`
 
 Status meaning must not depend on color alone. Pair it with text and, where useful, an icon.
 
+### Dark theme
+
+Dark mode preserves the same semantic token roles and uses warm charcoal surfaces so artwork remains the primary source of color. The canvas is `#121518`; primary, raised, and muted surfaces are `#171B20`, `#1C2228`, and `#252C33`; borders are `#2C343C` through `#56616C`; heading and body text are `#F4F1EA` and `#C8CDD2`; and interaction uses the accessible blue `#78A9FF`. Do not use pure black as a page canvas or invert artwork assets. The light/dark control persists the collector’s selection and otherwise follows the operating-system preference.
+
 ## Typography
 
 ### Font families

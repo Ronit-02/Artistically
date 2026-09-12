@@ -5,6 +5,8 @@ const ServerEnvSchema = z
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     DATABASE_URL: z.string().url("DATABASE_URL must be a valid URL").optional(),
     JWT_SECRET: z.string().min(32, "JWT_SECRET must contain at least 32 characters"),
+    GOOGLE_CLIENT_ID: z.preprocess((value) => value || undefined, z.string().min(1).optional()),
+    GOOGLE_CLIENT_SECRET: z.preprocess((value) => value || undefined, z.string().min(1).optional()),
     NEXT_PUBLIC_APP_URL: z
       .string()
       .url("NEXT_PUBLIC_APP_URL must be a valid URL")
@@ -25,6 +27,14 @@ const ServerEnvSchema = z
     MEDIA_LOCAL_DIR: z.string().min(1).default(".media"),
   })
   .superRefine((environment, context) => {
+    if (Boolean(environment.GOOGLE_CLIENT_ID) !== Boolean(environment.GOOGLE_CLIENT_SECRET)) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["GOOGLE_CLIENT_ID"],
+        message: "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be configured together",
+      });
+    }
+
     if (environment.NODE_ENV !== "production") {return;}
 
     if (!environment.DATABASE_URL) {

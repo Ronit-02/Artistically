@@ -54,6 +54,7 @@ Each registered component documents the applicable default, hover, focus-visible
 | Primitive | `SectionHeader` | `src/components/ui/SectionHeader.tsx` | Section title with semantic link or button action and touch-accessible controls. |
 | Primitive | `SpecRow` | `src/components/ui/SpecRow.tsx` | Label-and-value factual detail row sourced from maintained product data. |
 | Primitive | `Skeleton` | `src/components/ui/Skeleton.tsx` | Decorative, token-aligned placeholder surface. Consumers provide the labelled loading container; the primitive remains hidden from assistive technology. |
+| Primitive | `ThemeToggle` | `src/components/ui/ThemeToggle.tsx` | Persisted light/dark preference control in the public application-settings submenu, with an accessible action label; it honors the operating-system preference until the collector selects a theme. |
 | Shared composite | `Navbar` and `Footer` | `src/components/layout/` | Labelled marketplace navigation, real destinations, and responsive action controls. |
 | Shared composite | `NotificationBell` and `SaleBanner` | `src/components/layout/` | Notification entry point and optional truthful, dismissible announcement. |
 | Shared composite | `ProductCard` and `CartItem` | `src/components/product/` | Artwork summary, cart-line presentation, semantic navigation, and accessible mutation controls. |

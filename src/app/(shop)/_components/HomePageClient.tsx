@@ -343,7 +343,7 @@ export default function HomePageClient() {
               <div className="pt-4">
                 <div className="mb-2 flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.08em] text-gray-500">
                   <span className="text-accent-600">{s.category ?? "Journal"}</span>
-                  <span aria-hidden="true" className="text-gray-300">/</span>
+                  <span aria-hidden="true" className="text-gray-500 opacity-50">/</span>
                   <time dateTime={s.date}>{new Date(s.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</time>
                 </div>
                 <h3 className="font-heading text-[20px] font-semibold leading-[1.3] tracking-tight-heading text-[#111] line-clamp-3">{formatEditorialTitle(s.title)}</h3>

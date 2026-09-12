@@ -19,7 +19,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   if (!user) {return unauthorized("Invalid email or password");}
 
-  const valid = await bcrypt.compare(input.password, user.password);
+  const valid = user.password ? await bcrypt.compare(input.password, user.password) : false;
   if (!valid) {return unauthorized("Invalid email or password");}
 
   const safeUser = {

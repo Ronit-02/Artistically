@@ -57,8 +57,8 @@ export default function Logo({
       >
         <path
           d={LOGO_PATH}
-          fill="#000000"
-          stroke="#000000"
+          fill="currentColor"
+          stroke="currentColor"
           strokeWidth="5"
           strokeLinecap="round"
           strokeLinejoin="round"

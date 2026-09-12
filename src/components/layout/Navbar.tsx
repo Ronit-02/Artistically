@@ -18,6 +18,7 @@ import { CATEGORY_LABELS, toSearchTypeLabel } from "@/lib/catalog-taxonomy";
 import { isArtistRole } from "@/lib/route-access";
 import NotificationBell from "@/components/layout/NotificationBell";
 import Logo from "@/components/ui/Logo";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import type { Artist, Product, SearchResult } from "@/types";
 
 const RECENT_KEY = "artistically_recent";
@@ -105,10 +106,11 @@ function NavbarContent() {
   const canAccessArtistPortal = isArtistRole(currentUser?.role ?? "");
   const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileSearch, setMobileSearch] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { const h = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) {setMenuOpen(false);} }; document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h); }, []);
+  useEffect(() => { const h = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) {setMenuOpen(false); setSettingsOpen(false);} }; document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h); }, []);
 
   const doSearch = useCallback((q: string) => { setSearchQuery(q); router.push(buildSearchHref(q)); }, [router, setSearchQuery]);
   const catClick = (cat: string) => { setSearchQuery(""); router.push(buildSearchHref("", { types: [toSearchTypeLabel(cat)] })); };
@@ -131,24 +133,40 @@ function NavbarContent() {
         <div className="flex items-center gap-0.5 flex-shrink-0 ml-auto sm:ml-0">
           {/* Profile */}
           <div className="relative" ref={menuRef}>
-            <button type="button" onClick={() => { if (!hasSession) {router.push("/login");} else {setMenuOpen(!menuOpen);} }}
-              aria-label={hasSession ? "Open account menu" : "Sign in"}
-              aria-expanded={hasSession ? menuOpen : undefined}
-              aria-haspopup={hasSession ? "menu" : undefined}
+            <button type="button" onClick={() => { setMenuOpen(!menuOpen); setSettingsOpen(false); }}
+              aria-label="Open account menu"
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
               className="p-3 rounded-lg text-gray-500 hover:text-accent-600 bg-transparent border-none cursor-pointer transition-colors">
               <svg aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1-.5-3c0-2.21 3.58-4 7-4s7 1.79 7 4a8.38 8.38 0 0 1-.5 3"/></svg>
             </button>
-            {hasSession && menuOpen && (
+            {menuOpen && (
               <div className="animate-scale-in absolute right-0 top-full mt-1.5 w-52 bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-50">
-                {[{ label: "Profile", href: "/profile" }, { label: "Orders", href: "/profile?tab=orders" }, { label: "Wishlist", href: "/wishlist" }].map(item => (
+                {(hasSession
+                  ? [{ label: "Profile", href: "/profile" }, { label: "Orders", href: "/profile?tab=orders" }, { label: "Wishlist", href: "/wishlist" }]
+                  : []
+                ).map(item => (
                   <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center px-4 py-2 text-[13px] text-gray-500 hover:bg-accent-50 hover:text-accent-600 transition-colors">{item.label}</Link>
                 ))}
-                <div className="my-1 mx-3 border-t border-gray-100"/>
-                {canAccessArtistPortal && <>
+                <div className="relative">
+                  <button type="button" onClick={() => setSettingsOpen(!settingsOpen)} aria-expanded={settingsOpen} aria-controls="application-settings-menu" className="flex min-h-11 w-full items-center justify-between px-4 py-2 text-left text-[13px] text-gray-500 hover:bg-accent-50 hover:text-accent-600 transition-colors bg-transparent border-none cursor-pointer">
+                    Settings
+                    <span aria-hidden="true">‹</span>
+                  </button>
+                  {settingsOpen && <section id="application-settings-menu" aria-label="Application settings" className="animate-scale-in absolute right-full top-0 z-50 mr-2 w-64 rounded-xl border border-gray-100 bg-white p-3 shadow-xl">
+                    <div className="flex items-center justify-between gap-3 rounded-lg px-2 py-2">
+                      <div><p className="text-[13px] font-medium text-gray-900">Appearance</p><p className="text-[12px] text-gray-500">Light or dark mode</p></div>
+                      <ThemeToggle />
+                    </div>
+                  </section>}
+                </div>
+                {!hasSession && <Link href="/login" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center px-4 py-2 text-[13px] text-gray-500 hover:bg-accent-50 hover:text-accent-600 transition-colors">Sign in</Link>}
+                {hasSession && <div className="my-1 mx-3 border-t border-gray-100"/>}
+                {hasSession && canAccessArtistPortal && <>
                   <Link href="/artist-portal" onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center px-4 py-2 text-[13px] text-accent-600 font-medium hover:bg-accent-50 transition-colors">Artist Portal</Link>
                   <div className="my-1 mx-3 border-t border-gray-100"/>
                 </>}
-                <button type="button" onClick={async () => { await logoutApi(); logout(); clearIdentityQueries(queryClient); setMenuOpen(false); router.push("/"); }} className="w-full min-h-11 text-left px-4 py-2 text-[13px] text-gray-500 hover:text-red-500 bg-transparent border-none cursor-pointer transition-colors">Logout</button>
+                {hasSession && <button type="button" onClick={async () => { await logoutApi(); logout(); clearIdentityQueries(queryClient); setMenuOpen(false); router.push("/"); }} className="w-full min-h-11 text-left px-4 py-2 text-[13px] text-gray-500 hover:text-red-500 bg-transparent border-none cursor-pointer transition-colors">Logout</button>}
               </div>
             )}
           </div>

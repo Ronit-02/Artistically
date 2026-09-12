@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAppStore } from "@/store/useAppStore";
 import { login as loginApi, register as registerApi } from "@/lib/api/auth";
@@ -16,6 +16,7 @@ import type { UserRole } from "@/types";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { setAuthUser } = useAppStore();
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -23,7 +24,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("collector");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => {
+    const googleError = searchParams.get("error");
+    if (googleError === "google-unavailable") { return "Google sign-in is not configured yet."; }
+    return googleError === "google" ? "Google sign-in could not be completed. Please try again." : "";
+  });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
 
   const handleSubmit = async () => {
@@ -166,6 +171,23 @@ export default function LoginPage() {
           {mode === "login" ? "Sign In" : "Create Account"}
         </Button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true"><div className="w-full border-t border-gray-200" /></div>
+          <div className="relative flex justify-center"><span className="bg-white px-3 text-xs text-gray-500">or</span></div>
+        </div>
+        <a
+          href="/api/auth/google"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-accent-600 focus:ring-offset-2"
+        >
+          <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.05H12v3.88h5.24a4.48 4.48 0 0 1-1.94 2.94v2.52h3.15c1.84-1.7 2.9-4.2 2.9-7.29Z" />
+            <path fill="#34A853" d="M12 21.78c2.63 0 4.84-.87 6.45-2.22l-3.15-2.52c-.87.58-1.99.92-3.3.92-2.53 0-4.68-1.71-5.45-4.01H3.3v2.6A9.74 9.74 0 0 0 12 21.78Z" />
+            <path fill="#FBBC05" d="M6.55 13.95a5.87 5.87 0 0 1 0-3.9v-2.6H3.3a9.78 9.78 0 0 0 0 9.1l3.25-2.6Z" />
+            <path fill="#EA4335" d="M12 6.04c1.44 0 2.73.5 3.75 1.47l2.81-2.81C16.84 3.1 14.63 2.22 12 2.22a9.74 9.74 0 0 0-8.7 5.23l3.25 2.6C7.32 7.75 9.47 6.04 12 6.04Z" />
+          </svg>
+          Continue with Google
+        </a>
 
         <p className="text-center text-sm text-gray-500 mt-4">
           {mode === "login" ? "Don't have an account? " : "Already have an account? "}

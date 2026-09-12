@@ -7,3 +7,4 @@ export { default as Breadcrumb } from "./Breadcrumb";
 export { default as PageHeader } from "./PageHeader";
 export { default as Logo } from "./Logo";
 export { default as Skeleton } from "./Skeleton";
+export { default as ThemeToggle } from "./ThemeToggle";

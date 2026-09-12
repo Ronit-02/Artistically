@@ -237,7 +237,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
 
           <div className="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2">
             <Link href={artistId ? `/artists/${artistId}` : "/artists"} className="text-sm font-medium text-gray-700 underline-offset-4 hover:text-accent-600 hover:underline">By {product.artistName}</Link>
-            <span aria-hidden="true" className="text-gray-300">/</span>
+            <span aria-hidden="true" className="text-gray-500 opacity-50">/</span>
             <RatingStars rating={product.rating} reviews={product.reviews} size="md" onStarClick={() => reviewsRef.current?.scrollIntoView({ behavior: "smooth" })}/>
           </div>
 
