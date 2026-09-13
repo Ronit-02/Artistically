@@ -1,11 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Logo from "@/components/ui/Logo";
 
 export default function UnavailablePage() {
+  const router = useRouter();
+
   const handleRetry = () => {
-    window.location.assign("/");
+    router.replace("/");
   };
 
   return (

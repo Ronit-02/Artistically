@@ -1,38 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 const THEME_STORAGE_KEY = "artistically-theme";
+const THEME_CHANGE_EVENT = "artistically-theme-change";
 
 type Theme = "light" | "dark";
 
+function getSavedTheme(): Theme | null {
+  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return savedTheme === "light" || savedTheme === "dark" ? savedTheme : null;
+}
+
+function getThemeSnapshot(): Theme {
+  return getSavedTheme() ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+}
+
+function getServerThemeSnapshot(): Theme {
+  return "light";
+}
+
+function subscribeToTheme(onStoreChange: () => void) {
+  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  const handleThemeChange = () => {
+    const savedTheme = getSavedTheme();
+    if (savedTheme) {
+      document.documentElement.dataset.theme = savedTheme;
+    } else {
+      delete document.documentElement.dataset.theme;
+    }
+    onStoreChange();
+  };
+  const handleStorageChange = (event: StorageEvent) => {
+    if (event.key === THEME_STORAGE_KEY) {
+      handleThemeChange();
+    }
+  };
+
+  mediaQuery.addEventListener("change", handleThemeChange);
+  window.addEventListener("storage", handleStorageChange);
+  window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+
+  return () => {
+    mediaQuery.removeEventListener("change", handleThemeChange);
+    window.removeEventListener("storage", handleStorageChange);
+    window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange);
+  };
+}
+
+function setThemePreference(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+  window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+}
+
 export default function ThemeToggle({ className = "" }: { className?: string }) {
-  const [preference, setPreference] = useState<Theme | null>(null);
-  const [systemTheme, setSystemTheme] = useState<Theme>("light");
+  const activeTheme = useSyncExternalStore(subscribeToTheme, getThemeSnapshot, getServerThemeSnapshot);
 
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (savedTheme === "light" || savedTheme === "dark") {
-      setPreference(savedTheme);
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const updateSystemTheme = () => setSystemTheme(mediaQuery.matches ? "dark" : "light");
-    updateSystemTheme();
-    mediaQuery.addEventListener("change", updateSystemTheme);
-    return () => mediaQuery.removeEventListener("change", updateSystemTheme);
-  }, []);
-
-  useEffect(() => {
-    if (!preference) {
-      return;
-    }
-    document.documentElement.dataset.theme = preference;
-    window.localStorage.setItem(THEME_STORAGE_KEY, preference);
-  }, [preference]);
-
-  const activeTheme = preference ?? systemTheme;
   const nextTheme = activeTheme === "dark" ? "light" : "dark";
 
   return (
@@ -40,7 +64,7 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
       type="button"
       aria-label={`Switch to ${nextTheme} mode`}
       title={`Switch to ${nextTheme} mode`}
-      onClick={() => setPreference(nextTheme)}
+      onClick={() => setThemePreference(nextTheme)}
       className={`theme-toggle inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-transparent bg-transparent text-gray-500 transition-colors hover:bg-gray-50 hover:text-accent-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 ${className}`}
     >
       {activeTheme === "dark" ? (
