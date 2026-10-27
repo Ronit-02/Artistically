@@ -21,11 +21,6 @@ import Skeleton from "@/components/ui/Skeleton";
 import { sortReviews, type ReviewSort } from "@/lib/review-sort";
 import type { ArtworkDetails } from "@/types";
 
-const ROOM_IMAGES = [
-  "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&q=80",
-  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=300&q=80",
-];
-
 const ARTWORK_TYPE_LABELS: Record<ArtworkDetails["artworkType"], string> = {
   ORIGINAL: "Original",
   LIMITED_EDITION: "Limited edition",
@@ -84,6 +79,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
 
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [isRoomPreviewNoticeVisible, setIsRoomPreviewNoticeVisible] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [reviewSort, setReviewSort] = useState<ReviewSort>("recent");
   const [reviewRating, setReviewRating] = useState(0);
@@ -181,7 +177,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)] lg:gap-16 xl:gap-20 mb-16 sm:mb-20">
 
         {/* LEFT — Carousel */}
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gray-50">
             <button type="button" aria-label="Previous product image" onClick={() => setCarouselIndex((carouselIndex - 1 + carouselImages.length) % carouselImages.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white shadow flex items-center justify-center border border-gray-200 z-10 cursor-pointer hover:bg-gray-50">
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
@@ -190,7 +186,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
             <button type="button" aria-label="Next product image" onClick={() => setCarouselIndex((carouselIndex + 1) % carouselImages.length)} className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white shadow flex items-center justify-center border border-gray-200 z-10 cursor-pointer hover:bg-gray-50">
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+            <div className="absolute bottom-3 left-3 right-3 flex flex-wrap justify-center gap-1.5">
               {carouselImages.map((_, i) => (
                 <button type="button" key={i} aria-label={`Show product image ${i + 1}`} aria-pressed={i === carouselIndex} onClick={() => setCarouselIndex(i)} className="w-11 h-11 rounded-full transition-all border-none cursor-pointer flex items-center justify-center bg-transparent">
                   <span aria-hidden="true" className={`block h-2 rounded-full transition-all ${i === carouselIndex ? "bg-white w-5" : "bg-white/50 w-2"}`} />
@@ -198,33 +194,17 @@ export default function ProductPageClient({ productId }: { productId: string }) 
               ))}
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {carouselImages.map((img, i) => (
               <button type="button" key={i} aria-label={`Show product image ${i + 1}`} aria-pressed={i === carouselIndex} onClick={() => setCarouselIndex(i)} className={`w-14 h-14 rounded-lg overflow-hidden border-2 transition-all cursor-pointer flex-shrink-0 relative ${i === carouselIndex ? "border-gray-900" : "border-transparent"}`}>
                 <Image src={img} alt="" fill className="object-cover" sizes="56px"/>
               </button>
             ))}
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">Approximate room preview</p>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs text-gray-500">Room</span>
-              <select aria-label="Preview room" className="text-xs border border-gray-300 rounded px-2 py-1 outline-none bg-white cursor-pointer">
-                <option>Living Room</option><option>Bedroom</option><option>Office</option>
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {ROOM_IMAGES.map((img, i) => (
-                <div key={i} className="rounded-lg overflow-hidden aspect-video bg-gray-100 relative">
-                  <Image src={img} alt="Approximate room preview" fill className="object-cover" sizes="150px"/>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* RIGHT — Details */}
-        <div className="lg:max-w-[480px] lg:pt-3">
+        <div className="min-w-0 lg:max-w-[480px] lg:pt-3 [overflow-wrap:anywhere]">
           <div className="mb-4 flex items-start justify-between gap-3">
             <div>
               <button type="button" onClick={handleCategorySearch} className="text-[12px] font-medium uppercase tracking-[0.08em] text-accent-600 hover:text-accent-700 hover:underline transition-colors bg-transparent border-none cursor-pointer p-0">{product.category}</button>
@@ -271,7 +251,21 @@ export default function ProductPageClient({ productId }: { productId: string }) 
 
           <div className="flex gap-3">
             <Button variant="primary" fullWidth onClick={handleAdd} disabled={addToCart.isPending || isOutOfStock}>{isOutOfStock ? "UNAVAILABLE" : added ? "✓ ADDED TO CART" : addToCart.isPending ? "ADDING…" : "ADD TO CART"}</Button>
-            <Button variant="secondary" onClick={() => router.push("/cart")}>View Cart</Button>
+            <Button variant="secondary" className="w-11 shrink-0 px-0" aria-label="View cart" title="View cart" onClick={() => router.push("/cart")}>
+              <svg aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l2.4 12h11.2L21 6H5.6M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+              </svg>
+            </Button>
+          </div>
+          <div className="mt-3">
+            <Button variant="secondary" onClick={() => setIsRoomPreviewNoticeVisible(true)}>
+              View in your room
+            </Button>
+            {isRoomPreviewNoticeVisible && (
+              <p role="status" className="mt-3 text-sm text-gray-500">
+                Viewing in your room feature is coming soon.
+              </p>
+            )}
           </div>
 
         </div>
@@ -326,7 +320,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
           <h2 className="font-heading text-xl font-semibold text-[#111]">Other Artworks by Creator</h2>
         </div>
         {relatedLoading ? (
-          <div aria-busy="true" aria-label="Loading related artworks" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3">{[1, 2, 3].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div>
+          <div aria-busy="true" aria-label="Loading related artworks" className="grid grid-cols-2 max-[379px]:grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3">{[1, 2, 3].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div>
         ) : relatedError ? (
           <div className="flex flex-col items-start gap-2 text-sm text-gray-500" role="alert">
             <p>Related artworks could not be loaded.</p>
@@ -335,7 +329,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
         ) : related.length === 0 ? (
           <p className="text-sm text-gray-500">No other published artworks by this artist yet.</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
+          <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
             {related.map((p) => <ProductCard key={p.id} product={p}/>)}
           </div>
         )}
@@ -349,7 +343,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
             <RatingStars rating={reviewAverage} size="md"/>
             <span className="text-sm text-gray-500">{reviewCount} {reviewCount === 1 ? "Review" : "Reviews"}</span>
           </div>
-          <select aria-label="Sort product reviews" value={reviewSort} onChange={(event) => setReviewSort(event.target.value as ReviewSort)} className="text-sm border border-gray-300 rounded px-3 py-1.5 outline-none bg-white cursor-pointer">
+          <select aria-label="Sort product reviews" value={reviewSort} onChange={(event) => setReviewSort(event.target.value as ReviewSort)} className="min-h-11 text-sm border border-gray-300 rounded px-3 py-1.5 outline-none bg-white cursor-pointer">
             <option value="highest">Highest to Lowest</option>
             <option value="lowest">Lowest to Highest</option>
             <option value="recent">Most Recent</option>
@@ -364,7 +358,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
               <Button variant="secondary" onClick={() => router.push("/login")}>Sign in to review</Button>
             </div>
           ) : (
-            <form onSubmit={handleReviewSubmit} className="space-y-4" noValidate>
+            <form onSubmit={handleReviewSubmit} className="min-w-0 space-y-4" noValidate>
               <div>
                 <h3 className="font-heading text-base font-semibold text-[#111]">Share your experience</h3>
                 <p className="text-sm text-gray-500 mt-1">Reviews are available after a delivered purchase.</p>
@@ -418,7 +412,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
         </div>
         <div className="space-y-6">
           {reviewsLoading ? (
-            <div aria-busy="true" aria-label="Loading reviews" className="space-y-4">{[1, 2].map((item) => <div key={item} className="space-y-2 border-b border-gray-100 pb-4"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /></div>)}</div>
+            <div aria-busy="true" aria-label="Loading reviews" className="min-w-0 space-y-4">{[1, 2].map((item) => <div key={item} className="space-y-2 border-b border-gray-100 pb-4"><Skeleton className="h-4 w-1/3" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-4/5" /></div>)}</div>
           ) : reviewsError ? (
             <div className="flex flex-col items-start gap-2 text-sm text-gray-500" role="alert">
               <p>Reviews could not be loaded.</p>
@@ -432,7 +426,7 @@ export default function ProductPageClient({ productId }: { productId: string }) 
             <div key={r.id} className="border-b border-gray-100 pb-6">
               <RatingStars rating={r.rating}/>
               <p className="text-sm text-gray-700 mt-2 mb-2">{r.text}</p>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-[#111]">{r.author[0]}</div>
                 <span className="text-xs text-gray-500">{r.author}</span>
                 <span className="text-xs text-gray-500">{r.date}</span>

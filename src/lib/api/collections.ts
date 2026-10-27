@@ -11,6 +11,8 @@ function mapCollection(collection: CollectionDto): Collection {
     coverImage: collection.coverImage,
     artworkCount: collection.artworkCount,
     featured: collection.featured,
+    ownerArtist: collection.ownerArtist,
+    category: collection.category,
   };
 }
 

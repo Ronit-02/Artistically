@@ -72,6 +72,10 @@ Detailed payment, media, authorization, and callback flows are maintained in the
 
 ## Server and client state ownership
 
+### Noncommercial photography gallery
+
+The dedicated photography page uses maintained editorial image references, titles, captions, topics, and source dimensions. This content is separate from marketplace products and has no commerce fields or catalog seed records. Gallery filters and the image viewer use local display state; existing marketplace API and persistence boundaries remain unchanged.
+
 ### Remote server state
 
 Remote-state queries own persisted marketplace and account data, along with mutation status and cache invalidation.

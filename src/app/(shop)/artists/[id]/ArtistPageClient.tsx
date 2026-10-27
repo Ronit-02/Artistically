@@ -21,7 +21,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
   } = useArtistProducts(artistId);
   const { currentUser, isAuthPending, following, toggle } = useArtistFollow(artistId);
 
-  if (isLoading) {return <div aria-busy="true" aria-label="Loading artist profile" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10"><Skeleton className="mb-8 h-56 w-full rounded-2xl" /><div className="mb-10 flex items-center gap-4"><Skeleton className="h-24 w-24 rounded-full" /><div className="space-y-3"><Skeleton className="h-7 w-52" /><Skeleton className="h-4 w-80" /></div></div><div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div></div>;}
+  if (isLoading) {return <div aria-busy="true" aria-label="Loading artist profile" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10"><Skeleton className="mb-8 h-56 w-full rounded-2xl" /><div className="mb-10 flex min-w-0 flex-wrap items-center gap-4"><Skeleton className="h-24 w-24 rounded-full" /><div className="min-w-0 w-full max-w-80 space-y-3"><Skeleton className="h-7 w-3/4" /><Skeleton className="h-4 w-full" /></div></div><div className="grid grid-cols-2 max-[379px]:grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div></div>;}
   if (isError) {
     return (
       <div className="text-center py-20">
@@ -37,7 +37,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
   const isOwnProfile = currentUser?.artist?.id === artist.id;
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 sm:px-10 pb-12">
+    <div className="max-w-[1240px] mx-auto px-6 sm:px-10 pb-12 [overflow-wrap:anywhere]">
       <Breadcrumb items={[{ label: "Artists" }, { label: artist.name }]} className="py-4" />
 
       {/* Cover */}
@@ -63,7 +63,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
               )}
             </div>
             <p className="text-sm text-gray-500 mt-0.5">{artist.handle}</p>
-            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+            <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
               <span><strong className="text-[#111]">{artist.followers}</strong> followers</span>
               <span><strong className="text-[#111]">{artist.designs}</strong> designs</span>
             </div>
@@ -89,7 +89,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
       {/* Products */}
       <h2 className="font-heading text-xl sm:text-2xl font-semibold text-gray-900 mb-5 tracking-tight-heading">Artworks by {artist.name}</h2>
       {productsLoading ? (
-        <div aria-busy="true" aria-label="Loading artworks" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div>
+        <div aria-busy="true" aria-label="Loading artworks" className="grid grid-cols-2 max-[379px]:grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}</div>
       ) : productsError ? (
         <div className="py-8 text-center">
           <p className="text-sm text-gray-500 mb-4">We couldn’t load this artist’s artworks.</p>
@@ -98,7 +98,7 @@ export default function ArtistPageClient({ artistId }: { artistId: string }) {
       ) : artistProducts.length === 0 ? (
         <p className="py-8 text-center text-sm text-gray-500">This artist has no published artworks yet.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {artistProducts.map((p) => <ProductCard key={p.id} product={p}/>) }
         </div>
       )}

@@ -62,6 +62,14 @@ npm run dev
 
 Open [http://localhost:3001](http://localhost:3001). The seed command is blocked when `NODE_ENV=production`.
 
+### Demo catalog
+
+Photography is a separate, noncommercial inspiration gallery at `/photography`, linked beside Artists and Collections. Its 40 unique remote images, original titles, captions, topics, and source dimensions live in `src/data/photography.ts`. The gallery supports topic filters and a keyboard-accessible full-image viewer, with no product, pricing, cart, or purchase data. It does not add photography records to the marketplace seed.
+
+`npm run db:seed` maintains ten fictional app artists, seven paintings, 24 digital artworks, 24 sculptures, 24 woodwork entries, 38 ceramics, 31 glasswork entries, and 46 textile artworks using user-supplied HTTPS cover URLs. Titles, app artist assignments, prices, discounts, descriptions, and specifications are original fictional catalog examples defined in `prisma/url-content.ts`, `prisma/digital-content.ts`, `prisma/sculpture-content.ts`, `prisma/woodwork-content.ts`, `prisma/ceramic-content.ts`, `prisma/glass-content.ts`, and `prisma/textile-content.ts`. Artwork covers use remote URLs; the six Browse by Category covers remain local in `public/category-covers/`.
+
+Listings disclose their demo context and use the existing non-sale reference state. App artist assignments do not claim authorship of the external images. Remaining categories stay empty until new cover URLs are supplied; no reviews, orders, collections, or stories are generated.
+
 ## Repository documentation
 
 The root README is intentionally product-focused. Detailed technical material lives in [`context/`](./context/project-overview.md):

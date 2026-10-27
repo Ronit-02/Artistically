@@ -59,6 +59,7 @@ Each registered component documents the applicable default, hover, focus-visible
 | Shared composite | `NotificationBell` and `SaleBanner` | `src/components/layout/` | Notification entry point and optional truthful, dismissible announcement. |
 | Shared composite | `ProductCard` and `CartItem` | `src/components/product/` | Artwork summary, cart-line presentation, semantic navigation, and accessible mutation controls. |
 | Shared composite | `ArtistCard` | `src/components/artist/ArtistCard.tsx` | Semantic artist-profile navigation and text-supported verification display. |
+| Shared composite | `StoryCard` | `src/components/StoryCard.tsx` | Shared homepage and journal-list card; accepts a `story` and optional `headingLevel` (2 or 3, default 3). Uses a 4:3 cover, category / date metadata with semantic time, title, optional excerpt, and shared hover/focus behavior. |
 | Feature | `ArtistCollectionManager` | `src/components/artist/ArtistCollectionManager.tsx` | Artist-portal collection management with validation, loading, retry, empty, and confirmation states. |
 | Feature | `ArtistSubmissionForm` | `src/components/artist/ArtistSubmissionForm.tsx` | Artist listing-submission workflow. |
 | Feature | `ArtistVerificationForm` | `src/components/artist/ArtistVerificationForm.tsx` | Artist verification-submission workflow with visible validation and recovery states. |

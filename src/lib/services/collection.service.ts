@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { productService } from "@/lib/services/product.service";
 import { InvalidStateError } from "@/lib/domain-errors";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 const collectionSelect = {
   id: true,
@@ -9,7 +10,8 @@ const collectionSelect = {
   coverImage: true,
   featured: true,
   published: true,
-  _count: { select: { items: true } },
+  items: { select: { product: { select: { category: true } } } },
+  _count: { select: { items: { where: { product: BROWSE_PRODUCT_WHERE } } } },
   ownerArtist: {
     select: {
       id: true,
@@ -27,9 +29,11 @@ function mapCollection(collection: {
   coverImage: string;
   featured: boolean;
   published: boolean;
+  items: { product: { category: string } }[];
   _count: { items: number };
   ownerArtist: { id: string; handle: string; verified: boolean; user: { firstName: string; lastName: string } } | null;
 }) {
+  const categories = [...new Set(collection.items.map(({ product }) => product.category))];
   return {
     id: collection.id,
     name: collection.name,
@@ -37,6 +41,7 @@ function mapCollection(collection: {
     coverImage: collection.coverImage,
     featured: collection.featured,
     published: collection.published,
+    category: categories.length === 1 ? categories[0] : categories.length > 1 ? "MIXED" : null,
     artworkCount: collection._count.items,
     ownerArtist: collection.ownerArtist
       ? {
@@ -64,14 +69,17 @@ export const collectionService = {
       where: { id, published: true },
       select: {
         ...collectionSelect,
-        items: { select: { productId: true, sortOrder: true }, orderBy: { sortOrder: "asc" } },
+        items: { where: { product: BROWSE_PRODUCT_WHERE }, select: { productId: true, sortOrder: true }, orderBy: { sortOrder: "asc" } },
       },
     });
     if (!collection) {return null;}
 
-    const products = await Promise.all(collection.items.map((item) => productService.getById(item.productId)));
+    const [products, categories] = await Promise.all([
+      Promise.all(collection.items.map((item) => productService.getById(item.productId))),
+      prisma.product.findMany({ where: { collectionItems: { some: { collectionId: id } } }, select: { category: true }, distinct: ["category"] }),
+    ]);
     return {
-      ...mapCollection(collection),
+      ...mapCollection({ ...collection, items: categories.map((product) => ({ product })) }),
       products: products.filter((product): product is NonNullable<typeof product> => product !== null),
     };
   },

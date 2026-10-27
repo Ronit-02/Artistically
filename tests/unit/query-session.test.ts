@@ -7,12 +7,13 @@ describe("clearIdentityQueries", () => {
 
     clearIdentityQueries(queryClient as never);
 
-    expect(queryClient.removeQueries).toHaveBeenCalledTimes(6);
+    expect(queryClient.removeQueries).toHaveBeenCalledTimes(7);
     expect(queryClient.removeQueries).toHaveBeenCalledWith({ queryKey: ["auth"] });
     expect(queryClient.removeQueries).toHaveBeenCalledWith({ queryKey: ["cart"] });
     expect(queryClient.removeQueries).toHaveBeenCalledWith({ queryKey: ["wishlist"] });
     expect(queryClient.removeQueries).toHaveBeenCalledWith({ queryKey: ["orders"] });
     expect(queryClient.removeQueries).toHaveBeenCalledWith({ queryKey: ["seller-orders"] });
     expect(queryClient.removeQueries).toHaveBeenCalledWith({ queryKey: ["seller-reviews"] });
+    expect(queryClient.removeQueries).toHaveBeenCalledWith({ queryKey: ["products"] });
   });
 });

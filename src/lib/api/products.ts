@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDER } from "@/lib/image-placeholder";
 import type { ArtworkDetails, Product } from "@/types";
 import { apiRequest, apiRequestPaginated, ApiClientError } from "@/lib/api/client";
 import type { ProductDto } from "@/types/api";
@@ -6,6 +7,7 @@ import { fromMinorUnits } from "@/lib/money";
 export type ProductListParams = {
   artistId?: string;
   search?: string;
+  includeSold?: boolean;
   category?: string;
   categories?: string[];
   minPrice?: number;
@@ -69,7 +71,7 @@ export function mapProduct(product: ProductDto): Product {
     stock: product.stock,
     originalPrice: product.originalPrice === null ? null : fromMinorUnits(product.originalPrice),
     discount: product.discount,
-    image: product.images.find((image) => image.isPrimary)?.url ?? product.images[0]?.url ?? "/paintings/painting-1.jpg",
+    image: product.images.find((image) => image.isPrimary)?.url ?? product.images[0]?.url ?? IMAGE_PLACEHOLDER,
     images: product.images.map((image) => image.url),
     category: product.category,
     ...(product.badge ? { badge: product.badge } : {}),
@@ -93,6 +95,7 @@ function buildProductQuery(params?: ProductListParams) {
   const query = new URLSearchParams({ limit: String(params?.limit ?? 50) });
   if (params?.artistId) {query.set("artistId", params.artistId);}
   if (params?.search) {query.set("search", params.search);}
+  if (params?.includeSold !== undefined) {query.set("includeSold", String(params.includeSold));}
   if (params?.category) {query.set("category", params.category);}
   params?.categories?.forEach((category) => query.append("category", category));
   if (params?.minPrice !== undefined) {query.set("minPrice", String(params.minPrice));}

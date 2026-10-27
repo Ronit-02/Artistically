@@ -102,7 +102,7 @@ function ArtistProfileSettings({ currentUser, artist }: { currentUser: AuthUserD
         {profileError && <p role="alert" className="text-sm text-red-600">{profileError}</p>}
         {Object.keys(profileFieldErrors).length > 0 && <ul role="alert" className="text-sm text-red-600 list-disc pl-5 space-y-1">{Object.entries(profileFieldErrors).flatMap(([field, messages]) => messages.map((message) => <li key={`${field}-${message}`}>{field}: {message}</li>))}</ul>}
         {profileMessage && <p role="status" className="text-sm text-green-600">{profileMessage}</p>}
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-wrap gap-3 pt-2">
           <Button variant="primary" type="submit" loading={updateProfileMutation.isPending || updateArtistMutation.isPending}>Save profile</Button>
           <Button variant="secondary" type="button" onClick={() => setProfileForm({ firstName: currentUser.firstName, lastName: currentUser.lastName, handle: artist?.handle ?? currentUser.artist?.handle ?? "", bio: artist?.bio ?? "" })}>Reset</Button>
         </div>
@@ -204,7 +204,7 @@ function ArtworkForm({ product, onSaved, onCancel }: { product: Product | null; 
 
   return (
     <form onSubmit={submit} className="bg-white border border-gray-100 rounded-xl p-5 sm:p-6 mb-5 space-y-4">
-      <div className="flex items-center justify-between gap-3"><h2 className="font-heading text-lg font-semibold text-gray-900">{product ? "Edit artwork" : "Add artwork"}</h2><Button variant="ghost" type="button" onClick={onCancel}>Close</Button></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-heading text-lg font-semibold text-gray-900">{product ? "Edit artwork" : "Add artwork"}</h2><Button variant="ghost" type="button" onClick={onCancel}>Close</Button></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label className="block text-xs font-medium text-gray-600 sm:col-span-2">Title<input required minLength={3} maxLength={200} value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50" /></label>
         <label className="block text-xs font-medium text-gray-600">Price (₹)<input required type="number" min="1" step="1" value={form.price} onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50" /></label>
@@ -216,12 +216,12 @@ function ArtworkForm({ product, onSaved, onCancel }: { product: Product | null; 
             {form.images.map((image, index) => (
               <div key={index} className="flex items-center gap-2">
                 <label className="sr-only" htmlFor={`artwork-image-${index}`}>Artwork image URL {index + 1}</label>
-                <input id={`artwork-image-${index}`} required type="url" value={image} onChange={(event) => setForm((current) => ({ ...current, images: current.images.map((value, imageIndex) => imageIndex === index ? event.target.value : value) }))} placeholder="https://…" className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50" />
+                <input id={`artwork-image-${index}`} required type="url" value={image} onChange={(event) => setForm((current) => ({ ...current, images: current.images.map((value, imageIndex) => imageIndex === index ? event.target.value : value) }))} placeholder="https://…" className="min-w-0 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50" />
                 {form.images.length > 1 && <button type="button" aria-label={`Remove artwork image ${index + 1}`} onClick={() => setForm((current) => ({ ...current, images: current.images.filter((_, imageIndex) => imageIndex !== index) }))} className="min-h-11 min-w-11 rounded-lg border border-gray-200 bg-white text-gray-500 hover:border-red-300 hover:text-red-600 cursor-pointer">×</button>}
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-between gap-3 mt-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-2">
             <p className="text-xs text-gray-500">Use up to {MAX_LISTING_IMAGES} images. The first image is the primary artwork image.</p>
             <button type="button" disabled={form.images.length >= MAX_LISTING_IMAGES} onClick={() => setForm((current) => ({ ...current, images: [...current.images, ""] }))} className="min-h-11 shrink-0 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600 hover:border-gray-400 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">Add image</button>
           </div>
@@ -246,7 +246,7 @@ function ArtworkForm({ product, onSaved, onCancel }: { product: Product | null; 
       </div>
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       {Object.keys(fieldErrors).length > 0 && <ul role="alert" className="text-sm text-red-600 list-disc pl-5 space-y-1">{Object.entries(fieldErrors).flatMap(([field, messages]) => messages.map((message) => <li key={`${field}-${message}`}>{formatFieldErrorLabel(field)}: {message}</li>))}</ul>}
-      <div className="flex gap-3"><Button type="submit" loading={isPending}>{product ? "Save artwork" : "Publish artwork"}</Button><Button variant="secondary" type="button" onClick={onCancel}>Cancel</Button></div>
+      <div className="flex flex-wrap gap-3"><Button type="submit" loading={isPending}>{product ? "Save artwork" : "Publish artwork"}</Button><Button variant="secondary" type="button" onClick={onCancel}>Cancel</Button></div>
     </form>
   );
 }
@@ -270,7 +270,7 @@ export default function ArtistPortalPage() {
     isPending: isProductsPending,
     isError: isProductsError,
     refetch: refetchProducts,
-  } = useProducts({ artistId });
+  } = useProducts(artistId ? { artistId, includeSold: true } : { artistId });
   const productsLoading = isAuthPending || isProductsPending;
   const { data: sellerOrders = [], isPending: isSellerOrdersPending, isError: isSellerOrdersError, refetch: refetchSellerOrders } = useSellerOrders();
   const { data: settlements, isPending: isSettlementsPending, isError: isSettlementsError, refetch: refetchSettlements } = useArtistSettlements();
@@ -326,7 +326,7 @@ export default function ArtistPortalPage() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 [overflow-wrap:anywhere]">
       {/* Header */}
       <div className="mb-6 sm:mb-8">
         <h1 className="font-heading text-2xl sm:text-3xl font-semibold text-gray-900 tracking-tight-heading">
@@ -368,7 +368,7 @@ export default function ArtistPortalPage() {
       {tab === "overview" && (
         <div id="artist-panel-overview" role="tabpanel" aria-labelledby="artist-tab-overview" tabIndex={0} className="space-y-8">
           {/* Stats grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 max-[379px]:grid-cols-1 xl:grid-cols-4 gap-4">
             <StatCard label="Published artworks" value={String(artistProducts.length)} icon="M4 6h16M4 12h16M4 18h16" />
             <StatCard label="Available inventory" value={String(availableInventory)} icon="M4 7h16v12H4zM8 7V5h8v2" />
             <StatCard label="Incoming orders" value={String(sellerOrders.length)} icon="M3 6h18M6 6v12h12V6M9 10h6M9 14h4" />
@@ -383,16 +383,16 @@ export default function ArtistPortalPage() {
 
           {/* Recent artworks */}
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <SectionHeader title="Recent Artworks" />
               <Button variant="primary" size="sm" onClick={openArtworkCreator}>Add artwork</Button>
             </div>
             <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
-              <table className="w-full">
+              <table className="w-full table-fixed sm:table-auto">
                 <thead>
                   <tr className="border-b border-gray-100">
                     {["Artwork", "Category", "Price", "Status"].map((h) => (
-                      <th key={h} className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-5 py-3">{h}</th>
+                      <th key={h} className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-2 sm:px-5 py-3">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -405,8 +405,8 @@ export default function ArtistPortalPage() {
                     <tr><td colSpan={4} className="px-5 py-8 text-center text-sm text-gray-500">No published artworks yet.</td></tr>
                   ) : recentProducts.map((p, i) => (
                     <tr key={p.id} className={`${i < recentProducts.length - 1 ? "border-b border-gray-50" : ""} hover:bg-gray-50 transition-colors`}>
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-3">
+                      <td className="px-2 sm:px-5 py-3.5">
+                        <div className="flex flex-wrap items-center gap-3">
                           <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 relative">
                             <Image src={p.image} alt={p.title} fill className="object-cover" sizes="40px" />
                           </div>
@@ -416,11 +416,11 @@ export default function ArtistPortalPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-5 py-3.5">
-                        <span className="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded font-medium">{p.category}</span>
+                      <td className="px-2 sm:px-5 py-3.5">
+                        <span className="text-xs bg-gray-50 text-gray-600 px-1 sm:px-2 py-1 rounded font-medium">{p.category}</span>
                       </td>
-                      <td className="px-5 py-3.5 text-sm text-gray-900 font-medium">₹{p.price.toLocaleString()}</td>
-                      <td className="px-5 py-3.5">
+                      <td className="px-2 sm:px-5 py-3.5 text-sm text-gray-900 font-medium">₹{p.price.toLocaleString()}</td>
+                      <td className="px-2 sm:px-5 py-3.5">
                         <span className={`text-xs font-medium px-2 py-1 rounded ${isProductSold(p.stock) ? "bg-gray-100 text-gray-600" : "bg-green-50 text-green-600"}`}>
                           {isProductSold(p.stock) ? "Sold" : "Published"}
                         </span>
@@ -446,7 +446,7 @@ export default function ArtistPortalPage() {
               <div className="space-y-3">
                 {sellerOrders.slice(0, 3).map((order) => (
                   <div key={order.id} className="bg-white border border-gray-100 rounded-xl px-5 py-4">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                       <p className="text-sm font-medium text-gray-900">Order {order.id}</p>
                       <span className="text-xs font-medium rounded bg-gray-50 text-gray-600 px-2 py-1">{order.status}</span>
                     </div>
@@ -467,7 +467,7 @@ export default function ArtistPortalPage() {
               <div className="bg-white border border-gray-100 rounded-xl px-5 py-8 text-center"><p className="text-sm text-gray-500">No settlement records yet.</p><p className="text-xs text-gray-500 mt-1">Seller allocations and Stripe payout events will appear here after a verified sale.</p></div>
             ) : (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <div className="grid grid-cols-2 max-[379px]:grid-cols-1 gap-3 md:grid-cols-4">
                   {[
                     ["Gross sales", settlements.statement.grossAmountMinor],
                     ["Platform fees", settlements.statement.platformFeeAmountMinor],
@@ -476,11 +476,11 @@ export default function ArtistPortalPage() {
                   ].map(([label, amount]) => <div key={label} className="bg-white border border-gray-100 rounded-xl px-4 py-3"><p className="text-xs text-gray-500">{label}</p><p className="text-sm font-medium text-gray-900 mt-1">₹{(Number(amount) / 100).toLocaleString("en-IN")}</p></div>)}
                 </div>
                 <div className="bg-white border border-gray-100 rounded-xl px-5 py-4"><div className="flex flex-wrap items-end justify-between gap-4"><div><label htmlFor="artist-payout-amount" className="block text-sm font-medium text-gray-900">Request a payout</label><p className="text-xs text-gray-500 mt-1">Available balance: ₹{(settlements.statement.outstandingAmountMinor / 100).toLocaleString("en-IN")}</p></div><div className="flex flex-wrap items-end gap-2"><div><label htmlFor="artist-payout-amount" className="sr-only">Payout amount in rupees</label><input id="artist-payout-amount" inputMode="decimal" value={payoutAmount} onChange={(event) => setPayoutAmount(event.target.value)} placeholder="Amount in ₹" className="min-h-11 w-32 rounded-lg border border-gray-200 px-3 text-sm" /></div><Button size="sm" loading={payoutMutation.isPending} disabled={!Number.isFinite(Number(payoutAmount)) || Number(payoutAmount) <= 0 || Math.round(Number(payoutAmount) * 100) > settlements.statement.outstandingAmountMinor} onClick={() => payoutMutation.mutate({ amountMinor: Math.round(Number(payoutAmount) * 100), idempotencyKey: crypto.randomUUID() }, { onSuccess: () => setPayoutAmount("") })}>Request payout</Button></div></div>{payoutMutation.isError && <p role="alert" className="mt-3 text-sm text-red-600">Couldn’t request the payout. Check the amount and Connect account status, then try again.</p>}</div>
-                {settlements.settlements.map((settlement) => <div key={settlement.id} className="bg-white border border-gray-100 rounded-xl px-5 py-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-medium text-gray-900">Settlement {settlement.sellerOrderId}</p><p className="text-xs text-gray-500 mt-1">{settlement.transfer?.stripeTransferId ? `Transfer ${settlement.transfer.stripeTransferId}` : "Transfer pending"}</p></div><span className="text-xs font-medium rounded bg-gray-50 text-gray-600 px-2 py-1">{settlement.status}</span></div><div className="grid grid-cols-2 gap-3 mt-4 text-xs md:grid-cols-4"><div><p className="text-gray-500">Net due</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.netAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Transferred</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.transferredAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Refunds</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.refundAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Remaining</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.outstandingAmountMinor / 100).toLocaleString("en-IN")}</p></div></div></div>)}
+                {settlements.settlements.map((settlement) => <div key={settlement.id} className="bg-white border border-gray-100 rounded-xl px-5 py-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-medium text-gray-900">Settlement {settlement.sellerOrderId}</p><p className="text-xs text-gray-500 mt-1">{settlement.transfer?.stripeTransferId ? `Transfer ${settlement.transfer.stripeTransferId}` : "Transfer pending"}</p></div><span className="text-xs font-medium rounded bg-gray-50 text-gray-600 px-2 py-1">{settlement.status}</span></div><div className="grid grid-cols-2 max-[379px]:grid-cols-1 gap-3 mt-4 text-xs md:grid-cols-4"><div><p className="text-gray-500">Net due</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.netAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Transferred</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.transferredAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Refunds</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.refundAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Remaining</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.outstandingAmountMinor / 100).toLocaleString("en-IN")}</p></div></div></div>)}
                 {settlements.sellerOrders.slice(0, 3).map((settlement) => (
                   <div key={settlement.id} className="bg-white border border-gray-100 rounded-xl px-5 py-4">
                     <div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-medium text-gray-900">Order {settlement.orderId}</p><p className="text-xs text-gray-500 mt-1">{new Date(settlement.createdAt).toLocaleDateString("en-IN")}</p></div><span className="text-xs font-medium rounded bg-gray-50 text-gray-600 px-2 py-1">{settlement.status}</span></div>
-                    <div className="grid grid-cols-3 gap-3 mt-4 text-xs"><div><p className="text-gray-500">Artwork gross</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.grossArtworkAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Platform fee</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.platformFeeAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Allocated net</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.netAllocatedAmountMinor / 100).toLocaleString("en-IN")}</p></div></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-xs"><div><p className="text-gray-500">Artwork gross</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.grossArtworkAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Platform fee</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.platformFeeAmountMinor / 100).toLocaleString("en-IN")}</p></div><div><p className="text-gray-500">Allocated net</p><p className="text-sm text-gray-900 mt-1">₹{(settlement.netAllocatedAmountMinor / 100).toLocaleString("en-IN")}</p></div></div>
                   </div>
                 ))}
                 {settlements.payouts.slice(0, 3).map((payout) => <div key={payout.id} className="bg-white border border-gray-100 rounded-xl px-5 py-4 flex items-center justify-between gap-3"><div><p className="text-sm font-medium text-gray-900">Stripe payout</p><p className="text-xs text-gray-500 mt-1">{payout.paidAt ? `Paid ${new Date(payout.paidAt).toLocaleDateString("en-IN")}` : "Awaiting payout confirmation"}</p></div><div className="text-right"><p className="text-sm text-gray-900">₹{(payout.amountMinor / 100).toLocaleString("en-IN")}</p><p className="text-xs text-gray-500 mt-1">{payout.status}</p></div></div>)}
@@ -493,7 +493,7 @@ export default function ArtistPortalPage() {
       {/* ── Artworks Tab ──────────────────────────────────────────── */}
       {tab === "artworks" && (
         <div id="artist-panel-artworks" role="tabpanel" aria-labelledby="artist-tab-artworks" tabIndex={0}>
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
             <p className="text-sm text-gray-500">Manage your published artworks</p>
             <Button variant="primary" size="sm" onClick={openArtworkCreator}>Add artwork</Button>
           </div>
@@ -506,7 +506,7 @@ export default function ArtistPortalPage() {
           ) : artistProducts.length === 0 ? (
             <p className="py-12 text-center text-sm text-gray-500">No published artworks yet.</p>
           ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-3 xl:grid-cols-4 gap-4">
             {artistProducts.map((p) => (
               <div key={p.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
                 <div className="relative aspect-square bg-gray-100">
@@ -515,7 +515,7 @@ export default function ArtistPortalPage() {
                 <div className="p-3">
                   <p className="text-sm font-heading font-medium text-gray-900 line-clamp-1">{p.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5">₹{p.price.toLocaleString()}</p>
-                  <div className="flex gap-2 mt-3">
+                  <div className="flex flex-wrap gap-2 mt-3">
                     <Button variant="secondary" size="sm" className="flex-1" onClick={() => setArtworkEditor(p)}>Edit</Button>
                     <button type="button" onClick={() => void archiveArtwork(p)} disabled={productMutations.archive.isPending} aria-label={`Archive ${p.title}`} className="inline-flex min-h-11 min-w-11 items-center justify-center px-4 py-2 text-[13px] rounded-lg font-medium bg-transparent text-gray-500 border-none cursor-pointer hover:text-red-600">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -545,7 +545,7 @@ export default function ArtistPortalPage() {
           ) : sellerOrders.length === 0 ? <div className="bg-white border border-gray-100 rounded-xl px-5 py-10 text-center"><p className="text-sm text-gray-500">No incoming orders yet.</p><p className="text-xs text-gray-500 mt-1">Orders for your published artworks will appear here.</p></div> : (
             <div className="space-y-4">
               {sellerOrderStatusMutation.isError && <p role="alert" className="text-sm text-red-600">Couldn’t update fulfillment status. Try again.</p>}
-              {sellerOrders.map((order) => <div key={order.id} className="bg-white border border-gray-100 rounded-xl p-5"><div className="flex flex-wrap justify-between gap-2 mb-4"><div><p className="text-sm font-medium text-gray-900">Order {order.id}</p><p className="text-xs text-gray-500 mt-1">{new Date(order.createdAt).toLocaleDateString("en-IN")}</p></div><div className="flex items-center gap-2"><span className={`text-xs font-medium rounded px-2 py-1 ${order.lateAt ? "bg-red-50 text-red-700" : "bg-gray-50 text-gray-600"}`}>{order.lateAt ? "LATE" : order.status}</span>{order.processingDueAt && <span className="text-xs text-gray-500">Due {new Date(order.processingDueAt).toLocaleDateString("en-IN")}</span>}</div></div><div className="space-y-3">{order.items.map((item) => <div key={item.id} className="rounded-lg border border-gray-100 p-3"><div className="flex items-center gap-3"><div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden relative">{item.product.images[0]?.url && <Image src={item.product.images[0].url} alt="" fill className="object-cover" sizes="48px" />}</div><div className="min-w-0 flex-1"><p className="text-sm text-gray-900 truncate">{item.product.title}</p><p className="text-xs text-gray-500">Qty {item.quantity} · {item.size}</p></div><select aria-label={`Fulfillment status for ${item.product.title}`} className="min-h-11 border border-gray-200 rounded-lg px-2 text-xs text-gray-700" value={item.fulfillmentStatus} disabled={sellerOrderStatusMutation.isPending} onChange={(event) => sellerOrderStatusMutation.mutate({ itemId: item.id, status: event.target.value as typeof item.fulfillmentStatus })}><option value="PENDING" disabled>Pending</option><option value="PROCESSING">Processing</option><option value="SHIPPED">Shipped</option><option value="IN_TRANSIT">In transit</option><option value="DELIVERED">Delivered</option></select><span className="text-sm text-gray-900">₹{(item.price * item.quantity).toLocaleString()}</span></div>{item.product.artworkDetails?.fulfillmentMode === "DIGITAL" && <div className="mt-3 border-t border-gray-100 pt-3"><p className="text-xs font-medium text-gray-700">Digital delivery</p>{digitalDeliveryItemId === item.id ? <div className="mt-2 flex flex-wrap gap-2"><input aria-label="Digital asset reference" value={digitalAssetReference} onChange={(event) => setDigitalAssetReference(event.target.value)} placeholder="Storage object key or HTTPS URL" className="min-h-10 min-w-[220px] flex-1 rounded-lg border border-gray-200 px-3 text-xs" /><input aria-label="Download limit" type="number" min="1" max="20" value={digitalDownloadLimit} onChange={(event) => setDigitalDownloadLimit(event.target.value)} className="min-h-10 w-20 rounded-lg border border-gray-200 px-2 text-xs" /><Button size="sm" loading={digitalDeliveryMutation.isPending} disabled={!digitalAssetReference.trim()} onClick={() => digitalDeliveryMutation.mutate({ itemId: item.id, assetReference: digitalAssetReference.trim(), downloadLimit: Number(digitalDownloadLimit) }, { onSuccess: () => { setDigitalDeliveryItemId(null); setDigitalAssetReference(""); } })}>Publish</Button><Button size="sm" variant="ghost" onClick={() => setDigitalDeliveryItemId(null)}>Cancel</Button></div> : <Button size="sm" variant="secondary" className="mt-2" onClick={() => setDigitalDeliveryItemId(item.id)}>Publish download</Button>}</div>}</div>)}</div><p className="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-100">Ship to: {order.shippingAddress}</p></div>)}
+              {sellerOrders.map((order) => <div key={order.id} className="bg-white border border-gray-100 rounded-xl p-5"><div className="flex flex-wrap justify-between gap-2 mb-4"><div><p className="text-sm font-medium text-gray-900">Order {order.id}</p><p className="text-xs text-gray-500 mt-1">{new Date(order.createdAt).toLocaleDateString("en-IN")}</p></div><div className="flex items-center gap-2"><span className={`text-xs font-medium rounded px-2 py-1 ${order.lateAt ? "bg-red-50 text-red-700" : "bg-gray-50 text-gray-600"}`}>{order.lateAt ? "LATE" : order.status}</span>{order.processingDueAt && <span className="text-xs text-gray-500">Due {new Date(order.processingDueAt).toLocaleDateString("en-IN")}</span>}</div></div><div className="space-y-3">{order.items.map((item) => <div key={item.id} className="rounded-lg border border-gray-100 p-3"><div className="flex flex-wrap items-center gap-3"><div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden relative">{item.product.images[0]?.url && <Image src={item.product.images[0].url} alt="" fill className="object-cover" sizes="48px" />}</div><div className="min-w-0 flex-1"><p className="text-sm text-gray-900 truncate">{item.product.title}</p><p className="text-xs text-gray-500">Qty {item.quantity} · {item.size}</p></div><select aria-label={`Fulfillment status for ${item.product.title}`} className="min-h-11 border border-gray-200 rounded-lg px-2 text-xs text-gray-700" value={item.fulfillmentStatus} disabled={sellerOrderStatusMutation.isPending} onChange={(event) => sellerOrderStatusMutation.mutate({ itemId: item.id, status: event.target.value as typeof item.fulfillmentStatus })}><option value="PENDING" disabled>Pending</option><option value="PROCESSING">Processing</option><option value="SHIPPED">Shipped</option><option value="IN_TRANSIT">In transit</option><option value="DELIVERED">Delivered</option></select><span className="text-sm text-gray-900">₹{(item.price * item.quantity).toLocaleString()}</span></div>{item.product.artworkDetails?.fulfillmentMode === "DIGITAL" && <div className="mt-3 border-t border-gray-100 pt-3"><p className="text-xs font-medium text-gray-700">Digital delivery</p>{digitalDeliveryItemId === item.id ? <div className="mt-2 flex flex-wrap gap-2"><input aria-label="Digital asset reference" value={digitalAssetReference} onChange={(event) => setDigitalAssetReference(event.target.value)} placeholder="Storage object key or HTTPS URL" className="min-h-11 min-w-0 w-full sm:w-auto sm:min-w-[220px] flex-1 rounded-lg border border-gray-200 px-3 text-xs" /><input aria-label="Download limit" type="number" min="1" max="20" value={digitalDownloadLimit} onChange={(event) => setDigitalDownloadLimit(event.target.value)} className="min-h-10 w-20 rounded-lg border border-gray-200 px-2 text-xs" /><Button size="sm" loading={digitalDeliveryMutation.isPending} disabled={!digitalAssetReference.trim()} onClick={() => digitalDeliveryMutation.mutate({ itemId: item.id, assetReference: digitalAssetReference.trim(), downloadLimit: Number(digitalDownloadLimit) }, { onSuccess: () => { setDigitalDeliveryItemId(null); setDigitalAssetReference(""); } })}>Publish</Button><Button size="sm" variant="ghost" onClick={() => setDigitalDeliveryItemId(null)}>Cancel</Button></div> : <Button size="sm" variant="secondary" className="mt-2" onClick={() => setDigitalDeliveryItemId(item.id)}>Publish download</Button>}</div>}</div>)}</div><p className="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-100">Ship to: {order.shippingAddress}</p></div>)}
             </div>
           )}
         </div>
@@ -554,7 +554,7 @@ export default function ArtistPortalPage() {
       {/* ── Analytics Tab ─────────────────────────────────────────── */}
       {tab === "analytics" && (
         <div id="artist-panel-analytics" role="tabpanel" aria-labelledby="artist-tab-analytics" tabIndex={0} className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 max-[379px]:grid-cols-1 xl:grid-cols-4 gap-4">
             <StatCard label="Published artworks" value={String(artistProducts.length)} icon="M4 6h16M4 12h16M4 18h16" />
             <StatCard label="Gross order value" value={`₹${grossSales.toLocaleString("en-IN")}`} icon="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             <StatCard label="Delivered reviews" value={String(sellerReviews.length)} icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2" />

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, ProductIdSchema } from "@/lib/validators";
 import { ok, created, notFound, withErrorHandler } from "@/lib/api-response";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 const wishlistSelect = {
   id: true,
@@ -28,7 +29,7 @@ const wishlistSelect = {
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const auth = await requireAuth(req);
   const items = await prisma.wishlistItem.findMany({
-    where: { userId: auth.userId },
+    where: { userId: auth.userId, product: BROWSE_PRODUCT_WHERE },
     select: wishlistSelect,
     orderBy: { createdAt: "desc" },
   });

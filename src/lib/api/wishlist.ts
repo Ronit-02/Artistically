@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDER } from "@/lib/image-placeholder";
 import type { Product } from "@/types";
 import type { WishlistItemDto } from "@/types/api";
 import { apiRequest } from "@/lib/api/client";
@@ -15,7 +16,7 @@ export function mapWishlistItem(item: WishlistItemDto): Product {
     price: fromMinorUnits(item.product.price),
     originalPrice: item.product.originalPrice === null ? null : fromMinorUnits(item.product.originalPrice),
     discount: item.product.discount,
-    image: item.product.images[0]?.url ?? "/paintings/painting-1.jpg",
+    image: item.product.images[0]?.url ?? IMAGE_PLACEHOLDER,
     category: item.product.category,
     ...(item.product.badge ? { badge: item.product.badge } : {}),
   };

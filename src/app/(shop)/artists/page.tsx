@@ -31,7 +31,7 @@ function ArtistFollowControl({ artistId }: { artistId: string | number }) {
         onClick={handleClick}
         disabled={isAuthPending || toggle.isPending}
         aria-pressed={following}
-        className="min-h-11 flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[13px] font-medium text-gray-700 hover:border-accent-300 hover:text-accent-600 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+        className="min-h-11 flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-[13px] font-medium text-gray-700 hover:border-accent-600 hover:text-accent-600 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
       >
         {toggle.isPending ? "Updating…" : following ? "Following" : "Follow artist"}
       </button>
@@ -82,7 +82,7 @@ export default function ArtistsPage() {
             placeholder="Search artists…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="min-h-11 w-full rounded-full border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-[13px] text-[#111] placeholder-gray-400 outline-none transition-all focus:border-accent-300 focus:ring-2 focus:ring-accent-50"
+            className="min-h-11 w-full rounded-full border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-[13px] text-[#111] placeholder-gray-400 outline-none transition-all focus:border-accent-600 focus:ring-2 focus:ring-accent-50"
           />
         </div>
       </div>
@@ -98,7 +98,7 @@ export default function ArtistsPage() {
             className={`min-h-11 px-4 py-1.5 rounded-full text-[12px] font-medium transition-all border cursor-pointer ${
               active === f
                 ? "bg-[#111] text-white border-[#111]"
-                : "bg-white text-gray-500 border-gray-200 hover:border-accent-300 hover:text-accent-600"
+                : "bg-white text-gray-500 border-gray-200 hover:border-accent-600 hover:text-accent-600"
             }`}
           >
             {f}

@@ -33,7 +33,7 @@ export default async function StoryPage({ params }: Props) {
       {storyJsonLd ? (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: storyJsonLd }} />
       ) : null}
-      <Suspense fallback={<div aria-busy="true" aria-label="Loading story" className="mx-auto max-w-[680px] px-6 py-10"><Skeleton className="aspect-[4/3] w-full rounded-xl" /></div>}>
+      <Suspense fallback={<div aria-busy="true" aria-label="Loading story" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10 sm:py-16"><Skeleton className="aspect-[16/9] w-full rounded-xl" /></div>}>
         <StoryPageClient storyId={id} />
       </Suspense>
     </>

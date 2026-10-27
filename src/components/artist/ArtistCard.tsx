@@ -15,11 +15,11 @@ export default function ArtistCard({ artist }: { artist: Artist }) {
       <div className="img-hover-zoom relative h-40 rounded-xl overflow-hidden bg-[#f5f5f5]">
         <Image src={artist.cover} alt={artist.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw"/>
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-        <div className="absolute bottom-3 left-3.5 flex items-center gap-2.5">
+        <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full border-2 border-white overflow-hidden relative flex-shrink-0">
             <Image src={artist.avatar} alt="" fill className="object-cover" sizes="32px" />
           </div>
-          <div>
+          <div className="min-w-0 [overflow-wrap:anywhere]">
             <p className="text-[13px] font-heading font-semibold text-white flex items-center gap-1">
               {artist.name}
               {artist.verified && <span className="sr-only">Verified artist</span>}

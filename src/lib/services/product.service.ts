@@ -13,6 +13,7 @@ import type {
 } from "@/lib/validators";
 import { ValidationError } from "@/lib/validators";
 import { toMinorUnits } from "@/lib/money";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 type ProductQuery = z.infer<typeof ProductQuerySchema>;
 type CreateProductInput = z.infer<typeof CreateProductSchema>;
@@ -172,7 +173,7 @@ function assertListingCompleteness(
 
 export const productService = {
   async list(query: ProductQuery) {
-    const { page, limit, category, categories, minPrice, maxPrice, priceRanges, minRating, minRatings, search, sortBy, artistId } = query;
+    const { page, limit, category, categories, minPrice, maxPrice, priceRanges, minRating, minRatings, search, sortBy, artistId, includeSold } = query;
     const skip = (page - 1) * limit;
 
     const categoryFilter = categories?.length
@@ -192,9 +193,13 @@ export const productService = {
 
     const where: Prisma.ProductWhereInput = {
       isActive: true,
+      ...(!includeSold && { AND: [BROWSE_PRODUCT_WHERE] }),
       ...categoryFilter,
       ...(artistId && { artistId }),
-      ...priceFilter,
+      ...(!search ? priceFilter : {}),
+      ...(search && Object.keys(priceFilter).length > 0 && {
+        AND: [...(!includeSold ? [BROWSE_PRODUCT_WHERE] : []), priceFilter],
+      }),
       ...(search && {
         OR: [
           { title: { contains: search, mode: "insensitive" } },
@@ -241,6 +246,28 @@ export const productService = {
       totalPromise = Promise.resolve(eligibleIds.length);
     } else {
       totalPromise = prisma.product.count({ where });
+    }
+
+    // Rank availability before the selected sort, and paginate across both
+    // groups so a sold match cannot displace an available match onto a later page.
+    if (includeSold && (search || category || categories?.length)) {
+      const availableWhere: Prisma.ProductWhereInput = { AND: [paginatedWhere, { stock: { gt: 0 } }] };
+      const unavailableWhere: Prisma.ProductWhereInput = { AND: [paginatedWhere, { stock: { lte: 0 } }] };
+      const [availableTotal, total] = await Promise.all([
+        prisma.product.count({ where: availableWhere }),
+        totalPromise,
+      ]);
+      const availableTake = Math.min(limit, Math.max(0, availableTotal - skip));
+      const stableOrder = [orderBy, { id: "asc" as const }];
+      const [available, unavailable] = await Promise.all([
+        availableTake > 0
+          ? prisma.product.findMany({ where: availableWhere, orderBy: stableOrder, skip, take: availableTake, select: productSelect })
+          : Promise.resolve([]),
+        availableTake < limit
+          ? prisma.product.findMany({ where: unavailableWhere, orderBy: stableOrder, skip: Math.max(0, skip - availableTotal), take: limit - availableTake, select: productSelect })
+          : Promise.resolve([]),
+      ]);
+      return { products: [...available, ...unavailable].map(withRating), total };
     }
 
     const [products, total] = await Promise.all([

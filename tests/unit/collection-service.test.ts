@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   collectionUpdate: vi.fn(),
   collectionUpdateMany: vi.fn(),
   productCount: vi.fn(),
+  productFindMany: vi.fn(),
+  getProduct: vi.fn(),
   collectionItemDeleteMany: vi.fn(),
   transaction: vi.fn(),
 }));
@@ -22,10 +24,12 @@ vi.mock("@/lib/prisma", () => ({
       update: mocks.collectionUpdate,
       updateMany: mocks.collectionUpdateMany,
     },
-    product: { count: mocks.productCount },
+    product: { count: mocks.productCount, findMany: mocks.productFindMany },
     $transaction: mocks.transaction,
   },
 }));
+
+vi.mock("@/lib/services/product.service", () => ({ productService: { getById: mocks.getProduct } }));
 
 import { collectionService } from "@/lib/services/collection.service";
 
@@ -107,5 +111,36 @@ describe("artist collection service", () => {
       where: { id: persistedCollection.id, ownerArtist: { userId: "artist-user" } },
       data: { published: false },
     });
+  });
+
+  it("derives public categories from members and preserves artist attribution", async () => {
+    const ownerArtist = { id: artist.id, handle: "@artist", verified: false, user: { firstName: "Mira", lastName: "Sen" } };
+    mocks.collectionFindMany.mockResolvedValue([
+      { ...persistedCollection, featured: false, ownerArtist, items: [{ product: { category: "CERAMICS" } }, { product: { category: "CERAMICS" } }] },
+      { ...persistedCollection, featured: false, ownerArtist: null, items: [{ product: { category: "CERAMICS" } }, { product: { category: "PAINTINGS" } }] },
+      { ...persistedCollection, featured: false, ownerArtist: null, items: [] },
+    ]);
+    await expect(collectionService.list()).resolves.toMatchObject([
+      { category: "CERAMICS", ownerArtist: { name: "Mira Sen" } },
+      { category: "MIXED", ownerArtist: null },
+      { category: null, ownerArtist: null },
+    ]);
+  });
+
+  it("keeps the detail category based on all members while returning only browseable artworks", async () => {
+    mocks.collectionFindFirst.mockResolvedValue({
+      ...persistedCollection, featured: false, ownerArtist: null,
+      items: [{ productId: "available-artwork", sortOrder: 0 }],
+    });
+    mocks.getProduct.mockResolvedValue({ id: "available-artwork", category: "CERAMICS" });
+    mocks.productFindMany.mockResolvedValue([{ category: "CERAMICS" }, { category: "PAINTINGS" }]);
+    await expect(collectionService.getById(persistedCollection.id)).resolves.toMatchObject({
+      category: "MIXED", products: [{ id: "available-artwork" }],
+    });
+    expect(mocks.productFindMany).toHaveBeenCalledWith({
+      where: { collectionItems: { some: { collectionId: persistedCollection.id } } },
+      select: { category: true }, distinct: ["category"],
+    });
+    expect(mocks.getProduct).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,3 +1,4 @@
+import { IMAGE_PLACEHOLDER } from "@/lib/image-placeholder";
 import type { OrderItem } from "@/types";
 import type { ArtistSettlementDto, OrderDto, SellerOrderDto } from "@/types/api";
 import { apiRequest, ApiClientError } from "@/lib/api/client";
@@ -25,7 +26,7 @@ export function mapOrdersToItems(orders: OrderDto[]): OrderItem[] {
       price: fromMinorUnits(item.price * item.quantity),
       originalPrice: null,
       discount: null,
-      image: item.product.images[0]?.url ?? "/paintings/painting-1.jpg",
+      image: item.product.images[0]?.url ?? IMAGE_PLACEHOLDER,
       size: item.size,
       status: itemStatus ?? statusMap[order.status],
       date: new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }),

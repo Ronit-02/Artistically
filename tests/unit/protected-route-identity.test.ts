@@ -49,6 +49,7 @@ import { GET as getWishlist } from "@/app/api/wishlist/route";
 import { GET as getOrders } from "@/app/api/orders/route";
 import { GET as getOrder } from "@/app/api/orders/[id]/route";
 import { GET as getUser, PATCH as patchUser } from "@/app/api/users/[id]/route";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 const validId = "cmabcdefghijklmnopqrstuvwx";
 
@@ -75,14 +76,14 @@ describe("protected route identity boundaries", () => {
     await getWishlist(request("/api/wishlist"));
 
     expect(mocks.cartFindMany).toHaveBeenCalledWith(expect.objectContaining({ where: { userId: "user-a" } }));
-    expect(mocks.wishlistFindMany).toHaveBeenCalledWith(expect.objectContaining({ where: { userId: "user-a" } }));
+    expect(mocks.wishlistFindMany).toHaveBeenCalledWith(expect.objectContaining({ where: { userId: "user-a", product: BROWSE_PRODUCT_WHERE } }));
 
     mocks.auth.userId = "user-b";
     await getCart(request("/api/cart"));
     await getWishlist(request("/api/wishlist"));
 
     expect(mocks.cartFindMany).toHaveBeenLastCalledWith(expect.objectContaining({ where: { userId: "user-b" } }));
-    expect(mocks.wishlistFindMany).toHaveBeenLastCalledWith(expect.objectContaining({ where: { userId: "user-b" } }));
+    expect(mocks.wishlistFindMany).toHaveBeenLastCalledWith(expect.objectContaining({ where: { userId: "user-b", product: BROWSE_PRODUCT_WHERE } }));
   });
 
   it("does not update a cart item owned by another user", async () => {

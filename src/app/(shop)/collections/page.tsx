@@ -29,16 +29,23 @@ export default function CollectionsPage() {
         <p className="text-sm text-gray-500">No published collections are available yet.</p>
       ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {collections.map((c) => (
+        {collections.map((c) => {
+          const title = c.name.replace(/^(?:Paintings|Digital Art|Sculptures|Woodwork|Ceramics|Glass Art|Textiles):\s*/i, "");
+          return (
           <Link key={c.id} href={`/collections/${c.id}`} className="card-hover group block">
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#f5f5f5] mb-4">
-              <Image src={c.coverImage} alt={c.name} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw"/>
+              <Image src={c.coverImage} alt={title} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" sizes="(max-width: 768px) 100vw, 33vw"/>
             </div>
-            <p className="text-[12px] font-medium text-accent-600 uppercase tracking-wider mb-2">Artistically Editorial</p>
-            <h3 className="font-heading text-[17px] font-medium text-[#111] leading-snug">{c.name}</h3>
+            <p className="flex items-center gap-1.5 text-[12px] font-medium text-gray-500 mb-2 whitespace-nowrap">
+              <span className="shrink-0 text-accent-600 uppercase tracking-wider">{c.category === "MIXED" ? "Mixed media" : c.category?.replaceAll("_", " ") ?? "Collection"}</span>
+              <span aria-hidden="true">/</span>
+              <span className="min-w-0 truncate">{c.ownerArtist?.name ?? "Artistically Curated"}</span>
+            </p>
+            <h3 className="font-heading text-[17px] font-medium text-[#111] leading-snug">{title}</h3>
             <p className="text-[13px] text-gray-500 mt-1.5 line-clamp-2 leading-relaxed">{c.description}</p>
           </Link>
-        ))}
+          );
+        })}
       </div>
       )}
     </div>

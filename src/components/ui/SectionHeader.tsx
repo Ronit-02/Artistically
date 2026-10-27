@@ -25,8 +25,8 @@ export default function SectionHeader({
   ) : null;
 
   return (
-    <div className={`flex items-end justify-between gap-4 ${className}`}>
-      <div>
+    <div className={`flex flex-wrap items-end justify-between gap-4 ${className}`}>
+      <div className="min-w-0 [overflow-wrap:anywhere]">
         <h2 className="font-heading text-[20px] sm:text-[24px] font-semibold text-[#111] tracking-tight-heading leading-snug">{title}</h2>
         {subtitle && <p className="text-[13px] text-gray-500 mt-1">{subtitle}</p>}
       </div>

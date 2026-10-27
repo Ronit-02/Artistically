@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { productService } from "@/lib/services/product.service";
 import { fromMinorUnits } from "@/lib/money";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 export const metadataService = {
   async getProduct(id: string) {
@@ -56,7 +57,7 @@ export const metadataService = {
         name: true,
         description: true,
         coverImage: true,
-        _count: { select: { items: true } },
+        _count: { select: { items: { where: { product: BROWSE_PRODUCT_WHERE } } } },
       },
     }).then((collection) => collection ? {
       id: collection.id,

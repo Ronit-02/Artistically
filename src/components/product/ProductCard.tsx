@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/types";
 import { useWishlist, useWishlistMutations } from "@/hooks/useWishlist";
-import { isProductSold } from "@/lib/product-availability";
+import { getProductBadge } from "@/lib/product-availability";
 
 export default function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
@@ -14,7 +14,8 @@ export default function ProductCard({ product }: { product: Product }) {
   const wishlisted = wishlist.some((item) => item.id === product.id);
   const wishlistPending = add.isPending || remove.isPending;
   const artistId = product.artistId;
-  const isSold = isProductSold(product.stock);
+  const badge = getProductBadge(product);
+  const isSoldOut = badge === "Sold";
 
   const handleWishlist = () => {
     if (isAuthPending) {return;}
@@ -27,12 +28,12 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="card-hover group relative">
+    <div className="card-hover group relative min-w-0 [overflow-wrap:anywhere]">
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); handleWishlist(); }}
         disabled={wishlistPending || isAuthPending}
-        className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 transition-all duration-200 shadow-sm disabled:cursor-not-allowed"
+        className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center border-none cursor-pointer opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-visible:opacity-100 [@media(hover:none)]:!opacity-100 transition-all duration-200 shadow-sm disabled:cursor-not-allowed"
         aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
         aria-pressed={wishlisted}
       >
@@ -41,15 +42,15 @@ export default function ProductCard({ product }: { product: Product }) {
         </svg>
       </button>
 
-      {(isSold || product.badge) && (
-        <span className={`absolute top-3 left-3 z-10 text-[12px] font-semibold tracking-wider uppercase px-2 py-1 rounded-md ${isSold ? "bg-gray-600 text-white" : "bg-[#111] text-white"}`}>
-          {isSold ? "Sold" : product.badge}
+      {badge && (
+        <span className={`absolute top-3 left-3 z-10 max-w-[calc(100%-5rem)] break-words text-[12px] font-semibold tracking-wider uppercase px-2 py-1 rounded-md ${badge === "Sold" ? "bg-gray-600 text-gray-700" : "bg-[#111] text-white"}`}>
+          {isSoldOut ? "Sold out" : badge}
         </span>
       )}
 
       <Link href={`/products/${product.id}`} className="block cursor-pointer img-hover-zoom rounded-xl bg-[#f5f5f5] overflow-hidden">
         <div className="aspect-[3/3.5] relative">
-          <Image src={product.image} alt={product.title} fill className="object-cover" sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"/>
+          <Image src={product.image} alt={product.title} fill className={`object-cover${isSoldOut ? " grayscale-[50%] opacity-70" : ""}`} sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 22vw"/>
         </div>
       </Link>
 

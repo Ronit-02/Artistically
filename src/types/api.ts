@@ -166,6 +166,7 @@ export type CollectionDto = {
   featured: boolean;
   published: boolean;
   artworkCount: number;
+  category: string | null;
   ownerArtist: {
     id: string;
     handle: string;

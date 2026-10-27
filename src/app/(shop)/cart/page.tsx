@@ -114,16 +114,16 @@ export default function CartPage() {
     <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-10 sm:py-14">
       <div className="flex flex-col lg:flex-row gap-12">
         {/* Left */}
-        <div className="flex-1">
-          <div className="flex items-end justify-between mb-8">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-end justify-between gap-3 mb-8">
             <h1 className="font-heading text-[26px] sm:text-[30px] font-semibold text-[#111] tracking-tight-heading">
               My Cart <span className="text-gray-500 font-normal text-[22px]">({cart.length})</span>
             </h1>
-             <div className="flex items-center gap-4">
+             <div className="flex flex-wrap items-center gap-4">
                {cart.length > 0 && (
                  <>
                    {clear.isError && <span role="alert" className="text-[12px] text-red-600">Couldn’t clear cart.</span>}
-                   <button type="button" onClick={() => clear.mutate()} disabled={clear.isPending} className="text-[13px] text-gray-500 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">{clear.isPending ? "Clearing…" : "Clear cart"}</button>
+                   <button type="button" onClick={() => clear.mutate()} disabled={clear.isPending} className="min-h-11 text-[13px] text-gray-500 hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">{clear.isPending ? "Clearing…" : "Clear cart"}</button>
                  </>
                )}
                <Link href="/" className="inline-flex min-h-11 items-center text-[13px] text-gray-500 hover:text-[#111] transition-colors">Continue Shopping</Link>
@@ -146,8 +146,8 @@ export default function CartPage() {
 
         {/* Right — Summary */}
         {cart.length > 0 && (
-          <div className="lg:w-[340px] xl:w-[380px]">
-            <div className="bg-[#fafafa] rounded-2xl p-6 sm:p-8 sticky top-24">
+          <div className="min-w-0 lg:w-[340px] lg:shrink-0 xl:w-[380px]">
+            <div className="bg-[#fafafa] rounded-2xl p-6 sm:p-8 lg:sticky lg:top-40 [@media(max-height:800px)]:static">
               <h2 className="font-heading text-[17px] font-semibold text-[#111] mb-6">Order Summary</h2>
               <div className="space-y-3.5 mb-5">
                 {[

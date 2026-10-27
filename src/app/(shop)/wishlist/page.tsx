@@ -11,7 +11,7 @@ export default function WishlistPage() {
   const { data: wishlist = [], currentUser, isAuthPending, isLoading, isError, refetch } = useWishlist();
 
   if (isAuthPending || (currentUser && isLoading)) {
-    return <div aria-busy="true" aria-label="Loading your wishlist" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10 sm:py-14"><Skeleton className="mb-10 h-9 w-44" /><div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-1/2" /></div>)}</div></div>;
+    return <div aria-busy="true" aria-label="Loading your wishlist" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10 sm:py-14"><Skeleton className="mb-10 h-9 w-44" /><div className="grid grid-cols-2 max-[379px]:grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-1/2" /></div>)}</div></div>;
   }
 
   if (!currentUser) {
@@ -57,7 +57,7 @@ export default function WishlistPage() {
           <p className="text-[13px] text-gray-500 mt-1">{wishlist.length} {wishlist.length === 1 ? "item" : "items"} saved</p>
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+      <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
         {wishlist.map((p) => <ProductCard key={p.id} product={p}/>)}
       </div>
     </div>

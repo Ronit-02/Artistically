@@ -58,9 +58,9 @@ function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
   };
 
   return (
-    <div className="relative flex-1 max-w-xl">
-      <form onSubmit={(e) => { e.preventDefault(); if (!local.trim()) {return;} saveRecent(local); setSearchQuery(local); setFocused(false); onSearch(local); }}>
-        <div className={`flex min-h-11 items-center w-full rounded-full px-4 gap-2.5 transition-all ${focused ? "bg-white border border-accent-300 shadow-sm" : "bg-[#f5f5f5] border border-transparent hover:bg-[#efefef]"}`}>
+    <div className="relative min-w-0 flex-1 max-w-xl">
+      <form onSubmit={(e) => { e.preventDefault(); const query = local.trim(); setLocal(query); saveRecent(query); setSearchQuery(query); setFocused(false); onSearch(query); }}>
+        <div className={`flex min-h-11 items-center w-full rounded-full px-4 gap-2.5 transition-all ${focused ? "bg-white border border-accent-600 shadow-sm" : "bg-[#f5f5f5] border border-transparent hover:bg-[#efefef]"}`}>
           <svg aria-hidden="true" className="w-[18px] h-[18px] flex-shrink-0 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <label htmlFor={searchId} className="sr-only">Search for products or artists</label>
           <input id={searchId} ref={inputRef} type="text" placeholder="Search for products or artists…"
@@ -73,7 +73,7 @@ function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
               if (e.key === "Enter" && selIdx >= 0 && results[selIdx]) { e.preventDefault(); saveRecent(local); setFocused(false); router.push(results[selIdx].href); }
               if (e.key === "Escape") { setFocused(false); inputRef.current?.blur(); }
             }}
-            className="flex-1 outline-none text-[13px] text-[#111] placeholder-gray-400 bg-transparent"/>
+            className="min-w-0 w-full flex-1 outline-none text-[13px] text-[#111] placeholder-gray-400 bg-transparent"/>
           <span className="flex h-11 w-11 shrink-0 items-center justify-center">
             {local && <button type="button" aria-label="Clear search" onPointerDown={(event) => { event.preventDefault(); clearSearch(); }} className="flex h-11 w-11 items-center justify-center text-gray-500 hover:text-gray-900 bg-transparent border-none cursor-pointer p-0"><svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
           </span>
@@ -112,27 +112,28 @@ function NavbarContent() {
 
   useEffect(() => { const h = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) {setMenuOpen(false); setSettingsOpen(false);} }; document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h); }, []);
 
-  const doSearch = useCallback((q: string) => { setSearchQuery(q); router.push(buildSearchHref(q)); }, [router, setSearchQuery]);
+  const doSearch = useCallback((q: string) => { setSearchQuery(q); router.push(buildSearchHref(q, q.trim() ? {} : { sort: "price_asc" })); }, [router, setSearchQuery]);
   const catClick = (cat: string) => { setSearchQuery(""); router.push(buildSearchHref("", { types: [toSearchTypeLabel(cat)] })); };
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
       {/* Top row — spacious */}
-      <div className="max-w-[1240px] mx-auto px-6 sm:px-10 flex items-center gap-6 h-[60px]">
+      <div className="max-w-[1240px] mx-auto px-6 sm:px-10 flex flex-wrap sm:flex-nowrap items-center gap-x-2 sm:gap-x-6 min-h-[60px] max-[439px]:py-2">
         <Logo size={40} />
 
-        <div className="hidden sm:flex flex-1"><SearchBar key={searchQuery} onSearch={doSearch}/></div>
+        <div className="hidden sm:flex min-w-0 flex-1"><SearchBar key={searchQuery} onSearch={doSearch}/></div>
 
         {/* Right links */}
-        <nav aria-label="Primary navigation" className="hidden md:flex items-center gap-6">
+        <nav aria-label="Primary navigation" className="hidden lg:flex items-center gap-6">
           <Link href="/artists" className="text-[13px] text-gray-500 hover:text-accent-600 transition-colors font-medium">Artists</Link>
           <Link href="/collections" className="text-[13px] text-gray-500 hover:text-accent-600 transition-colors font-medium">Collections</Link>
+          <Link href="/photography" className="text-[13px] text-gray-500 hover:text-accent-600 transition-colors font-medium">Photography</Link>
           {canAccessArtistPortal && <Link href="/artist-portal" className="text-[13px] text-accent-600 hover:text-accent-700 transition-colors font-medium">Sell</Link>}
         </nav>
 
-        <div className="flex items-center gap-0.5 flex-shrink-0 ml-auto sm:ml-0">
+        <div className="flex items-center gap-0.5 flex-shrink-0 ml-auto sm:ml-0 max-[439px]:w-full max-[439px]:justify-between">
           {/* Profile */}
-          <div className="relative" ref={menuRef}>
+          <div className="relative max-sm:static" ref={menuRef}>
             <button type="button" onClick={() => { setMenuOpen(!menuOpen); setSettingsOpen(false); }}
               aria-label="Open account menu"
               aria-expanded={menuOpen}
@@ -141,7 +142,7 @@ function NavbarContent() {
               <svg aria-hidden="true" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5.5 21a8.38 8.38 0 0 1-.5-3c0-2.21 3.58-4 7-4s7 1.79 7 4a8.38 8.38 0 0 1-.5 3"/></svg>
             </button>
             {menuOpen && (
-              <div className="animate-scale-in absolute right-0 top-full mt-1.5 w-52 bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-50">
+              <div className="animate-scale-in absolute right-0 top-full max-sm:top-[60px] max-[439px]:top-[100px] max-sm:left-6 max-sm:right-6 mt-1.5 w-52 max-sm:w-auto max-md:max-h-[calc(100dvh-12rem)] max-md:overflow-y-auto bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-50">
                 {(hasSession
                   ? [{ label: "Profile", href: "/profile" }, { label: "Orders", href: "/profile?tab=orders" }, { label: "Wishlist", href: "/wishlist" }]
                   : []
@@ -153,7 +154,7 @@ function NavbarContent() {
                     Settings
                     <span aria-hidden="true">‹</span>
                   </button>
-                  {settingsOpen && <section id="application-settings-menu" aria-label="Application settings" className="animate-scale-in absolute right-full top-0 z-50 mr-2 w-64 rounded-xl border border-gray-100 bg-white p-3 shadow-xl">
+                  {settingsOpen && <section id="application-settings-menu" aria-label="Application settings" className="animate-scale-in relative z-50 w-full border-y border-gray-100 bg-white p-3 md:absolute md:right-full md:top-0 md:mr-2 md:w-64 md:rounded-xl md:border md:shadow-xl">
                     <div className="flex items-center justify-between gap-3 rounded-lg px-2 py-2">
                       <div><p className="text-[13px] font-medium text-gray-900">Appearance</p><p className="text-[12px] text-gray-500">Light or dark mode</p></div>
                       <ThemeToggle />
@@ -193,10 +194,16 @@ function NavbarContent() {
 
       {mobileSearch && <div className="sm:hidden px-6 pb-3"><SearchBar key={searchQuery} onSearch={q => { doSearch(q); setMobileSearch(false); }}/></div>}
 
+      <nav aria-label="Primary navigation" className="flex flex-wrap items-center justify-center gap-x-6 px-6 lg:hidden">
+        <Link href="/artists" className="inline-flex min-h-11 items-center text-[13px] font-medium text-gray-500 transition-colors hover:text-accent-600">Artists</Link>
+        <Link href="/collections" className="inline-flex min-h-11 items-center text-[13px] font-medium text-gray-500 transition-colors hover:text-accent-600">Collections</Link>
+        <Link href="/photography" className="inline-flex min-h-11 items-center text-[13px] font-medium text-gray-500 transition-colors hover:text-accent-600">Photography</Link>
+      </nav>
+
       {/* Category nav — spacious */}
       <div className="border-t border-gray-50">
         <nav aria-label="Artwork categories" className="max-w-[1240px] mx-auto px-6 sm:px-10 py-2.5 overflow-x-auto">
-           <ul className="flex items-center justify-start sm:justify-center gap-6 sm:gap-8 list-none m-0 p-0 whitespace-nowrap">
+           <ul className="flex w-max min-w-full items-center justify-start sm:justify-center gap-6 sm:gap-8 list-none m-0 p-0 whitespace-nowrap">
             {CATEGORY_LABELS.map(cat => (
               <li key={cat}><button type="button" onClick={() => catClick(cat)} className="inline-flex min-h-11 items-center text-[13px] text-gray-500 hover:text-accent-600 transition-colors bg-transparent border-none cursor-pointer px-1 font-medium">{cat}</button></li>
             ))}

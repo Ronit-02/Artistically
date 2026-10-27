@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useId, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
 import { useProductPage } from "@/hooks/useProducts";
@@ -44,18 +44,26 @@ function CheckGroup({
   checked: readonly FilterValue[];
   onToggle: (value: FilterValue) => void;
 }) {
+  const [isOpen, setIsOpen] = useState(true);
+  const panelId = useId();
+
   return (
-    <fieldset className="mb-6">
-      <legend className="text-[12px] font-semibold text-[#111] uppercase tracking-wider mb-2.5">{label}</legend>
-      <div className="space-y-2">
+    <fieldset className="min-w-0 border-b border-gray-100 pb-3">
+      <legend className="w-full p-0">
+        <button type="button" aria-expanded={isOpen} aria-controls={panelId} onClick={() => setIsOpen((current) => !current)} className="flex min-h-11 w-full items-center justify-between gap-3 bg-transparent p-0 text-left cursor-pointer">
+          <span className="text-[12px] font-semibold text-[#111] uppercase tracking-wider">{label}</span>
+          <svg aria-hidden="true" className={`h-4 w-4 shrink-0 text-gray-500 motion-safe:transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+        </button>
+      </legend>
+      <div id={panelId} hidden={!isOpen} className="pl-4">
         {items.map((item) => (
-          <label key={String(item)} className="flex items-center gap-2.5 cursor-pointer group">
-            <input type="checkbox" checked={checked.includes(item)} onChange={() => onToggle(item)} className="w-3.5 h-3.5 rounded border-gray-300 text-accent-600 cursor-pointer accent-accent-600"/>
+          <label key={String(item)} className="flex min-h-11 items-center gap-2.5 cursor-pointer group">
+            <input type="checkbox" aria-label={typeof item === "number" ? `${item} stars and up` : undefined} checked={checked.includes(item)} onChange={() => onToggle(item)} className="w-3.5 h-3.5 shrink-0 rounded border-gray-300 text-accent-600 cursor-pointer accent-accent-600"/>
             <span className="text-[13px] text-gray-500 group-hover:text-accent-600 transition-colors">
               {typeof item === "number" ? (
                 <span className="flex items-center gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <svg key={i} className={`w-3 h-3 ${i < item ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"}`} viewBox="0 0 18 18"><path d={STAR_PATH}/></svg>
+                    <svg key={i} aria-hidden="true" className={`w-3 h-3 ${i < item ? "text-yellow-400 fill-yellow-400" : "text-gray-200 fill-gray-200"}`} viewBox="0 0 18 18"><path d={STAR_PATH}/></svg>
                   ))}
                   <span className="text-[12px] text-gray-500">& up</span>
                 </span>
@@ -88,7 +96,7 @@ function FilterPanel({
   const activeFilters = checkedTypes.length + checkedPrices.length + checkedRatings.length;
 
   return (
-    <div>
+    <div className="space-y-3">
       <CheckGroup label="Art Type" items={ART_TYPES} checked={checkedTypes} onToggle={(value) => onToggleType(String(value))}/>
       <CheckGroup label="Price Range" items={PRICE_RANGES} checked={checkedPrices} onToggle={(value) => onTogglePrice(String(value))}/>
       <CheckGroup label="Rating" items={RATINGS} checked={checkedRatings} onToggle={(value) => onToggleRating(Number(value))}/>
@@ -103,7 +111,7 @@ function FilterPanel({
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div aria-busy="true" aria-label="Loading artworks" className="mx-auto grid max-w-[1240px] grid-cols-2 gap-6 px-6 py-10 sm:grid-cols-3 sm:px-10"><Skeleton className="aspect-[4/5] w-full" /><Skeleton className="aspect-[4/5] w-full" /><Skeleton className="aspect-[4/5] w-full" /></div>}>
+    <Suspense fallback={<div aria-busy="true" aria-label="Loading artworks" className="mx-auto grid max-w-[1240px] grid-cols-2 max-[379px]:grid-cols-1 gap-6 px-6 py-10 sm:grid-cols-3 sm:px-10"><Skeleton className="aspect-[4/5] w-full" /><Skeleton className="aspect-[4/5] w-full" /><Skeleton className="aspect-[4/5] w-full" /></div>}>
       <SearchPageContent />
     </Suspense>
   );
@@ -162,6 +170,7 @@ function SearchResults({
 
     return {
       search: searchQuery || undefined,
+      includeSold: searchQuery.trim().length > 0 || checkedTypes.length > 0,
       categories: checkedTypes.map((type) => API_CATEGORY_BY_LABEL[type]).filter((category): category is string => !!category),
       priceRanges: checkedPrices.map((price) => {
         const [minimum, maximum] = PRICE_RANGE_MAP[price] ?? [0, Infinity];
@@ -202,6 +211,12 @@ function SearchResults({
   };
 
   const totalPages = Math.max(1, productPage?.pagination.totalPages ?? 1);
+  const visiblePages = Array.from(new Set([
+    1,
+    ...Array.from({ length: Math.min(3, totalPages) }, (_, index) =>
+      Math.min(Math.max(2, currentPage - 1), Math.max(1, totalPages - 3)) + index),
+    totalPages,
+  ])).filter((page) => page <= totalPages).sort((left, right) => left - right);
   const paginated = products;
   const activeFilters = checkedTypes.length + checkedPrices.length + checkedRatings.length;
 
@@ -218,7 +233,7 @@ function SearchResults({
         </aside>
 
         {/* Main */}
-        <div className="flex-1">
+        <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
           {/* Header */}
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div>
@@ -227,8 +242,8 @@ function SearchResults({
               </h1>
               <p className="text-[13px] text-gray-500 mt-0.5">{productPage?.pagination.total ?? 0} artworks found</p>
             </div>
-            <div className="flex items-center gap-2.5">
-              <button type="button" onClick={() => setFiltersOpen(!filtersOpen)} className="lg:hidden min-h-11 flex items-center gap-1.5 text-[13px] text-gray-500 border border-gray-200 rounded-lg px-3 py-2 bg-white cursor-pointer hover:border-gray-300 transition-colors">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button type="button" aria-expanded={filtersOpen} aria-controls="mobile-artwork-filters" onClick={() => setFiltersOpen(!filtersOpen)} className="lg:hidden min-h-11 flex items-center gap-1.5 text-[13px] text-gray-500 border border-gray-200 rounded-lg px-3 py-2 bg-white cursor-pointer hover:border-gray-300 transition-colors">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
                 Filters {activeFilters > 0 && `(${activeFilters})`}
               </button>
@@ -244,7 +259,7 @@ function SearchResults({
 
           {/* Mobile filters */}
           {filtersOpen && (
-            <div className="lg:hidden bg-[#fafafa] rounded-xl p-5 mb-6 border border-gray-100">
+            <div id="mobile-artwork-filters" className="lg:hidden bg-[#fafafa] rounded-xl p-5 mb-6 border border-gray-100">
               <FilterPanel checkedTypes={checkedTypes} checkedPrices={checkedPrices} checkedRatings={checkedRatings} onToggleType={(value) => toggle(setCheckedTypes, value)} onTogglePrice={(value) => toggle(setCheckedPrices, value)} onToggleRating={(value) => toggle(setCheckedRatings, value)} onClear={clearFilters}/>
             </div>
           )}
@@ -253,9 +268,9 @@ function SearchResults({
           {searchQuery && (
             <div className="flex items-center gap-2 mb-5 flex-wrap">
               <span className="text-[12px] text-gray-500">Searching:</span>
-              <span className="inline-flex items-center gap-1.5 text-[12px] bg-accent-50 text-accent-700 px-2.5 py-1 rounded-md font-medium">
+              <span className="inline-flex max-w-full items-center gap-1.5 text-[12px] bg-accent-50 text-accent-700 px-2.5 py-1 rounded-md font-medium">
                 {searchQuery}
-                <button type="button" onClick={clearSearch} aria-label="Clear search query" className="min-w-11 min-h-11 inline-flex items-center justify-center hover:text-accent-900 bg-transparent border-none cursor-pointer p-0 transition-colors">
+                <button type="button" onClick={clearSearch} aria-label="Clear search query" className="min-w-11 min-h-11 inline-flex items-center justify-center hover:text-accent-700 bg-transparent border-none cursor-pointer p-0 transition-colors">
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
               </span>
@@ -264,7 +279,7 @@ function SearchResults({
 
           {/* Grid */}
           {isLoading ? (
-            <div aria-busy="true" aria-label="Loading artworks" className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">{[1, 2, 3, 4, 5, 6, 7, 8].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-1/2" /></div>)}</div>
+            <div aria-busy="true" aria-label="Loading artworks" className="grid grid-cols-2 max-[379px]:grid-cols-1 gap-x-4 gap-y-10 sm:grid-cols-3 xl:grid-cols-4">{[1, 2, 3, 4, 5, 6, 7, 8].map((item) => <div key={item} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-1/2" /></div>)}</div>
           ) : isError ? (
             <div className="text-center py-20">
               <p className="text-gray-500 text-[14px] mb-4">We couldn’t load artworks right now.</p>
@@ -275,27 +290,33 @@ function SearchResults({
               <p className="text-gray-500 text-[14px]">No artworks found. Try adjusting your filters.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-3 xl:grid-cols-4 gap-4">
               {paginated.map((p) => <ProductCard key={p.id} product={p}/>)}
             </div>
           )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-1.5 mt-10">
+            <nav aria-label="Artwork pagination" className="flex items-center justify-center gap-1.5 mt-10">
               <button type="button" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}
                 aria-label="Previous page"
                 className="min-w-11 min-h-11 rounded-lg border border-gray-200 flex items-center justify-center text-[13px] text-gray-500 disabled:opacity-30 cursor-pointer hover:bg-[#f5f5f5] bg-white transition-colors">‹</button>
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <button type="button" key={i} onClick={() => setCurrentPage(i + 1)}
-                  aria-label={`Go to page ${i + 1}`}
-                  aria-current={currentPage === i + 1 ? "page" : undefined}
-                  className={`min-w-11 min-h-11 rounded-lg border text-[13px] cursor-pointer transition-colors ${currentPage === i + 1 ? "bg-accent-600 text-white border-accent-600" : "border-gray-200 text-gray-500 hover:bg-[#f5f5f5] bg-white"}`}>{i + 1}</button>
-              ))}
+              <span aria-live="polite" className="px-3 text-[13px] text-gray-500 sm:sr-only sm:px-0">Page {currentPage} of {totalPages}</span>
+              <div className="hidden items-center gap-1.5 sm:flex">
+                {visiblePages.map((page, index) => (
+                  <div key={page} className="flex items-center gap-1.5">
+                    {index > 0 && page - visiblePages[index - 1] > 1 && <span aria-hidden="true" className="px-1 text-[13px] text-gray-500">…</span>}
+                    <button type="button" onClick={() => setCurrentPage(page)}
+                      aria-label={`Go to page ${page}`}
+                      aria-current={currentPage === page ? "page" : undefined}
+                      className={`min-w-11 min-h-11 rounded-lg border text-[13px] cursor-pointer transition-colors ${currentPage === page ? "bg-accent-600 text-white border-accent-600" : "border-gray-200 text-gray-500 hover:bg-[#f5f5f5] bg-white"}`}>{page}</button>
+                  </div>
+                ))}
+              </div>
               <button type="button" onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}
                 aria-label="Next page"
                 className="min-w-11 min-h-11 rounded-lg border border-gray-200 flex items-center justify-center text-[13px] text-gray-500 disabled:opacity-30 cursor-pointer hover:bg-[#f5f5f5] bg-white transition-colors">›</button>
-            </div>
+            </nav>
           )}
         </div>
       </div>

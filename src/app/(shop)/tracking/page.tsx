@@ -1,5 +1,6 @@
 "use client";
 
+import { IMAGE_PLACEHOLDER } from "@/lib/image-placeholder";
 import type { FormEvent} from "react";
 import { Suspense, useState } from "react";
 import Image from "next/image";
@@ -127,8 +128,8 @@ function TrackingPageContent() {
   ];
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-6 sm:py-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-6 sm:py-8 [overflow-wrap:anywhere]">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-heading font-semibold text-gray-900 tracking-tight-heading">Order tracking</h1>
           <p className="text-xs text-gray-500 mt-1">Order {order.id}</p>
@@ -137,17 +138,17 @@ function TrackingPageContent() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <div className="space-y-4 mb-8">
             {order.items.map((item) => (
-              <div key={item.id} className="flex gap-4 bg-white border border-gray-200 rounded-xl p-4">
+              <div key={item.id} className="flex flex-col sm:flex-row gap-4 bg-white border border-gray-200 rounded-xl p-4">
                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 relative flex-shrink-0">
-                  <Image src={item.product.images[0]?.url ?? "/paintings/painting-1.jpg"} alt={item.product.title} fill className="object-cover" sizes="80px"/>
+                  <Image src={item.product.images[0]?.url ?? IMAGE_PLACEHOLDER} alt={item.product.title} fill className="object-cover" sizes="80px"/>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 line-clamp-2">{item.product.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5">by {item.product.artist.user.firstName} {item.product.artist.user.lastName}</p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                  <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
                     <span>Size: {item.size}</span>
                     <span>Qty: {item.quantity}</span>
                     <span className="font-semibold text-[#111]">₹{(item.price * item.quantity).toLocaleString()}</span>
@@ -208,13 +209,13 @@ function TrackingPageContent() {
               <h2 className="text-sm font-semibold text-gray-900 mb-4">Order history</h2>
               <div className="space-y-3">
                 {deliveryRecords.slice(-6).reverse().map((record) => (
-                  <div key={record.id} className="flex items-start justify-between gap-3 text-xs">
+                  <div key={record.id} className="flex flex-wrap items-start justify-between gap-3 text-xs">
                     <div><p className="font-medium text-gray-800">{record.type.replaceAll("_", " ")}</p>{record.note && <p className="mt-0.5 text-gray-500">{record.note}</p>}</div>
                     <time className="shrink-0 text-gray-500">{formatDate(record.occurredAt)}</time>
                   </div>
                 ))}
                 {disputes.map((dispute) => (
-                  <div key={dispute.id} className="flex items-start justify-between gap-3 border-t border-gray-100 pt-3 text-xs">
+                  <div key={dispute.id} className="flex flex-wrap items-start justify-between gap-3 border-t border-gray-100 pt-3 text-xs">
                     <div><p className="font-medium text-gray-800">Dispute · {dispute.type.replaceAll("_", " ")}</p><p className="mt-0.5 text-gray-500">{dispute.status.replaceAll("_", " ")}</p></div>
                     <time className="shrink-0 text-gray-500">{formatDate(dispute.createdAt)}</time>
                   </div>
@@ -224,16 +225,16 @@ function TrackingPageContent() {
           )}
         </div>
 
-        <div className="lg:w-80 xl:w-96">
+        <div className="min-w-0 lg:w-80 lg:shrink-0 xl:w-96">
           <div className="bg-gray-50 rounded-2xl p-5 sm:p-6">
             <h2 className="text-sm font-semibold text-gray-900 mb-4">Order summary</h2>
             <div className="space-y-3 mb-5">
-              {summaryRows.map(({ label, value }) => <div key={label} className="flex justify-between text-sm"><span className="text-gray-500">{label}</span><span className="text-gray-900 text-right">{value}</span></div>)}
-              <div className="flex justify-between text-sm"><span className="text-gray-500">Expected delivery</span><span className="text-gray-900 text-right">{formatDate(order.estimatedDelivery)}</span></div>
+              {summaryRows.map(({ label, value }) => <div key={label} className="flex flex-wrap justify-between gap-x-3 text-sm"><span className="text-gray-500">{label}</span><span className="text-gray-900 text-right">{value}</span></div>)}
+              <div className="flex flex-wrap justify-between gap-x-3 text-sm"><span className="text-gray-500">Expected delivery</span><span className="text-gray-900 text-right">{formatDate(order.estimatedDelivery)}</span></div>
             </div>
             <div className="space-y-2">
               <a
-                href={`mailto:hello@artistically.com?subject=${encodeURIComponent(`Order support: ${order.id}`)}`}
+                href={`mailto:artistically.business@gmail.com?subject=${encodeURIComponent(`Order support: ${order.id}`)}`}
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all shadow-sm"
               >
                 Contact support
@@ -243,7 +244,7 @@ function TrackingPageContent() {
               ) : canCancel ? (
                 <div className="space-y-2" role="group" aria-label="Confirm order cancellation">
                   <p className="text-xs text-gray-500">Cancel this order? This action releases its reserved stock and cannot be undone.</p>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button variant="secondary" fullWidth disabled={cancelOrder.isPending} onClick={() => setConfirmingCancel(false)}>Keep Order</Button>
                     <Button variant="ghost" fullWidth disabled={cancelOrder.isPending} onClick={() => cancelOrder.mutate(order.id)}>{cancelOrder.isPending ? "Cancelling…" : "Confirm Cancellation"}</Button>
                   </div>

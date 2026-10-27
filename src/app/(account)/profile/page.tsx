@@ -112,12 +112,12 @@ export default function ProfilePage() {
   const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-700 outline-none focus:border-gray-400 focus-visible:ring-2 focus-visible:ring-accent-100 transition-colors disabled:bg-gray-50 disabled:text-gray-500";
 
   if (isAuthPending) {
-    return <div aria-busy="true" aria-label="Loading your profile" className="mx-auto max-w-[840px] space-y-6 px-6 py-8 sm:px-10"><Skeleton className="h-28 w-full rounded-2xl" /><Skeleton className="h-10 w-72" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
+    return <div aria-busy="true" aria-label="Loading your profile" className="mx-auto max-w-[1240px] space-y-6 px-6 py-8 sm:px-10"><Skeleton className="h-28 w-full rounded-2xl" /><Skeleton className="h-10 w-full max-w-72" /><Skeleton className="h-64 w-full rounded-xl" /></div>;
   }
 
   if (!currentUser) {
     return (
-      <div className="max-w-[840px] mx-auto px-6 sm:px-10 py-24 text-center">
+      <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-24 text-center">
         <h1 className="font-heading text-[26px] font-semibold text-[#111] mb-2">Sign in to view your profile</h1>
         <p className="text-[15px] text-gray-500 mb-8">Your profile, orders, and wishlist are private to your account.</p>
         <Button variant="primary" onClick={() => router.push("/login")}>Sign In</Button>
@@ -126,14 +126,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-[840px] mx-auto px-6 sm:px-10 py-6 sm:py-8">
+    <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-6 sm:py-8">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 sm:mb-8">
         <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-2xl font-bold text-[#111] flex-shrink-0">
            {displayedForm.firstName[0]}
         </div>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
            <h1 className="text-xl sm:text-2xl font-heading font-semibold text-gray-900 tracking-tight-heading">{displayedForm.firstName} {displayedForm.lastName}</h1>
            <p className="text-sm text-gray-500">{displayedForm.email}</p>
         </div>
@@ -144,7 +144,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-6" role="tablist" aria-label="Account sections">
+      <div className="flex flex-wrap border-b border-gray-200 mb-6" role="tablist" aria-label="Account sections">
         {([["profile", "Profile"], ["orders", "Orders"], ["wishlist", "Wishlist"]] as [Tab, string][]).map(([t, label]) => (
            <button type="button" key={t} role="tab" aria-selected={tab === t} onClick={() => moveToTab(t)} className={`min-h-11 px-4 py-3 text-sm font-medium border-b-2 transition-colors bg-transparent cursor-pointer -mb-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 ${tab === t ? "border-gray-900 text-[#111]" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
             {label}
@@ -174,7 +174,7 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
-          <div className="flex gap-3 mt-6">
+          <div className="flex flex-wrap gap-3 mt-6">
             {editing ? (
               <>
                 <Button variant="primary" onClick={handleSave} disabled={updateProfile.isPending}>{updateProfile.isPending ? "Saving…" : "Save Changes"}</Button>
@@ -209,10 +209,10 @@ export default function ProfilePage() {
               <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 relative flex-shrink-0">
                 <Image src={order.image} alt={order.title} fill className="object-cover" sizes="64px"/>
               </div>
-              <div className="flex-1">
+              <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
                 <p className="text-sm font-medium text-gray-900">{order.title}</p>
                 <p className="text-xs text-gray-500 mt-0.5">by {order.artist}</p>
-                <div className="flex items-center gap-3 mt-2">
+                <div className="flex flex-wrap items-center gap-3 mt-2">
                   <span className="text-sm font-semibold text-gray-900">₹{order.price.toLocaleString()}</span>
                   {order.status && (
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_STYLES[order.status] ?? ""}`}>
@@ -237,7 +237,7 @@ export default function ProfilePage() {
             <Button variant="primary" onClick={() => router.push("/")}>Discover Art</Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-3 gap-4">
             {wishlist.map((p) => <ProductCard key={p.id} product={p}/>)}
           </div>
         )

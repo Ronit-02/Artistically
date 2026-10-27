@@ -22,6 +22,7 @@ vi.mock("@/lib/prisma", () => ({
 
 import { productService } from "@/lib/services/product.service";
 import { ProductQuerySchema, validate } from "@/lib/validators";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 const lowRatedCandidate = {
   id: "cm7q1k8l90000abcde1234567",
@@ -32,6 +33,88 @@ const highRatedCandidate = {
   id: "cm7q1k8l90000abcde1234568",
   reviews: [{ rating: 5 }],
 };
+
+describe("sold listing discovery and search ranking", () => {
+  beforeEach(() => vi.resetAllMocks());
+
+  it("filters sold listings in the database before pagination and counting", async () => {
+    mocks.productFindMany.mockResolvedValue([]);
+    mocks.productCount.mockResolvedValue(0);
+    await productService.list(validate(ProductQuerySchema, { search: "study" }));
+    expect(mocks.productFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ AND: [BROWSE_PRODUCT_WHERE] }),
+    }));
+    expect(mocks.productCount).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ AND: [BROWSE_PRODUCT_WHERE] }),
+    }));
+  });
+
+  it.each([{ search: "study" }, { category: "PAINTINGS" }, { categories: ["PAINTINGS", "CERAMICS"] }])("fills a page with available matches before sold matches for %j", async (filters) => {
+    mocks.productCount.mockResolvedValueOnce(7).mockResolvedValueOnce(5);
+    mocks.productFindMany.mockResolvedValue([{ id: "available", reviews: [] }]);
+    const result = await productService.list(validate(ProductQuerySchema, {
+      ...filters, includeSold: true, page: 1, limit: 3, sortBy: "price_asc",
+    }));
+    expect(result.total).toBe(7);
+    expect(mocks.productFindMany).toHaveBeenCalledTimes(1);
+    expect(mocks.productFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { AND: [expect.objectContaining(filters.search ? { OR: expect.any(Array) } : { category: filters.categories ? { in: filters.categories } : filters.category }), { stock: { gt: 0 } }] },
+      skip: 0, take: 3, orderBy: [{ price: "asc" }, { id: "asc" }],
+    }));
+  });
+
+  it.each([{ search: "study" }, { category: "PAINTINGS" }, { categories: ["PAINTINGS", "CERAMICS"] }])("joins available and sold matches at the page boundary for %j", async (filters) => {
+    mocks.productCount.mockResolvedValueOnce(7).mockResolvedValueOnce(4);
+    mocks.productFindMany
+      .mockResolvedValueOnce([{ id: "available-last", reviews: [] }])
+      .mockResolvedValueOnce([{ id: "sold-first", reviews: [] }, { id: "sold-second", reviews: [] }]);
+    const result = await productService.list(validate(ProductQuerySchema, {
+      ...filters, includeSold: true, page: 2, limit: 3,
+    }));
+    expect(result.products.map((product) => product.id)).toEqual(["available-last", "sold-first", "sold-second"]);
+    expect(result.total).toBe(7);
+    expect(mocks.productFindMany).toHaveBeenNthCalledWith(1, expect.objectContaining({ skip: 3, take: 1 }));
+    expect(mocks.productFindMany).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      where: { AND: [expect.any(Object), { stock: { lte: 0 } }] }, skip: 0, take: 2,
+    }));
+  });
+
+  it.each([{ search: "study" }, { category: "PAINTINGS" }, { categories: ["PAINTINGS", "CERAMICS"] }])("offsets later sold-only pages without repeating matches for %j", async (filters) => {
+    mocks.productCount.mockResolvedValueOnce(10).mockResolvedValueOnce(4);
+    mocks.productFindMany.mockResolvedValue([{ id: "sold-third", reviews: [] }]);
+    await productService.list(validate(ProductQuerySchema, { ...filters, includeSold: true, page: 3, limit: 3 }));
+    expect(mocks.productFindMany).toHaveBeenCalledTimes(1);
+    expect(mocks.productFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { AND: [expect.any(Object), { stock: { lte: 0 } }] }, skip: 2, take: 3,
+    }));
+  });
+
+  it("keeps rating and price filters when ranking explicit search results", async () => {
+    mocks.productFindMany
+      .mockResolvedValueOnce([lowRatedCandidate, highRatedCandidate])
+      .mockResolvedValueOnce([highRatedCandidate]);
+    mocks.productCount.mockResolvedValueOnce(1);
+    const result = await productService.list(validate(ProductQuerySchema, {
+      search: "study", includeSold: true, minRating: 4, priceRanges: ["1000-+"], limit: 1,
+    }));
+    expect(result.total).toBe(1);
+    expect(mocks.productFindMany).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      where: expect.objectContaining({ AND: [{ OR: [{ price: { gte: 100000 } }] }] }),
+    }));
+    expect(mocks.productFindMany).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      where: { AND: [expect.objectContaining({ id: { in: [highRatedCandidate.id] } }), { stock: { gt: 0 } }] },
+    }));
+  });
+
+  it("preserves all inventory records when the route authorizes an inventory read", async () => {
+    mocks.productCount.mockResolvedValue(1);
+    mocks.productFindMany.mockResolvedValue([{ id: "sold-inventory", reviews: [] }]);
+    await productService.list(validate(ProductQuerySchema, { includeSold: true, artistId: "cm7q1k8l90000abcde1234567" }));
+    expect(mocks.productFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { isActive: true, artistId: "cm7q1k8l90000abcde1234567" },
+    }));
+  });
+});
 
 describe("product rating filtering", () => {
   beforeEach(() => {

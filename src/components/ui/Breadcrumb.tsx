@@ -16,7 +16,7 @@ interface BreadcrumbProps {
 export default function Breadcrumb({ items, className = "" }: BreadcrumbProps) {
   return (
     <nav aria-label="Breadcrumb" className={`text-[13px] text-gray-500 ${className}`}>
-      <ol className="flex items-center gap-2 list-none m-0 p-0">
+      <ol className="flex flex-wrap items-center gap-2 list-none m-0 p-0 [overflow-wrap:anywhere]">
         <li>
           <Link href="/" className="inline-flex min-h-11 items-center hover:text-accent-600 transition-colors">
             Home
@@ -26,7 +26,7 @@ export default function Breadcrumb({ items, className = "" }: BreadcrumbProps) {
           const isCurrentPage = i === items.length - 1 && !item.href && !item.onClick;
 
           return (
-            <li key={`${item.label}-${i}`} className="flex items-center gap-2">
+            <li key={`${item.label}-${i}`} className="flex min-w-0 max-w-full items-center gap-2">
               <span aria-hidden="true" className="text-gray-200">/</span>
               {item.href ? (
                 <Link href={item.href} className="inline-flex min-h-11 items-center hover:text-accent-600 transition-colors">

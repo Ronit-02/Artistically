@@ -38,6 +38,11 @@ For collectors, the promise is meaningful art from credible artists with clear a
 - Collections and editorial stories.
 - Informational, support, and policy pages.
 
+### Photography
+
+- A separate inspiration gallery for enjoying photography, with topic browsing and full-image viewing.
+- Photography gallery content has no prices, discounts, cart actions, sales listings, or app artist associations.
+
 ### Collector experience
 
 - Account and profile experiences.

@@ -20,7 +20,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({
   ...nativeProps
 }, ref) {
   const base =
-    "inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-200 disabled:cursor-not-allowed disabled:opacity-50 select-none";
+    "inline-flex min-h-11 items-center justify-center gap-2 font-medium transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-200 disabled:cursor-not-allowed disabled:opacity-50 select-none";
   const sizes = {
     sm: "px-4 py-2 text-[13px] rounded-lg",
     md: "px-5 py-2.5 text-sm rounded-xl",
@@ -28,11 +28,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({
   };
   const variants = {
     primary:
-      "bg-gray-900 text-white hover:bg-gray-800 active:bg-gray-950 border-none shadow-sm",
+      "bg-gray-900 text-white enabled:hover:bg-[var(--color-action-primary-hover)] enabled:active:bg-[var(--color-action-primary-pressed)] border-none shadow-sm",
     secondary:
-      "bg-white text-gray-700 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100 shadow-sm",
+      "bg-white text-gray-700 border border-gray-200 enabled:hover:border-[var(--color-border-strong)] enabled:hover:bg-[var(--color-surface-muted)] enabled:active:bg-[var(--color-surface)] shadow-sm",
     ghost:
-      "bg-transparent text-gray-500 hover:text-gray-900 hover:bg-gray-50 active:bg-gray-100 border-none",
+      "bg-transparent text-gray-500 enabled:hover:text-[var(--color-text-heading)] enabled:hover:bg-[var(--color-surface-muted)] enabled:active:bg-[var(--color-surface)] border-none",
   };
   return (
     <button

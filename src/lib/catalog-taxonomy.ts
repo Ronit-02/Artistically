@@ -14,7 +14,6 @@ export const CATEGORY_LABELS = [
 
 export const ART_TYPES: readonly string[] = [
   "Digital Art",
-  "Photography",
   "Textile Design",
   "Painting",
   "Sculpture",

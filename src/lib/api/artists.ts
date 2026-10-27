@@ -1,4 +1,5 @@
 import type { Artist, Product } from "@/types";
+import { IMAGE_PLACEHOLDER } from "@/lib/image-placeholder";
 import { apiRequest, ApiClientError } from "@/lib/api/client";
 import { fetchProducts } from "@/lib/api/products";
 import type { ArtistDto, ArtistFollowDto } from "@/types/api";
@@ -16,8 +17,8 @@ function mapArtist(artist: ArtistDto): Artist {
     name,
     handle: artist.handle,
     followers: artist._count.followers.toLocaleString(),
-    avatar: artist.user.avatar ?? "/artists/artist-1.jpg",
-    cover: artist.cover ?? "/artists/artist-1-cover.jpg",
+    avatar: artist.user.avatar ?? IMAGE_PLACEHOLDER,
+    cover: artist.cover ?? IMAGE_PLACEHOLDER,
     designs: artist._count.products,
     bio: artist.bio ?? undefined,
     verified: artist.verified,

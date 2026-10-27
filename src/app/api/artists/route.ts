@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, refreshAccessToken } from "@/lib/auth";
 import { validate, CreateArtistSchema } from "@/lib/validators";
 import { ok, created, conflict, withErrorHandler } from "@/lib/api-response";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 const artistSelect = {
   id: true,
@@ -15,7 +16,7 @@ const artistSelect = {
   verification: { select: { status: true } },
   createdAt: true,
   user: { select: { firstName: true, lastName: true, avatar: true } },
-  _count: { select: { products: true, followers: true } },
+  _count: { select: { products: { where: BROWSE_PRODUCT_WHERE }, followers: true } },
 };
 
 export const GET = withErrorHandler(async () => {

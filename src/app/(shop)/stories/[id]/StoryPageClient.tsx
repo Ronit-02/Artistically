@@ -12,7 +12,7 @@ export default function StoryPageClient({ storyId }: { storyId: string }) {
   const { data: story, isLoading, isError, refetch } = useStory(storyId);
   const { data: allStories } = useStories();
 
-  if (isLoading) {return <main aria-busy="true" aria-label="Loading story" className="mx-auto max-w-[680px] px-6 py-10 sm:py-16"><Skeleton className="mb-8 aspect-[4/3] w-full rounded-xl" /><Skeleton className="mb-4 h-5 w-1/4" /><Skeleton className="mb-5 h-10 w-4/5" /><Skeleton className="mb-3 h-4 w-full" /><Skeleton className="h-4 w-11/12" /></main>;}
+  if (isLoading) {return <div aria-busy="true" aria-label="Loading story" className="mx-auto max-w-[1240px] px-6 py-10 sm:px-10 sm:py-16"><Skeleton className="mb-8 aspect-[16/9] w-full rounded-xl" /><Skeleton className="mb-4 h-5 w-1/4" /><Skeleton className="mb-5 h-10 w-4/5" /><Skeleton className="mb-3 h-4 w-full" /><Skeleton className="h-4 w-11/12" /></div>;}
   if (isError) {
     return (
       <div className="text-center py-20">
@@ -28,15 +28,16 @@ export default function StoryPageClient({ storyId }: { storyId: string }) {
   const otherStories = (allStories ?? []).filter((s) => s.id !== story.id);
 
   return (
-    <div className="max-w-[840px] mx-auto px-6 sm:px-10 py-10 sm:py-16">
+    <div className="max-w-[1240px] mx-auto px-6 sm:px-10 py-10 sm:py-16">
       <Breadcrumb items={[{ label: "Stories", href: "/stories" }, { label: story.title }]} className="mb-6"/>
 
       {/* Hero image */}
       <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-8 bg-[#f5f5f5]">
-        <Image src={story.image} alt={story.title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 840px" priority/>
+        <Image src={story.image} alt={story.title} fill className="object-cover" sizes="(min-width: 1240px) 1160px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 48px)" priority/>
       </div>
 
       {/* Meta */}
+      <div className="w-full">
       <div className="flex items-center gap-2 mb-4 text-[13px] text-gray-500">
         {story.category && <span className="font-medium uppercase tracking-wider text-[12px] text-accent-600">{story.category}</span>}
         {story.category && <span>·</span>}
@@ -48,6 +49,7 @@ export default function StoryPageClient({ storyId }: { storyId: string }) {
 
       <div className="space-y-5 text-[16px] text-[#555] leading-[1.8] mb-16">
         {story.content?.split(/\n{2,}/).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+      </div>
       </div>
 
       {/* Related */}

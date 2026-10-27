@@ -178,7 +178,7 @@ export default function ArtistPortalLayout({
             className="lg:hidden fixed inset-0 bg-black/30 z-40 border-none p-0 cursor-pointer"
             onClick={() => setSidebarOpen(false)}
           />
-          <div id="artist-portal-mobile-nav" className="lg:hidden fixed inset-y-0 left-0 w-64 bg-white z-50 shadow-xl animate-slide-down">
+          <div id="artist-portal-mobile-nav" className="lg:hidden fixed inset-y-0 left-0 w-64 max-w-full overflow-y-auto bg-white z-50 shadow-xl animate-slide-down">
             <div className="px-4 pt-16 pb-4">
               <nav className="space-y-1">
                 {NAV_ITEMS.map((item) => (
@@ -223,7 +223,7 @@ export default function ArtistPortalLayout({
       )}
 
       {/* ── Main content ──────────────────────────────────────────── */}
-      <main className="flex-1 lg:ml-60 xl:ml-64 pt-14 lg:pt-0">
+      <main className="min-w-0 flex-1 lg:ml-60 xl:ml-64 pt-[68px] lg:pt-0">
         {children}
       </main>
     </div>

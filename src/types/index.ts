@@ -164,6 +164,8 @@ export interface Collection {
   coverImage: string;
   artworkCount: number;
   featured?: boolean;
+  category?: string | null;
+  ownerArtist?: { id: string; handle: string; verified: boolean; name: string } | null;
 }
 
 // ─── Search Result ───────────────────────────────────────────────────────────

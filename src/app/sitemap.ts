@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { serverEnv } from "@/lib/env";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 const staticRoutes = [
   "/",
   "/about",
   "/artists",
   "/collections",
+  "/photography",
   "/contact",
   "/help",
   "/search",
@@ -30,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     const [products, artists, stories] = await Promise.all([
-      prisma.product.findMany({ where: { isActive: true }, select: { id: true, updatedAt: true } }),
+      prisma.product.findMany({ where: BROWSE_PRODUCT_WHERE, select: { id: true, updatedAt: true } }),
       prisma.artist.findMany({ select: { id: true, updatedAt: true } }),
       prisma.story.findMany({ where: { published: true }, select: { id: true, updatedAt: true } }),
     ]);

@@ -1,40 +1,41 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import Image from "next/image";
+import { useState, useEffect, useCallback, useRef, type PointerEvent as ReactPointerEvent } from "react";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
 import { useProducts } from "@/hooks/useProducts";
 import { useArtists } from "@/hooks/useArtists";
 import { useStories } from "@/hooks/useStories";
-import { useCollections } from "@/hooks/useCollections";
+import { useCollection, useCollections } from "@/hooks/useCollections";
 import { CATEGORY_LABELS, toSearchTypeLabel } from "@/lib/catalog-taxonomy";
 import { buildSearchHref } from "@/lib/search-url";
 import ProductCard from "@/components/product/ProductCard";
+import StoryCard from "@/components/StoryCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import ArtistCard from "@/components/artist/ArtistCard";
 import Button from "@/components/ui/Button";
 import Skeleton from "@/components/ui/Skeleton";
+import paintingsCover from "../../../../public/category-covers/paintings.webp";
+import digitalCover from "../../../../public/category-covers/digital.webp";
+import sculpturesCover from "../../../../public/category-covers/sculptures.webp";
+import glassCover from "../../../../public/category-covers/glass.webp";
+import woodworkCover from "../../../../public/category-covers/woodwork.webp";
+import ceramicsCover from "../../../../public/category-covers/ceramics.webp";
 
-const CATEGORY_COVER_IMAGES: Record<string, string> = {
-  Paintings: "/paintings/painting-1.jpg",
-  "Digital Art": "/digital-arts/digital-art-cover.jpg",
-  Sculptures: "/sculptures/sculpture-cover.jpg",
-  "Glass Art": "/sculptures/sculpture-4.jpg",
-  Woodwork: "/sculptures/sculpture-7.jpg",
-  Ceramics: "/ceramics/ceramic-3.jpg",
+const CATEGORY_COVER_IMAGES: Record<(typeof CATEGORY_LABELS)[number], StaticImageData> = {
+  Paintings: paintingsCover,
+  "Digital Art": digitalCover,
+  Sculptures: sculpturesCover,
+  "Glass Art": glassCover,
+  Woodwork: woodworkCover,
+  Ceramics: ceramicsCover,
 };
 
 /* ── Auto-rotate Carousel ──────────────────────────────────────────────── */
 
 type Slide = { label: string; title: string; cta: string; image: string | null; query: string; href?: string };
-
-function formatEditorialTitle(title: string) {
-  if (title !== title.toUpperCase()) {return title;}
-  const normalized = title.toLowerCase();
-  return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}`;
-}
 
 function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide: Slide) => void }) {
   const [idx, setIdx] = useState(0);
@@ -65,14 +66,14 @@ function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide:
       aria-label="Artwork highlights"
     >
       {/* Text side */}
-      <div className="flex flex-col justify-center px-8 sm:px-12 py-10">
+      <div className="order-2 md:order-1 min-w-0 flex flex-col justify-center px-6 sm:px-8 lg:px-12 py-10">
         <p className="text-[12px] font-medium text-accent-600 uppercase tracking-wider mb-3">{slide.label}</p>
         <h2 className="font-heading text-[1.5rem] sm:text-[2rem] font-bold text-[#111] leading-[1.15] tracking-tighter-heading mb-4">{slide.title}</h2>
         <div className="mb-6">
           <Button variant="primary" size="md" onClick={() => onNavigate(slide)}>{slide.cta}</Button>
         </div>
         {/* Dots + arrows */}
-        <div className="flex items-center gap-3" aria-live="polite">
+        <div className="flex flex-wrap items-center gap-3" aria-live="polite">
           <div className="flex gap-1.5">
             {slides.map((s, i) => (
               <button
@@ -88,20 +89,20 @@ function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide:
             ))}
           </div>
           <div className="flex gap-1 ml-auto">
-            <button type="button" aria-label="Show previous highlight" onClick={prev} className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:border-accent-300 cursor-pointer transition-colors">
+            <button type="button" aria-label="Show previous highlight" onClick={prev} className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:border-accent-600 cursor-pointer transition-colors">
               <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <button type="button" aria-label="Show next highlight" onClick={next} className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:border-accent-300 cursor-pointer transition-colors">
+            <button type="button" aria-label="Show next highlight" onClick={next} className="w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center bg-white hover:border-accent-600 cursor-pointer transition-colors">
               <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
             </button>
           </div>
         </div>
       </div>
       {/* Image side */}
-      <div className="relative min-h-[240px] md:min-h-0 overflow-hidden">
+      <div className="order-1 md:order-2 relative min-h-[240px] md:min-h-0 overflow-hidden">
         {slides.map((s, i) => (
           <div key={i} aria-hidden={i !== idx} className={`absolute inset-0 transition-opacity duration-700 ${i === idx ? "opacity-100" : "opacity-0"}`}>
-            {s.image ? <Image src={s.image} alt={s.label} fill className="object-cover" sizes="55vw" priority={i === 0}/> : <div className="absolute inset-0 bg-gray-100" />}
+            {s.image ? <Image src={s.image} alt={s.label} fill className="object-cover" sizes="55vw" loading={i === idx ? "eager" : "lazy"} fetchPriority={i === idx ? "high" : "auto"}/> : <div className="absolute inset-0 bg-gray-100" />}
           </div>
         ))}
       </div>
@@ -114,27 +115,39 @@ function Carousel({ slides, onNavigate }: { slides: Slide[]; onNavigate: (slide:
 export default function HomePageClient() {
   const router = useRouter();
   const artistRailRef = useRef<HTMLDivElement>(null);
+  const artistDragRef = useRef<{ pointerId: number; startX: number; scrollLeft: number; hasDragged: boolean } | null>(null);
+  const suppressArtistClickRef = useRef(false);
+  const [isArtistRailDragging, setIsArtistRailDragging] = useState(false);
   const productsQuery = useProducts();
+  const paintingsQuery = useProducts({ category: "PAINTINGS", limit: 5 });
+  const ceramicsQuery = useProducts({ category: "CERAMICS", limit: 5 });
   const artistsQuery = useArtists();
   const storiesQuery = useStories();
   const collectionsQuery = useCollections();
   const products = productsQuery.data ?? [];
+  const paintings = paintingsQuery.data ?? [];
+  const ceramics = ceramicsQuery.data ?? [];
   const artists = artistsQuery.data ?? [];
   const stories = storiesQuery.data ?? [];
   const collections = collectionsQuery.data ?? [];
+  const sculptureCollection = collections.find((collection) => collection.category === "SCULPTURES" && collection.artworkCount > 0);
+  const sculptureCollectionQuery = useCollection(sculptureCollection?.id ?? "");
+  const editorCollection = sculptureCollectionQuery.data;
+  const editorCollectionPending = collectionsQuery.isPending || (!!sculptureCollection && sculptureCollectionQuery.isPending);
+  const editorCollectionError = collectionsQuery.isError || sculptureCollectionQuery.isError;
   const [artistRailControls, setArtistRailControls] = useState({ canGoBack: false, canGoForward: false });
   const setSearchQuery = useAppStore((s) => s.setSearchQuery);
   const catSearch = (cat: string) => { setSearchQuery(""); router.push(buildSearchHref("", { types: [toSearchTypeLabel(cat)] })); };
   const navigate = (q: string) => { if (q) {catSearch(q);} else {router.push("/search");} };
   const slides: Slide[] = [
-    { label: "Explore paintings", title: "Find original work from independent artists", cta: "Browse paintings", image: "/paintings/painting-1.jpg", query: "Paintings" },
-    { label: "Meet the artists", title: "Discover artists and their published work", cta: "View artists", image: "/artists/artist-1-cover.jpg", query: "", href: "/artists" },
-    { label: "Browse recent listings", title: "Explore work currently published on Artistically", cta: "See recent art", image: "/paintings/painting-2.jpg", query: "" },
-    { label: "Ceramics & pottery", title: "Explore sculptural texture and handmade form", cta: "Explore ceramics", image: "/ceramics/ceramic-3.jpg", query: "Ceramics" },
+    { label: "Explore paintings", title: "Find original work from independent artists", cta: "Browse paintings", image: paintings[0]?.image ?? null, query: "Paintings" },
+    { label: "Meet the artists", title: "Discover artists and their published work", cta: "View artists", image: artists[0]?.cover ?? null, query: "", href: "/artists" },
+    { label: "Browse recent listings", title: "Explore work currently published on Artistically", cta: "See recent art", image: products[1]?.image ?? null, query: "" },
+    { label: "Ceramics & pottery", title: "Explore sculptural texture and handmade form", cta: "Explore ceramics", image: ceramics[0]?.image ?? null, query: "Ceramics" },
   ];
-  const catalogPending = productsQuery.isPending || artistsQuery.isPending || storiesQuery.isPending || collectionsQuery.isPending;
-  const catalogError = productsQuery.isError || artistsQuery.isError || storiesQuery.isError || collectionsQuery.isError;
-  const isCatalogUnavailable = productsQuery.isError && artistsQuery.isError && storiesQuery.isError && collectionsQuery.isError;
+  const catalogPending = productsQuery.isPending || paintingsQuery.isPending || ceramicsQuery.isPending || artistsQuery.isPending || storiesQuery.isPending || collectionsQuery.isPending;
+  const catalogError = productsQuery.isError || paintingsQuery.isError || editorCollectionError || ceramicsQuery.isError || artistsQuery.isError || storiesQuery.isError || collectionsQuery.isError;
+  const isCatalogUnavailable = productsQuery.isError && paintingsQuery.isError && ceramicsQuery.isError && artistsQuery.isError && storiesQuery.isError && collectionsQuery.isError;
 
   const updateArtistRailControls = useCallback(() => {
     const rail = artistRailRef.current;
@@ -149,6 +162,41 @@ export default function HomePageClient() {
     const rail = artistRailRef.current;
     if (!rail) {return;}
     rail.scrollBy({ left: direction * Math.max(rail.clientWidth * 0.8, 280), behavior: "smooth" });
+  };
+
+  const startArtistDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "mouse" || event.button !== 0) {return;}
+    suppressArtistClickRef.current = false;
+    artistDragRef.current = { pointerId: event.pointerId, startX: event.clientX, scrollLeft: event.currentTarget.scrollLeft, hasDragged: false };
+  };
+
+  const moveArtistDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = artistDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId || event.buttons !== 1) {return;}
+    const distance = event.clientX - drag.startX;
+    // Keep ordinary card clicks intact until the pointer deliberately moves.
+    if (!drag.hasDragged) {
+      if (Math.abs(distance) < 6) {return;}
+      drag.hasDragged = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      event.currentTarget.style.scrollSnapType = "none";
+      setIsArtistRailDragging(true);
+    }
+    event.preventDefault();
+    event.currentTarget.scrollLeft = drag.scrollLeft - distance;
+  };
+
+  const finishArtistDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = artistDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) {return;}
+    artistDragRef.current = null;
+    suppressArtistClickRef.current = drag.hasDragged && event.type === "pointerup";
+    event.currentTarget.style.removeProperty("scroll-snap-type");
+    setIsArtistRailDragging(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    updateArtistRailControls();
   };
 
   useEffect(() => {
@@ -172,21 +220,20 @@ export default function HomePageClient() {
 
       {/* ═══════ CAROUSEL — Auto-rotate: paintings / artists / recent listings / ceramics ═══════ */}
       <section className="py-10 sm:py-12">
-        {catalogPending ? <div aria-busy="true" aria-label="Loading homepage highlights" className="grid min-h-[320px] grid-cols-1 overflow-hidden rounded-2xl bg-[#fafafa] md:grid-cols-2 sm:min-h-[360px]"><div className="space-y-5 p-10 sm:p-12"><Skeleton className="h-4 w-28" /><Skeleton className="h-9 w-4/5" /><Skeleton className="h-5 w-2/3" /><Skeleton className="h-11 w-36 rounded-xl" /></div><Skeleton className="h-full min-h-[240px] rounded-none" /></div> : <Carousel slides={slides} onNavigate={(slide) => slide.href ? router.push(slide.href) : navigate(slide.query)}/>} 
+        {catalogPending ? <div aria-busy="true" aria-label="Loading homepage highlights" className="grid min-h-[320px] grid-cols-1 overflow-hidden rounded-2xl bg-[#fafafa] md:grid-cols-2 sm:min-h-[360px]"><div className="order-2 md:order-1 space-y-5 p-10 sm:p-12"><Skeleton className="h-4 w-28" /><Skeleton className="h-9 w-4/5" /><Skeleton className="h-5 w-2/3" /><Skeleton className="h-11 w-36 rounded-xl" /></div><Skeleton className="order-1 md:order-2 h-full min-h-[240px] rounded-none" /></div> : <Carousel slides={slides} onNavigate={(slide) => slide.href ? router.push(slide.href) : navigate(slide.query)}/>}
       </section>
 
       {/* ═══════ CATEGORIES — Image grid ═══════ */}
       <section className="py-8 sm:py-10">
         <SectionHeader title="Browse by Category" subtitle="Find original art in these popular categories" href="/search" className="mb-6"/>
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 gap-4">
-          {CATEGORY_LABELS.map((cat) => {
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {CATEGORY_LABELS.map((cat, index) => {
             const image = CATEGORY_COVER_IMAGES[cat];
             return (
-              <button key={cat} type="button" onClick={() => catSearch(cat)} className="group min-h-11 cursor-pointer border-none bg-transparent p-0 text-left">
-                <div className="h-[180px] img-hover-zoom relative rounded-xl overflow-hidden bg-[#f5f5f5] mb-2">
-                  {image ? <Image src={image} alt={cat} fill className="object-cover" sizes="(max-width: 640px) 33vw, 16vw"/> : <span className="absolute inset-0 flex items-center justify-center px-3 text-center text-xs text-gray-500">More {cat.toLowerCase()} soon</span>}
+              <button key={cat} type="button" aria-label={`Browse ${cat}`} onClick={() => catSearch(cat)} className="group min-w-0 min-h-11 cursor-pointer rounded-xl border-none bg-transparent p-0 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2">
+                <div className="aspect-video w-full img-hover-zoom relative rounded-xl overflow-hidden bg-[#f5f5f5]">
+                  <Image src={image} alt="" fill className="object-contain" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" loading={index < 4 ? "eager" : "lazy"}/>
                 </div>
-                <p className="text-[12px] font-medium text-[#111] text-center">{cat}</p>
               </button>
             );
           })}
@@ -194,46 +241,48 @@ export default function HomePageClient() {
       </section>
 
       {/* ═══════ FEATURED PAINTINGS ═══════ */}
-      <section className="py-10 sm:py-12 border-t border-gray-100">
+      <section className="py-10 sm:py-12">
         <SectionHeader title="Paintings" subtitle="Original work with distinctive presence." onLinkClick={() => catSearch("Paintings")} className="mb-6"/>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {products.filter((p) => p.category === "PAINTINGS").slice(0, 5).map((p) => <ProductCard key={p.id} product={p}/>)}
+        <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {paintings.map((p) => <ProductCard key={p.id} product={p}/>)}
           {catalogPending && [1, 2, 3, 4, 5].map((item) => <div key={`painting-${item}`} className="space-y-3"><Skeleton className="aspect-[4/5] w-full rounded-xl" /><Skeleton className="h-4 w-3/4" /></div>)}
-          {!catalogPending && !catalogError && products.filter((p) => p.category === "PAINTINGS").length === 0 && <p className="col-span-full py-8 text-sm text-gray-500">No paintings are published yet.</p>}
+          {!catalogPending && !catalogError && paintings.length === 0 && <p className="col-span-full py-8 text-sm text-gray-500">No paintings are published yet.</p>}
         </div>
       </section>
 
       {/* ═══════ EDITOR'S PICK — Etsy-inspired: text left + images right + product row ═══════ */}
-      <section className="py-10 sm:py-12 border-t border-gray-100">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <section aria-label="Editor's Picks" className="py-10 sm:py-12">
+        <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 [&>.editor-artwork]:hidden [&>.editor-artwork:nth-child(-n+5)]:block max-[379px]:[&>.editor-artwork:nth-child(n+4)]:hidden sm:[&>.editor-artwork:nth-child(-n+5)]:block lg:[&>.editor-artwork:nth-child(-n+7)]:block xl:[&>.editor-artwork:nth-child(-n+9)]:block">
           {/* Text */}
-          <div className="flex flex-col pr-4 col-span-2">
+          <div className="flex flex-col pr-4 col-span-full sm:col-span-2">
             <p className="text-[12px] font-medium text-accent-600 uppercase tracking-wider mb-2">Editor&apos;s Picks</p>
-            <h2 className="font-heading text-[1.5rem] sm:text-[1.75rem] font-bold text-[#111] leading-[1.15] tracking-tighter-heading mb-3">The Sculpture Collection</h2>
-            <p className="text-[14px] text-gray-500 leading-relaxed mb-5">Hand-selected sculptures and three-dimensional artworks that bring space, form, and texture into your home.</p>
+            {editorCollectionPending ? <div aria-busy="true" aria-label="Loading editor's collection" className="space-y-3"><Skeleton className="h-8 w-3/4" /><Skeleton className="h-16 w-full" /></div> : editorCollectionError ? <p role="status" className="text-sm text-gray-500">The collection could not be loaded. Refresh to try again.</p> : editorCollection ? <>
+            <h2 className="font-heading text-[1.5rem] sm:text-[1.75rem] font-bold text-[#111] leading-[1.15] tracking-tighter-heading mb-3">{editorCollection.name.replace(/^Sculptures:\s*/i, "")}</h2>
+            <p className="text-[14px] text-gray-500 leading-relaxed mb-5">{editorCollection.description}</p>
             <div>
-              <button type="button" onClick={() => catSearch("Sculptures")} className="inline-flex min-h-11 items-center gap-2 text-[13px] font-medium text-[#111] bg-[#f5f5f5] hover:bg-[#eee] px-5 py-2.5 rounded-full border-none cursor-pointer transition-colors">
+              <Link href={`/collections/${editorCollection.id}`} className="inline-flex min-h-11 items-center gap-2 text-[13px] font-medium text-[#111] bg-[#f5f5f5] hover:bg-[#eee] px-5 py-2.5 rounded-full border-none cursor-pointer transition-colors">
                 Shop these unique finds
-              </button>
+              </Link>
             </div>
+            </> : <p className="text-sm text-gray-500">No sculpture collection is available yet.</p>}
           </div>
           {/* Products */}
-          {products.filter((p) => p.category === "SCULPTURES").map((p) => <ProductCard key={p.id} product={p}/>)}
-          {!catalogPending && !catalogError && products.filter((p) => p.category === "SCULPTURES").length === 0 && <p className="col-span-full py-8 text-sm text-gray-500">No sculptures are published yet.</p>}
+          {editorCollection?.products.slice(0, 8).map((product) => <div key={product.id} className="editor-artwork min-w-0"><ProductCard product={product}/></div>)}
+          {!editorCollectionPending && !editorCollectionError && editorCollection?.products.length === 0 && <p className="col-span-full py-8 text-sm text-gray-500">No artworks are available in this collection yet.</p>}
         </div>
       </section>
 
       {/* ═══════ CERAMICS ═══════ */}
-      <section className="py-10 sm:py-12 border-t border-gray-100">
-        <SectionHeader title="Ceramics & Pottery" subtitle="Handmade forms for everyday spaces." onLinkClick={() => catSearch("Ceramics")} className="mb-6"/>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {products.filter((p) => p.category === "CERAMICS").map((p) => <ProductCard key={p.id} product={p}/>)}
-          {!catalogPending && !catalogError && products.filter((p) => p.category === "CERAMICS").length === 0 && <p className="col-span-full py-8 text-sm text-gray-500">No ceramics are published yet.</p>}
+      <section className="py-10 sm:py-12">
+        <SectionHeader title="Ceramics" subtitle="Handmade forms for everyday spaces." onLinkClick={() => catSearch("Ceramics")} className="mb-6"/>
+        <div className="grid grid-cols-2 max-[379px]:grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {ceramics.map((p) => <ProductCard key={p.id} product={p}/>)}
+          {!catalogPending && !catalogError && ceramics.length === 0 && <p className="col-span-full py-8 text-sm text-gray-500">No ceramics are published yet.</p>}
         </div>
       </section>
 
       {/* ═══════ COLLECTIONS — Text below image (not overlay) ═══════ */}
-      <section className="py-10 sm:py-12 border-t border-gray-100">
+      <section className="py-10 sm:py-12">
         <SectionHeader title="Curated Collections" subtitle="Artworks connected by a shared point of view." href="/collections" className="mb-6"/>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {collections.filter(c => c.featured).map((c) => (
@@ -254,7 +303,7 @@ export default function HomePageClient() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
           {/* Left — Large feature */}
           <div className="relative rounded-2xl overflow-hidden bg-[#f5f5f5] min-h-[360px] sm:min-h-[460px] group cursor-pointer img-hover-zoom" onClick={() => catSearch("Paintings")}>
-            <Image src="/paintings/painting-1.jpg" alt="Botanical Study in Red" fill className="object-cover" sizes="(max-width: 1024px) 100vw, 55vw" priority/>
+            {products[0] && <Image src={products[0].image} alt={products[0].title} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 55vw" priority/>}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent"/>
             <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
               <h1 className="font-heading text-[1.5rem] sm:text-[2.25rem] font-bold text-white leading-[1.12] tracking-tighter-heading mb-2 max-w-md">Buy meaningful art from independent artists</h1>
@@ -271,7 +320,7 @@ export default function HomePageClient() {
               <Link href={`/collections/${collections[0].id}`} className="relative w-2/5 rounded-xl overflow-hidden bg-[#f5f5f5] flex-shrink-0 img-hover-zoom">
                 <Image src={collections[0].coverImage} alt={collections[0].name} fill className="object-cover" sizes="20vw"/>
               </Link>
-              <div className="flex-1 flex flex-col justify-center py-1">
+              <div className="min-w-0 flex-1 flex flex-col justify-center py-1 [overflow-wrap:anywhere]">
                 <p className="text-[12px] font-medium text-accent-600 uppercase tracking-wider mb-1.5">Collection</p>
                 <h3 className="font-heading text-[18px] sm:text-[22px] font-semibold text-[#111] leading-snug mb-1.5">{collections[0].name}</h3>
                 <p className="text-[12px] text-gray-500 leading-relaxed line-clamp-2 mb-3">{collections[0].description}</p>
@@ -284,7 +333,7 @@ export default function HomePageClient() {
               <Link href={`/artists/${artists[0].id}`} className="relative w-2/5 rounded-xl overflow-hidden bg-[#f5f5f5] flex-shrink-0 img-hover-zoom">
                 <Image src={artists[0].cover} alt={artists[0].name} fill className="object-cover" sizes="20vw"/>
               </Link>
-              <div className="flex-1 flex flex-col justify-center py-1">
+              <div className="min-w-0 flex-1 flex flex-col justify-center py-1 [overflow-wrap:anywhere]">
                 <p className="text-[12px] font-medium text-accent-600 uppercase tracking-wider mb-1.5">Artist profile</p>
                 <h3 className="font-heading text-[18px] sm:text-[22px] font-semibold text-[#111] leading-snug mb-1.5">{artists[0].name}</h3>
                 <p className="text-[12px] text-gray-500 leading-relaxed mb-3">{artists[0].designs} original artworks available</p>
@@ -300,8 +349,8 @@ export default function HomePageClient() {
       {catalogError && <p role="status" className="pb-8 text-center text-sm text-gray-500">Some homepage sections could not be loaded. Refresh to try again.</p>}
 
       {/* ═══════ ARTISTS — Horizontal scroll ═══════ */}
-      <section className="py-10 sm:py-12 border-t border-gray-100">
-        <div className="mb-6 flex items-center justify-between gap-4">
+      <section className="py-10 sm:py-12">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="font-heading text-[20px] font-semibold leading-snug tracking-tight-heading text-[#111] sm:text-[24px]">Artists</h2>
             <p className="mt-1 text-[13px] text-gray-500">Meet the artists behind the work.</p>
@@ -315,42 +364,46 @@ export default function HomePageClient() {
             </button>
           </div>
         </div>
-        <div id="featured-artists" ref={artistRailRef} onScroll={updateArtistRailControls} className="flex gap-5 overflow-x-auto pb-2 -mx-2 px-2 snap-x snap-mandatory" style={{ scrollbarWidth: "none" }}>
+        <div
+          id="featured-artists"
+          ref={artistRailRef}
+          onScroll={updateArtistRailControls}
+          onPointerDown={startArtistDrag}
+          onPointerMove={moveArtistDrag}
+          onPointerUp={finishArtistDrag}
+          onPointerCancel={finishArtistDrag}
+          onLostPointerCapture={finishArtistDrag}
+          onDragStart={(event) => event.preventDefault()}
+          onClickCapture={(event) => {
+            if (suppressArtistClickRef.current && event.detail > 0) {
+              suppressArtistClickRef.current = false;
+              event.preventDefault();
+              event.stopPropagation();
+            }
+          }}
+          className={`flex gap-5 overflow-x-auto pb-2 -mx-2 px-2 scroll-px-2 snap-x snap-mandatory select-none ${isArtistRailDragging ? "cursor-grabbing [&_*]:cursor-grabbing" : "cursor-grab"}`}
+          style={{ scrollbarWidth: "none" }}
+        >
           {artists.map((a) => (
             <div key={a.id} className="flex-shrink-0 w-[260px] sm:w-[300px] snap-start">
               <ArtistCard artist={a}/>
             </div>
           ))}
-          <Link href="/artists" className="group flex h-40 w-[260px] shrink-0 snap-start flex-col justify-between rounded-xl border border-gray-200 bg-[#fafafa] p-5 transition-colors hover:border-gray-400 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:w-[300px]">
+          {!artistsQuery.isPending && <Link href="/artists" className="group flex h-40 w-[260px] shrink-0 snap-start flex-col justify-between rounded-xl border border-gray-200 bg-[#fafafa] p-5 transition-colors hover:border-gray-400 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:w-[300px]">
             <div>
               <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-accent-600">Artistically artists</p>
               <h3 className="mt-2 font-heading text-[20px] font-semibold leading-snug tracking-tight-heading text-[#111]">Discover more artists</h3>
             </div>
             <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#111]">View all artists <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">→</span></span>
-          </Link>
+          </Link>}
         </div>
       </section>
 
       {/* ═══════ STORIES ═══════ */}
-      <section className="py-10 sm:py-12 border-t border-gray-100">
+      <section className="py-10 sm:py-12">
         <SectionHeader title="From the editorial journal" subtitle="Notes on collecting, making, and living with art." href="/stories" linkLabel="All stories" className="mb-7"/>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {stories.slice(0, 3).map((s) => (
-            <Link key={s.id} href={`/stories/${s.id}`} className="card-hover group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2">
-              <div className="img-hover-zoom relative aspect-[4/3] overflow-hidden rounded-xl bg-[#f5f5f5]">
-                <Image src={s.image} alt={s.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw"/>
-              </div>
-              <div className="pt-4">
-                <div className="mb-2 flex items-center gap-2 text-[12px] font-medium uppercase tracking-[0.08em] text-gray-500">
-                  <span className="text-accent-600">{s.category ?? "Journal"}</span>
-                  <span aria-hidden="true" className="text-gray-500 opacity-50">/</span>
-                  <time dateTime={s.date}>{new Date(s.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</time>
-                </div>
-                <h3 className="font-heading text-[20px] font-semibold leading-[1.3] tracking-tight-heading text-[#111] line-clamp-3">{formatEditorialTitle(s.title)}</h3>
-                {s.excerpt && <p className="mt-2.5 text-[14px] leading-relaxed text-gray-500 line-clamp-2">{s.excerpt}</p>}
-              </div>
-            </Link>
-          ))}
+          {stories.slice(0, 3).map((story) => <StoryCard key={story.id} story={story} />)}
         </div>
       </section>
 

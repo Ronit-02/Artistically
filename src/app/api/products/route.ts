@@ -15,6 +15,16 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     priceRanges: searchParams.getAll("priceRange").length > 0 ? searchParams.getAll("priceRange") : undefined,
     minRatings: searchParams.getAll("minRating").length > 0 ? searchParams.getAll("minRating") : undefined,
   });
+  const hasCategoryFilter = !!query.category || (query.categories?.length ?? 0) > 0;
+  if (query.includeSold && !query.search && !hasCategoryFilter) {
+    const auth = await requireAuth(req);
+    if (auth.role !== "ADMIN") {
+      const artist = await prisma.artist.findUnique({ where: { userId: auth.userId }, select: { id: true } });
+      if (!artist || artist.id !== query.artistId) {
+        return forbidden("Only your inventory can include sold artworks without a search or category filter");
+      }
+    }
+  }
   const { products, total } = await productService.list(query);
   return paginated(products, total, query.page, query.limit);
 });

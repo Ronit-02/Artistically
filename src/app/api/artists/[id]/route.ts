@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { validate, RouteIdSchema, UpdateArtistSchema } from "@/lib/validators";
 import { ok, notFound, forbidden, withErrorHandler } from "@/lib/api-response";
+import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -23,9 +24,9 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: unknown) => {
       verification: { select: { status: true } },
       createdAt: true,
       user: { select: { firstName: true, lastName: true, avatar: true } },
-      _count: { select: { products: true, followers: true } },
+      _count: { select: { products: { where: BROWSE_PRODUCT_WHERE }, followers: true } },
       products: {
-        where: { isActive: true },
+        where: BROWSE_PRODUCT_WHERE,
         take: 20,
         orderBy: { createdAt: "desc" },
         select: {

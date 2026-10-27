@@ -58,7 +58,14 @@ describe("product query boundary", () => {
       limit: 24,
       minPrice: 500,
       sortBy: "price_asc",
+      includeSold: false,
     });
+  });
+
+  it("parses sold inclusion explicitly and trims submitted search text", () => {
+    expect(validate(ProductQuerySchema, { includeSold: "false", search: "   " })).toMatchObject({ includeSold: false, search: "" });
+    expect(validate(ProductQuerySchema, { includeSold: "true", search: " study " })).toMatchObject({ includeSold: true, search: "study" });
+    expect(() => validate(ProductQuerySchema, { includeSold: "anything" })).toThrow("Validation failed");
   });
 
   it("rejects unsupported categories", () => {

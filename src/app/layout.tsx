@@ -14,13 +14,11 @@ const websiteJsonLd = serializeJsonLd(createWebsiteJsonLd(serverEnv.NEXT_PUBLIC_
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    // The theme script intentionally sets data-theme before React hydrates.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: "try { const theme = localStorage.getItem('artistically-theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; } catch {}" }} />
         <link rel="icon" type="image/svg+xml" href="/favicon-2.svg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://cdn.fontshare.com" crossOrigin="anonymous" />
       </head>
       <body className="font-body">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteJsonLd }} />

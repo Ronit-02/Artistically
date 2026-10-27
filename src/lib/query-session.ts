@@ -7,6 +7,7 @@ const IDENTITY_QUERY_ROOTS = [
   ["orders"],
   ["seller-orders"],
   ["seller-reviews"],
+  ["products"],
 ] as const;
 
 export function clearIdentityQueries(queryClient: QueryClient) {

@@ -266,7 +266,11 @@ export const ProductQuerySchema = z
     priceRanges: z.array(z.string().regex(/^\d+(?:\.\d+)?-(?:\d+(?:\.\d+)?|\+)$/)).min(1).optional(),
     minRating: z.coerce.number().min(1).max(5).optional(),
     minRatings: z.array(z.coerce.number().min(1).max(5)).min(1).optional(),
-    search: z.string().max(100).optional(),
+    search: z.string().trim().max(100).optional(),
+    includeSold: z.preprocess(
+      (value) => value === "true" ? true : value === "false" ? false : value,
+      z.boolean(),
+    ).default(false),
     sortBy: z
       .enum(["price_asc", "price_desc", "newest", "popular"])
       .default("newest"),

@@ -19,6 +19,7 @@ const collectionDto = {
   published: true,
   artworkCount: 1,
   ownerArtist: null,
+  category: "PAINTINGS",
 };
 
 const productDto = {
@@ -55,6 +56,8 @@ describe("collection API mapping", () => {
       coverImage: collectionDto.coverImage,
       artworkCount: collectionDto.artworkCount,
       featured: true,
+      ownerArtist: null,
+      category: "PAINTINGS",
     }]);
   });
 
@@ -65,6 +68,12 @@ describe("collection API mapping", () => {
       id: collectionDto.id,
       products: [{ id: productDto.id, title: productDto.title, artistName: "A Artist" }],
     });
+  });
+
+  it("preserves artist ownership for collection creator attribution", async () => {
+    const ownerArtist = { id: "demo-artist", name: "Mira Sen", handle: "@mirasen", verified: false };
+    mockedApiRequest.mockResolvedValueOnce([{ ...collectionDto, ownerArtist }]);
+    await expect(fetchCollections()).resolves.toMatchObject([{ ownerArtist }]);
   });
 
   it("returns null only for a not-found response", async () => {

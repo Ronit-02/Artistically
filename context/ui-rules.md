@@ -14,13 +14,15 @@
 - Product image and title destinations are keyboard-reachable semantic links.
 - Keep artist identity, title, price, and critical availability visible without hover. Wishlist controls work on touch and keyboard.
 - Badges represent maintained facts; show comparison price only with a legitimate comparison price and discount policy.
-- Use one primary image and a stable aspect ratio. Sold work may remain discoverable but cannot be added to cart.
+- Artwork cards show only `Sold out` or `Limited edition` badges when applicable; ordinary listings remain unbadged. Sold artwork images are lightly desaturated and faded while text, badges, and controls remain fully readable. Non-sale reference records do not receive sale or scarcity badges or sold styling. Limited editions require a declared edition type and size, with sold availability taking precedence.
+- Use one primary image and a stable aspect ratio. Sold work appears in search results for a submitted, non-empty text search or selected art-type filters, ranked below all available matches across pagination. The chosen sort applies within each availability group. Other marketplace lists and wishlists omit sold work; counts reflect the same filter. Detail pages remain accessible from search, and private order history, cart availability notices, and inventory management retain their records. Sold work cannot be added to cart.
 
 ### Artist, collection, and story cards
 
 - Artist cards show a name, available context, and a defined verification state; verification has accessible text and an explanation.
 - Use semantic full-card destinations without competing nested actions.
 - Collection counts and editorial dates, authors, and categories come from maintained content fields.
+- Collection cards display the cover image, a single metadata line formatted as `CATEGORY / Collection owner`, title, and description. Card titles omit known leading category prefixes because category is shown separately. Collection detail headings and breadcrumbs use the same clean title, with a separate CATEGORY / Collection owner line below the hero heading. The category uses uppercase accent blue and the creator uses muted grey; long creator names truncate to preserve one line. Show the owning artist's name for artist collections and `Artistically Curated` for platform collections; mixed-category collections use `Mixed media`.
 
 ### Operational cards
 
@@ -35,6 +37,7 @@
 - Use a link for navigation and a button for a state change. Disable only when the reason is apparent; otherwise permit submission and show validation.
 - Announcement bars show only active, accurate campaigns, lead to their stated destination, have accessible dismissal, and do not stack unnecessarily.
 - The global header keeps logo, search, primary navigation, account, wishlist, and cart in a consistent order. Mobile navigation retains access to every required action and starts overflowing category navigation at the logical first item.
+- Photography is part of the same website and uses the shared public header, including search, primary links, and the artwork-category row. Its noncommercial gallery content does not change global navigation.
 - Artist-workspace navigation distinguishes workspace from marketplace context, persists the selected section in the URL, and shows maintained attention states without fabricated analytics.
 
 ## Status, forms, and data presentation
@@ -64,6 +67,7 @@
 
 ## Responsive and content rules
 
+- Public marketplace and information pages, story detail pages, and account profile frames use the existing 1240px maximum container with 24px mobile and 40px `sm`-and-up gutters. Information-page prose and story article content fill the available content width inside that frame, without an additional narrow column. Form fields retain their existing reading-width limits. Dedicated sign-in, recovery, confirmation, and standalone status screens retain compact centered layouts.
 - Verify narrow mobile, tablet, small-laptop, and wide-desktop behavior. Required actions never rely on horizontal page overflow; sticky surfaces do not cover content or trap short screens.
 - Product grids reduce columns before reducing text below readable size. Mobile filters use an accessible drawer with applied-count feedback and a clear reset action.
 - Legal and support pages require reviewed, page-specific content before launch. Contact and social destinations are real or omitted.

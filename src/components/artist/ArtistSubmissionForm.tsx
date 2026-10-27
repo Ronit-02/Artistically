@@ -48,7 +48,7 @@ export default function ArtistSubmissionForm({ onSubmitted, onCancel }: { onSubm
   };
 
   return <form onSubmit={submitForm} className="bg-white border border-gray-100 rounded-xl p-5 sm:p-6 mb-5 space-y-4">
-    <div className="flex items-center justify-between gap-3"><div><h2 className="font-heading text-lg font-semibold text-gray-900">Submit artwork</h2><p className="text-xs text-gray-500 mt-1">Upload your files and submit one complete listing for review.</p></div><Button variant="ghost" type="button" onClick={onCancel}>Close</Button></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-heading text-lg font-semibold text-gray-900">Submit artwork</h2><p className="text-xs text-gray-500 mt-1">Upload your files and submit one complete listing for review.</p></div><Button variant="ghost" type="button" onClick={onCancel}>Close</Button></div>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <label className="block text-xs font-medium text-gray-600 sm:col-span-2">Title<input required minLength={3} maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50" /></label>
       <label className="block text-xs font-medium text-gray-600">Price (₹)<input required type="number" min="1" step="1" value={price} onChange={(e) => setPrice(e.target.value)} className="mt-1.5 w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-normal outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50" /></label>
@@ -61,6 +61,6 @@ export default function ArtistSubmissionForm({ onSubmitted, onCancel }: { onSubm
       {isDigital && <label className="block text-xs font-medium text-gray-600 sm:col-span-2">Protected digital file<input required accept="image/*,application/pdf,application/zip,video/*,audio/*" type="file" onChange={(e) => setDigitalFile(e.target.files?.[0] ?? null)} className="mt-1.5 block w-full text-sm text-gray-600" /><span className="block mt-1 text-xs font-normal text-gray-500">This file is private and is only delivered through an authorized order download.</span></label>}
     </div>
     {error && <p role="alert" className="text-sm text-red-600">{error}</p>}{message && <p role="status" className="text-sm text-green-700">{message}</p>}
-    <div className="flex gap-3"><Button type="submit" loading={upload.isPending || submit.isPending}>Upload and submit</Button><Button variant="secondary" type="button" onClick={onCancel}>Cancel</Button></div>
+    <div className="flex flex-wrap gap-3"><Button type="submit" loading={upload.isPending || submit.isPending}>Upload and submit</Button><Button variant="secondary" type="button" onClick={onCancel}>Cancel</Button></div>
   </form>;
 }
