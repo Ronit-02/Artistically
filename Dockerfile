@@ -22,10 +22,10 @@ COPY . .
 
 # Placeholder env variables are needed during build for successful env validations
 # These exists only during build
-ARG BUILD_JWT_SECRET = artistically-build-only-placeholder-rotate-not-a-runtime-secret
-ENV JWT_SECRET = ${BUILD_JWT_SECRET}
-ARG BUILD_DATABASE_URL = postgresql://build:build@localhost:5432/build?schema=public
-ENV DATABASE_URL = ${BUILD_DATABASE_URL}
+ARG BUILD_JWT_SECRET=artistically-build-only-placeholder-rotate-not-a-runtime-secret
+ENV JWT_SECRET=${BUILD_JWT_SECRET}
+ARG BUILD_DATABASE_URL=postgresql://build:build@localhost:5432/build?schema=public
+ENV DATABASE_URL=${BUILD_DATABASE_URL}
 
 # Run the production build 
 RUN npm run build
