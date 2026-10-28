@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/product/CatalogImage";
 import Link from "next/link";
 import type { Artist } from "@/types";
 

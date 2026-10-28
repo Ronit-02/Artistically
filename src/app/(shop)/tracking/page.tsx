@@ -3,7 +3,7 @@
 import { IMAGE_PLACEHOLDER } from "@/lib/image-placeholder";
 import type { FormEvent} from "react";
 import { Suspense, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/product/CatalogImage";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCurrentUser } from "@/hooks/useCurrentUser";

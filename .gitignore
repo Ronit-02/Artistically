@@ -31,3 +31,6 @@ next-env.d.ts
 # sensitive local context
 *.local.md
 /sensitive context/
+
+# Downloaded catalog conversion cache
+/.catalog-media/

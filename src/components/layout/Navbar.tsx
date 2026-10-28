@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useMemo, useId } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@/components/product/CatalogImage";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
 import { useCurrentUser } from "@/hooks/useCurrentUser";

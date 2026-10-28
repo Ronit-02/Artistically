@@ -1,12 +1,18 @@
 import type { NextConfig } from "next";
+import catalogManifest from "./src/data/catalog-image-manifest.json";
 
 const isDevelopment = process.env.NODE_ENV === "development";
+const catalogUrls: { url: string; filePath: string }[] = catalogManifest.images;
+const firstCatalogUrl = catalogUrls[0] ? new URL(catalogUrls[0].url) : undefined;
+const imagekitEndpoint = process.env.IMAGEKIT_URL_ENDPOINT?.replace(/\/$/, "")
+  ?? (firstCatalogUrl ? `${firstCatalogUrl.origin}${firstCatalogUrl.pathname.slice(0, -catalogUrls[0].filePath.length)}` : undefined);
 
 const nextConfig: NextConfig = {
   output: "standalone",
   productionBrowserSourceMaps: false,
   images: {
     remotePatterns: [
+      ...(imagekitEndpoint ? [new URL(`${imagekitEndpoint}/artistically/**`)] : []),
       new URL("https://mymodernmet.com/wp/wp-content/uploads/2021/07/caravaggio-calling-of-saint-matthew.jpeg"),
       new URL("https://mymodernmet.com/wp/wp-content/uploads/2021/07/edward-hopper-nighthawks-1.jpeg"),
       new URL("https://www.angelaedwards.co.uk/wp-content/uploads/2022/07/Guernica-1024x511-1.jpg"),

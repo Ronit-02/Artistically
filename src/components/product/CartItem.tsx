@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/product/CatalogImage";
 import Link from "next/link";
 import type { CartItem as CartItemType } from "@/types";
 import { useCartMutations } from "@/hooks/useCart";

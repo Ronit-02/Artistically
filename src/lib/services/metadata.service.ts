@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { productService } from "@/lib/services/product.service";
 import { fromMinorUnits } from "@/lib/money";
 import { BROWSE_PRODUCT_WHERE } from "@/lib/product-visibility";
+import { catalogImageUrl } from "@/lib/catalog-images";
 
 export const metadataService = {
   async getProduct(id: string) {
@@ -14,7 +15,7 @@ export const metadataService = {
       description: product.description,
       category: product.category,
       artistName: `${product.artist.user.firstName} ${product.artist.user.lastName}`.trim(),
-      image: product.images.find((image) => image.isPrimary)?.url ?? product.images[0]?.url ?? null,
+      image: product.images.length ? catalogImageUrl(product.images.find((image) => image.isPrimary)?.url ?? product.images[0].url) : null,
       price: fromMinorUnits(product.price),
       stock: product.stock,
     };
@@ -37,7 +38,7 @@ export const metadataService = {
         name: `${artist.user.firstName} ${artist.user.lastName}`.trim(),
         handle: artist.handle,
         bio: artist.bio,
-        cover: artist.cover,
+        cover: artist.cover ? catalogImageUrl(artist.cover) : null,
       };
     });
   },
@@ -63,7 +64,7 @@ export const metadataService = {
       id: collection.id,
       name: collection.name,
       description: collection.description,
-      coverImage: collection.coverImage,
+      coverImage: catalogImageUrl(collection.coverImage),
       artworkCount: collection._count.items,
     } : null);
   },

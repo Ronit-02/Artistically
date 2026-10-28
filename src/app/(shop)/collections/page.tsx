@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/product/CatalogImage";
 import Link from "next/link";
 import { useCollections } from "@/hooks/useCollections";
 import Breadcrumb from "@/components/ui/Breadcrumb";

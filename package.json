@@ -22,7 +22,8 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "media:migrate-catalog": "ts-node --project scripts/tsconfig.catalog.json scripts/migrate-catalog-images.ts"
   },
   "dependencies": {
     "@next/env": "^16.3.3",
