@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image, { type ImageProps } from "next/image";
+import type { ImageProps } from "next/image";
+import Image from "@/components/ui/LoadingImage";
 import { catalogImageCandidates } from "@/lib/catalog-images";
 
 function ResolvedCatalogImage({ src, alt, onError, ...props }: ImageProps) {

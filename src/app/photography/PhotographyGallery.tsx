@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import Image from "@/components/ui/LoadingImage";
 import Button from "@/components/ui/Button";
 import { galleryPhotographs, photographyTopics, type PhotographyTopic } from "@/data/photography";
 

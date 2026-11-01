@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import Image from "@/components/ui/LoadingImage";
 import Link from "next/link";
 import { useStory, useStories } from "@/hooks/useStories";
 import Breadcrumb from "@/components/ui/Breadcrumb";
