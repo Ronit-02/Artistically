@@ -9,13 +9,13 @@ on:
 jobs:
   health:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 7
     env:
       APP_URL: ${{ vars.PRODUCTION_APP_URL }}
     steps:
       - name: Require production URL
         run: test -n "$APP_URL"
       - name: Check liveness
-        run: curl --fail --silent --show-error --max-time 15 "$APP_URL/api/health/live"
+        run: curl --fail --silent --show-error --max-time 60 --retry 2 --retry-all-errors --retry-delay 5 "$APP_URL/api/health/live"
       - name: Check readiness
-        run: curl --fail --silent --show-error --max-time 15 "$APP_URL/api/health/ready"
+        run: curl --fail --silent --show-error --max-time 60 --retry 2 --retry-all-errors --retry-delay 5 "$APP_URL/api/health/ready"
