@@ -23,7 +23,7 @@ export default function LoginPage() {
 }
 
 function LoginPageFallback() {
-  return <div aria-busy="true" aria-label="Loading sign in" className="min-h-[80vh]" />;
+  return <div aria-busy="true" aria-label="Loading sign in" className="min-h-screen" />;
 }
 
 function LoginPageContent() {
@@ -88,7 +88,7 @@ function LoginPageContent() {
   const inputClass = "w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all";
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -208,9 +208,6 @@ function LoginPageContent() {
           </button>
         </p>
 
-        <div className="mt-6 text-center">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-600 transition-colors">← Back to Home</Link>
-        </div>
       </div>
     </div>
   );

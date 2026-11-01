@@ -258,7 +258,7 @@ export default function HomePageClient() {
           <div className="flex flex-col pr-4 col-span-full sm:col-span-2">
             <p className="text-[12px] font-medium text-accent-600 uppercase tracking-wider mb-2">Editor&apos;s Picks</p>
             {editorCollectionPending ? <div aria-busy="true" aria-label="Loading editor's collection" className="space-y-3"><Skeleton className="h-8 w-3/4" /><Skeleton className="h-16 w-full" /></div> : editorCollectionError ? <p role="status" className="text-sm text-gray-500">The collection could not be loaded. Refresh to try again.</p> : editorCollection ? <>
-            <h2 className="font-heading text-[1.5rem] sm:text-[1.75rem] font-bold text-[#111] leading-[1.15] tracking-tighter-heading mb-3">{editorCollection.name.replace(/^Sculptures:\s*/i, "")}</h2>
+            <h2 className="font-heading text-[1.5rem] sm:text-[1.75rem] font-semibold text-[#111] leading-[1.15] tracking-tighter-heading mb-3">{editorCollection.name.replace(/^Sculptures:\s*/i, "")}</h2>
             <p className="text-[14px] text-gray-500 leading-relaxed mb-5">{editorCollection.description}</p>
             <div>
               <Link href={`/collections/${editorCollection.id}`} className="inline-flex min-h-11 items-center gap-2 text-[13px] font-medium text-[#111] bg-[#f5f5f5] hover:bg-[#eee] px-5 py-2.5 rounded-full border-none cursor-pointer transition-colors">
@@ -301,6 +301,7 @@ export default function HomePageClient() {
 
       {/* ═══════ HERO — Singulart-inspired: large left + text+image right ═══════ */}
       <section className="py-6 sm:py-8">
+        <SectionHeader title="Discover Your Next Inspiration" subtitle="Explore original artworks, thoughtful collections, and the artists behind them." className="mb-6"/>
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-5">
           {/* Left — Large feature */}
           <div className="relative rounded-2xl overflow-hidden bg-[#f5f5f5] min-h-[360px] sm:min-h-[460px] group cursor-pointer img-hover-zoom" onClick={() => catSearch("Paintings")}>

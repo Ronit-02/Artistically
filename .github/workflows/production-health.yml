@@ -3,7 +3,8 @@ name: Production health monitor
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    # 09:00 and 21:00 IST (03:30 and 15:30 UTC).
+    - cron: "30 3,15 * * *"
 
 jobs:
   health:
